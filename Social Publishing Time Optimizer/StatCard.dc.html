@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex; flex-direction:column; gap:10px; padding:18px 20px; background:#fff; border:1px solid rgba(26,26,26,0.08); border-radius:14px; font-family:'Inter',sans-serif; min-width:0;">
+  <div style="font-size:12.5px; font-weight:600; color:rgba(26,26,26,0.55); letter-spacing:0.01em;">{{ label }}</div>
+  <div style="display:flex; align-items:baseline; gap:8px;">
+    <div style="font-size:26px; font-weight:650; color:#17181c; letter-spacing:-0.02em; line-height:1;">{{ value }}</div>
+    <sc-if value="{{ hasTrend }}">
+      <div style="font-size:12px; font-weight:600; color:{{ trendColor }}; display:flex; align-items:center; gap:2px;">
+        <span>{{ trendArrow }}</span><span>{{ trend }}</span>
+      </div>
+    </sc-if>
+  </div>
+  <sc-if value="{{ hasSub }}">
+    <div style="font-size:12px; color:rgba(26,26,26,0.45); line-height:1.3;">{{ sublabel }}</div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:220,&quot;height&quot;:110},&quot;label&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Total Views&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;value&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;128.4K&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;trend&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;+12.4%&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;sublabel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;vs last 30 days&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const trendVal = this.props.trend;
+    const isUp = typeof trendVal === 'string' && trendVal.trim().startsWith('+');
+    const isDown = typeof trendVal === 'string' && trendVal.trim().startsWith('-');
+    return {
+      label: this.props.label || '',
+      value: this.props.value || '',
+      sublabel: this.props.sublabel || '',
+      hasSub: !!this.props.sublabel,
+      trend: trendVal || '',
+      hasTrend: !!trendVal,
+      trendColor: isDown ? '#C22F2F' : (isUp ? '#0A7A55' : 'rgba(26,26,26,0.45)'),
+      trendArrow: isDown ? '\u2193' : (isUp ? '\u2191' : ''),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
