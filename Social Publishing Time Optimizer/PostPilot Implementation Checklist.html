@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PostPilot — Implementation Checklist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #f2f1ee 0%, #faf9f7 100%);
+      color: #2c2e36;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 48px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #e6e4df;
+    }
+    
+    .logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: #3D5AFE;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .logo svg {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
+    
+    header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #14151a;
+    }
+    
+    .subtitle {
+      font-size: 13px;
+      color: #9a9aa0;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+    
+    .view-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 8px;
+      background: white;
+      border: 1px solid #e6e4df;
+      border-radius: 9px;
+      padding: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      z-index: 1000;
+    }
+    
+    .view-toggle button {
+      padding: 8px 14px;
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+      color: #5c5e68;
+    }
+    
+    .view-toggle button.active {
+      background: #3D5AFE;
+      color: white;
+    }
+    
+    .section {
+      background: white;
+      border: 1px solid #e6e4df;
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .section h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #14151a;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .section h2 .route {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px;
+      color: #3D5AFE;
+      font-weight: 600;
+      background: #f0f0ff;
+      padding: 3px 9px;
+      border-radius: 5px;
+    }
+    
+    .section > .subtitle {
+      margin-bottom: 24px;
+      display: block;
+    }
+    
+    .subsection {
+      margin-bottom: 20px;
+    }
+    
+    .subsection h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #3D5AFE;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    
+    .subsection-content {
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: #2c2e36;
+    }
+    
+    .subsection-content p {
+      margin-bottom: 8px;
+    }
+    
+    .subsection-content strong {
+      color: #14151a;
+      font-weight: 700;
+    }
+    
+    .subsection-content code {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      background: #f5f5f7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #3c3e46;
+    }
+    
+    .subsection-content ul, .subsection-content ol {
+      margin-left: 20px;
+      margin-bottom: 8px;
+    }
+    
+    .subsection-content li {
+      margin-bottom: 6px;
+    }
+    
+    .state-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-right: 8px;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    
+    .state-badge.loading { background: #e6f0ff; color: #2a6fdb; }
+    .state-badge.empty { background: #e8f0e6; color: #0e9f6e; }
+    .state-badge.error { background: #ffe6e6; color: #c22f2f; }
+    .state-badge.degraded { background: #fff5e6; color: #9a6414; }
+    
+    .highlight-box {
+      background: #f0f0ff;
+      border-left: 3px solid #3D5AFE;
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+    
+    .highlight-box p {
+      margin: 0;
+    }
+    
+    .api-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 12px 0;
+    }
+    
+    .api-item {
+      font-size: 13px;
+      padding: 10px 12px;
+      background: #faf9f7;
+      border-radius: 6px;
+      border-left: 3px solid #e6e4df;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    
+    .api-item.get { border-left-color: #2a6fdb; }
+    .api-item.post { border-left-color: #0a7a55; }
+    .api-item.patch { border-left-color: #9a6414; }
+    .api-item.delete { border-left-color: #c22f2f; }
+    
+    .divider {
+      height: 1px;
+      background: #e6e4df;
+      margin: 32px 0;
+    }
+    
+    .footer {
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid #e6e4df;
+      color: #9a9aa0;
+      font-size: 12px;
+    }
+    
+    .hidden { display: none; }
+    
+    @media (max-width: 768px) {
+      .container { padding: 24px 16px; }
+      header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .section { padding: 20px 16px; }
+      .view-toggle { top: 12px; right: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="view-toggle">
+  <button class="active" onclick="switchView('html')">HTML View</button>
+  <button onclick="switchView('markdown')">Markdown View</button>
+</div>
+
+<div id="html-view" class="view">
+<div class="container">
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="6,6 18,12 6,18"/>
+      </svg>
+    </div>
+    <div>
+      <h1>PostPilot</h1>
+      <p class="subtitle">Page-by-Page Implementation Checklist (MVP)</p>
+    </div>
+  </header>
+
+  <p style="margin-bottom: 40px; color: #5c5e68; font-size: 14px;">
+    Companion to <code>PostPilot Engineering Spec</code>. One section per route. 
+    <strong>"Mock in v1"</strong> = acceptable to fake/stub for demo; 
+    <strong>"Production-ready in v1"</strong> = must be real for launch.
+  </p>
+
+  <!-- Dashboard -->
+  <div class="section">
+    <h2>Dashboard <span class="route">/app</span></h2>
+    <p class="subtitle">Fast overview of connected platforms, upcoming posts, recent performance, and best posting-time guidance; primary landing page.</p>
+    
+    <div class="subsection">
+      <h3>Components</h3>
+      <div class="subsection-content">
+        StatCard ×5–6, BestTimeCard (hero, 3-slot), PostCard list (Upcoming Posts), TrendChartCard (views bar chart), InsightNote list, EmptyState (no accounts / no posts / no analytics).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Data Required</h3>
+      <div class="subsection-content">
+        Workspace KPIs (scheduled this week, published this month, total views, avg engagement, top platform), top-3 recommendation slots + confidence, next 3–5 upcoming PostTargets (thumbnail, title, time, platforms, status), 12–14pt views trend, top post + top day, 3 rule-derived insight strings.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>User Actions</h3>
+      <div class="subsection-content">
+        Click "Create Post" CTA → composer; click a Best-Time CTA → prefill schedule in composer; click an upcoming post → calendar/detail; click "View calendar/analytics/recommendations" links.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Validation Rules</h3>
+      <div class="subsection-content">None (read-only page).</div>
+    </div>
+    
+    <div class="subsection">
+      <h3>States</h3>
+      <div class="subsection-content">
+        <span class="state-badge loading">Loading</span> Skeleton KPI cards + skeleton list.<br><br>
+        <span class="state-badge empty">Empty</span> No accounts connected → "Connect your first account" CTA; accounts connected but 0 posts → "Upload your first video"; posts exist but &lt;90 days / insufficient data → "No analytics yet — publish content to start receiving recommendations" in place of BestTimeCard.<br><br>
+        <span class="state-badge error">Error</span> KPI panel shows retry state independently per Suspense boundary (one failed widget shouldn't blank the page).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>API Endpoints</h3>
+      <div class="api-list">
+        <div class="api-item get">GET /api/analytics/overview</div>
+        <div class="api-item get">GET /api/recommendations?platform=combined</div>
+        <div class="api-item get">GET /api/calendar?from=today&to=+7d</div>
+        <div class="api-item get">GET /api/accounts</div>
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Edge Cases</h3>
+      <div class="subsection-content">
+        Brand-new workspace with zero data; account disconnected mid-session (KPIs should degrade, not error); mixed-status upcoming posts (draft + scheduled + needs-review in same list); very large view counts (format as 128.4K / 1.2M).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Implementation Scope</h3>
+      <div class="highlight-box">
+        <p><strong>Mock in v1:</strong> Insight strings (rule templates over real numbers is fine to start; no ML needed).</p>
+        <p style="margin-top: 10px;"><strong>Production-ready in v1:</strong> KPI numbers, upcoming posts list, best-time hero (even if heuristic), all empty states.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Composer -->
+  <div class="section">
+    <h2>Create Post / Composer <span class="route">/app/create/[draftId]</span></h2>
+    <p class="subtitle">Create one post and adapt it to YouTube + TikTok in a single workflow; schedule, draft, or publish immediately.</p>
+    
+    <div class="subsection">
+      <h3>Components</h3>
+      <div class="subsection-content">
+        MediaDropzone, BaseContentForm, PlatformSelector (toggle cards), PlatformFieldPanel ×2 (YouTube/TikTok tabs), SmartAdaptationPanel, ScheduleControl, PlatformPreview (switchable), footer action bar.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Data Required</h3>
+      <div class="subsection-content">
+        Draft (if editing existing), connected accounts + capabilities, media upload state, current recommendation slot (for "use recommended time"), platform character/field limits.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>User Actions</h3>
+      <div class="subsection-content">
+        Drag-drop or select video; edit base title/caption/tags/campaign; toggle platforms on/off; edit per-platform fields; apply a smart-adaptation suggestion; choose now/draft/schedule; pick date/time/timezone or accept recommended time; switch preview platform; Save Draft / Schedule / Publish Now.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Validation Rules</h3>
+      <div class="subsection-content">
+        Internal title required; ≥1 platform selected; media upload complete before schedule/publish; <strong>YouTube:</strong> title 1–100 chars required, description ≤5000, made-for-kids required boolean; <strong>TikTok:</strong> caption ≤2200 (warn >150), privacy required; schedule time must be future + platform min lead time; valid IANA timezone. <br><br><strong>Warnings (non-blocking):</strong> Caption too long for TikTok, YouTube title missing, aspect-ratio mismatch, identical copy across platforms.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>States</h3>
+      <div class="subsection-content">
+        <span class="state-badge loading">Loading</span> Media upload progress bar, draft fetch skeleton.<br><br>
+        <span class="state-badge empty">Empty</span> No media yet → dropzone prompt; no accounts connected → banner "Connect an account to publish" with link to Accounts.<br><br>
+        <span class="state-badge error">Error</span> Upload failure (retry chunk), validation errors inline per field, publish-now failure toast with link to failed target.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>API Endpoints</h3>
+      <div class="api-list">
+        <div class="api-item post">POST /api/media/presign</div>
+        <div class="api-item post">POST /api/media/:id/complete</div>
+        <div class="api-item post">POST /api/posts</div>
+        <div class="api-item patch">PATCH /api/posts/:id</div>
+        <div class="api-item post">POST /api/posts/:id/schedule</div>
+        <div class="api-item post">POST /api/posts/:id/publish-now</div>
+        <div class="api-item get">GET /api/recommendations/apply context</div>
+        <div class="api-item get">GET /api/accounts</div>
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Edge Cases</h3>
+      <div class="subsection-content">
+        Platform disconnected while composing (disable its panel + warn); media exceeds platform duration/size limit; user deselects a platform after customizing it (preserve overrides in case re-selected); scheduling in the past due to timezone mix-up; duplicate rapid-click on Publish Now (idempotency key).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Implementation Scope</h3>
+      <div class="highlight-box">
+        <p><strong>Mock in v1:</strong> Hashtag/caption AI suggestions can be simple heuristic rules, not a real model; custom-thumbnail upload can be a placeholder control.</p>
+        <p style="margin-top: 10px;"><strong>Production-ready in v1:</strong> Upload pipeline, validation, platform toggle/override logic, scheduling, publish-now, preview accuracy.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar -->
+  <div class="section">
+    <h2>Calendar <span class="route">/app/calendar</span></h2>
+    <p class="subtitle">Visualize and rearrange the content pipeline; editorial command center.</p>
+    
+    <div class="subsection">
+      <h3>Components</h3>
+      <div class="subsection-content">
+        CalendarGrid (month/week/agenda), view-mode switcher, filter bar (platform/status/campaign), day cell with PostChip, DetailDrawer (preview, time, platforms, edit/duplicate/cancel), recommended-window highlight overlay.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Data Required</h3>
+      <div class="subsection-content">
+        PostTargets in visible range (thumbnail, title, time, platforms, status), recommendation heatmap (for day/window highlighting), filter facet values.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>User Actions</h3>
+      <div class="subsection-content">
+        Switch month/week/agenda; drag a post to a new day/time; click a post → open drawer; filter by platform/status/campaign; from drawer: edit (→ composer), duplicate, cancel scheduled post.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Validation Rules</h3>
+      <div class="subsection-content">
+        Rescheduled time must be future + platform lead time; cannot drag a Published or Failed post (read-only in those states).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>States</h3>
+      <div class="subsection-content">
+        <span class="state-badge loading">Loading</span> Grid skeleton per visible range.<br><br>
+        <span class="state-badge empty">Empty</span> No posts in range → "Nothing scheduled — plan your next post" with Create Post CTA.<br><br>
+        <span class="state-badge error">Error</span> Drag-reschedule failure reverts the chip with a toast.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>API Endpoints</h3>
+      <div class="api-list">
+        <div class="api-item get">GET /api/calendar?from&to</div>
+        <div class="api-item patch">PATCH /api/targets/:id/reschedule</div>
+        <div class="api-item post">POST /api/targets/:id/cancel</div>
+        <div class="api-item post">POST /api/posts/:id/duplicate</div>
+        <div class="api-item get">GET /api/recommendations?platform=combined</div>
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Edge Cases</h3>
+      <div class="subsection-content">
+        Post targeting multiple platforms shown as one chip with both badges; overlapping posts same day/time (stack, don't clip); drag across month boundary in month view; cancelling a post that's mid-publish (lock while status=publishing).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Implementation Scope</h3>
+      <div class="highlight-box">
+        <p><strong>Mock in v1:</strong> Week-view hourly grid can initially reuse month-view data without a distinct hourly layout.</p>
+        <p style="margin-top: 10px;"><strong>Production-ready in v1:</strong> Month view, agenda view, drag-to-reschedule, detail drawer, filters, status colors.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Library -->
+  <div class="section">
+    <h2>Content Library <span class="route">/app/library</span></h2>
+    <p class="subtitle">Central store of all drafts, uploaded media, and content assets; entry point to reuse/repurpose.</p>
+    
+    <div class="subsection">
+      <h3>Components</h3>
+      <div class="subsection-content">
+        Search input, filter bar (status/platform/type/campaign/date), content grid (PostCard variant with thumbnail + metadata), "top performer" / "needs adaptation" tags, EmptyState.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Data Required</h3>
+      <div class="subsection-content">
+        Paginated list of Posts with status, platforms, last-edited date, scheduled date if any, and a performance tag computed from analytics (top performer threshold).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>User Actions</h3>
+      <div class="subsection-content">
+        Search by title; filter; open an item → composer (pre-filled); duplicate an item.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Validation Rules</h3>
+      <div class="subsection-content">
+        None (read/browse page); search input debounced.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>States</h3>
+      <div class="subsection-content">
+        <span class="state-badge loading">Loading</span> Grid skeleton.<br><br>
+        <span class="state-badge empty">Empty</span> No content yet → "Upload your first video" CTA; filtered-to-zero → "No content matches these filters" with clear-filters action.<br><br>
+        <span class="state-badge error">Error</span> Failed page fetch → retry button, keep previously loaded items visible.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>API Endpoints</h3>
+      <div class="api-list">
+        <div class="api-item get">GET /api/posts?status=&platform=&campaign=&q=&cursor=</div>
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Edge Cases</h3>
+      <div class="subsection-content">
+        Very large libraries (cursor pagination, not offset); item with no thumbnail yet (processing state); item scheduled but its media was deleted (should not happen — guard on delete).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Implementation Scope</h3>
+      <div class="highlight-box">
+        <p><strong>Mock in v1:</strong> "Top performer" threshold can be a simple percentile rule rather than a tuned model.</p>
+        <p style="margin-top: 10px;"><strong>Production-ready in v1:</strong> Search, filters, pagination, status accuracy, open-in-composer.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics -->
+  <div class="section">
+    <h2>Analytics <span class="route">/app/analytics</span></h2>
+    <p class="subtitle">Cross-platform performance dashboard; understand what's working.</p>
+    
+    <div class="subsection">
+      <h3>Components</h3>
+      <div class="subsection-content">
+        Platform filter tabs, date-range picker, compare-to-previous toggle, StatCard ×5, TrendChartCard ×2 (views, engagement), platform-comparison bar widget, content performance table (sortable), PlatformBadge/StatusBadge in rows.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Data Required</h3>
+      <div class="subsection-content">
+        KPI set + period-over-period deltas, two time series (views, engagement), per-platform view totals, paginated recent-post performance rows (views/likes/comments/shares/watch time/engagement/status).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>User Actions</h3>
+      <div class="subsection-content">
+        Switch platform filter; change date range; toggle comparison; sort/paginate the table; click a row → post detail or library.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Validation Rules</h3>
+      <div class="subsection-content">
+        Date range must be valid (from ≤ to); range capped at data availability (e.g., disable beyond 90 days if that's the retention window in v1).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>States</h3>
+      <div class="subsection-content">
+        <span class="state-badge loading">Loading</span> Chart + table skeletons.<br><br>
+        <span class="state-badge empty">Empty</span> No published posts yet → "No analytics yet — connect platforms and publish content to start receiving recommendations".<br><br>
+        <span class="state-badge degraded">Degraded</span> Stale-data badge if last sync >24h; failed fetch shows retry without clearing cached view.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>API Endpoints</h3>
+      <div class="api-list">
+        <div class="api-item get">GET /api/analytics/overview</div>
+        <div class="api-item get">GET /api/analytics/timeseries?metric=&interval=</div>
+        <div class="api-item get">GET /api/analytics/posts?cursor=</div>
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Edge Cases</h3>
+      <div class="subsection-content">
+        Post with data on only one platform (don't show N/A as 0); very new post with partial-day data skewing rates; TikTok/YouTube metric field mismatches (normalize into common schema, show "—" for unsupported fields per platform).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Implementation Scope</h3>
+      <div class="highlight-box">
+        <p><strong>Mock in v1:</strong> Watch-time/avg-watch-duration can be YouTube-only at first if TikTok tier doesn't expose it — label clearly rather than fake a number.</p>
+        <p style="margin-top: 10px;"><strong>Production-ready in v1:</strong> KPI accuracy, both trend charts, platform comparison, the performance table with real pagination/sorting.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recommendations -->
+  <div class="section">
+    <h2>Recommendations <span class="route">/app/recommendations</span></h2>
+    <p class="subtitle">Turn analytics into concrete best-time scheduling guidance; the hero differentiator.</p>
+    
+    <div class="subsection">
+      <h3>Components</h3>
+      <div class="subsection-content">
+        BestTimeCard ×3 (YouTube/TikTok/Combined) with confidence + sample size, HeatmapCard with platform tabs (YouTube/TikTok/Combined), CalculationExplainer panel, RecommendedActions list, one-click action buttons (schedule/apply/export).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Data Required</h3>
+      <div class="subsection-content">
+        Best (day, hour) + confidence + sample size per platform and combined; full day×hour score grid per tab; plain-language method description; 2–3 templated recommended-action strings; export payload.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>User Actions</h3>
+      <div class="subsection-content">
+        Switch heatmap tab; hover a cell for detail; "Schedule next post at best time" → opens composer prefilled; "Apply best time to selected draft" → picks a draft, applies slot; "Export report" → downloads PDF/CSV.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Validation Rules</h3>
+      <div class="subsection-content">
+        Applying a time still runs the composer's schedule validation (future time, lead time, timezone).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>States</h3>
+      <div class="subsection-content">
+        <span class="state-badge loading">Loading</span> Heatmap + card skeletons.<br><br>
+        <span class="state-badge empty">Empty/cold-start</span> Insufficient history (below sample-size threshold) → show benchmark-based recommendation clearly labeled "based on general benchmarks, not yet your own data" instead of hiding the feature.<br><br>
+        <span class="state-badge error">Error</span> Recompute failure keeps last-known-good recommendation with a "last updated" timestamp rather than blanking.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>API Endpoints</h3>
+      <div class="api-list">
+        <div class="api-item get">GET /api/recommendations?platform=youtube|tiktok|combined</div>
+        <div class="api-item post">POST /api/recommendations/apply</div>
+        <div class="api-item get">GET /api/recommendations/export</div>
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Edge Cases</h3>
+      <div class="subsection-content">
+        Ties between two equally-strong slots (pick most recent/higher sample size, don't flicker); very sparse data producing noisy heatmap (apply the empirical-Bayes shrinkage so weak cells don't look falsely hot); user has only one platform connected (hide Combined tab, or show it disabled with explanation).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Implementation Scope</h3>
+      <div class="highlight-box">
+        <p><strong>Mock in v1:</strong> Cold-start benchmark values can be static per-category constants shipped at launch.</p>
+        <p style="margin-top: 10px;"><strong>Production-ready in v1:</strong> The heuristic scoring itself, confidence/sample-size display, heatmap rendering, apply-to-composer flow.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accounts -->
+  <div class="section">
+    <h2>Accounts <span class="route">/app/accounts</span></h2>
+    <p class="subtitle">Manage platform connections and account health.</p>
+    
+    <div class="subsection">
+      <h3>Components</h3>
+      <div class="subsection-content">
+        ConnectionCard ×2 (YouTube, TikTok) with avatar/handle, status badge, last-synced time, capability chips (publishing/analytics/recommendations), action buttons (connect/reconnect/disconnect/test); "Coming soon" grid (Instagram, LinkedIn, X, Facebook).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Data Required</h3>
+      <div class="subsection-content">
+        Per-account status, handle/avatar, lastSyncedAt, capability flags, scope/permission issues.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>User Actions</h3>
+      <div class="subsection-content">
+        Connect (starts OAuth redirect); Reconnect (re-run OAuth on a flagged account); Disconnect (confirm dialog, then revoke); Test connection (ping, shows pass/fail toast).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Validation Rules</h3>
+      <div class="subsection-content">
+        Disconnect requires confirmation if account has scheduled posts (warn they'll be cancelled/paused); reconnect must match the same external account (prevent silently swapping identities without warning).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>States</h3>
+      <div class="subsection-content">
+        <span class="state-badge loading">Loading</span> Card skeletons during initial fetch.<br><br>
+        <span class="state-badge empty">Empty</span> Nothing connected → prominent "Connect your first account" empty state (blocks most of the app functionally).<br><br>
+        <span class="state-badge error">Error</span> Test-connection failure shows the platform's error reason inline; disconnect failure keeps the card in its prior state with a toast.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>API Endpoints</h3>
+      <div class="api-list">
+        <div class="api-item get">GET /api/accounts</div>
+        <div class="api-item get">GET /api/accounts/:provider/connect</div>
+        <div class="api-item get">GET /api/accounts/:provider/callback</div>
+        <div class="api-item post">POST /api/accounts/:id/test</div>
+        <div class="api-item delete">DELETE /api/accounts/:id</div>
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Edge Cases</h3>
+      <div class="subsection-content">
+        OAuth callback error/deny (return to page with a dismissible error, not a crash); account connected in another browser tab mid-session (poll or refetch on focus); reconnect flow started but abandoned (leave prior state untouched until callback completes).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Implementation Scope</h3>
+      <div class="highlight-box">
+        <p><strong>Mock in v1:</strong> "Coming soon" platform cards are static, non-interactive (just visual roadmap signaling).</p>
+        <p style="margin-top: 10px;"><strong>Production-ready in v1:</strong> Full OAuth connect/reconnect/disconnect/test for YouTube + TikTok, accurate capability/health display.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="section">
+    <h2>Settings <span class="route">/app/settings/*</span></h2>
+    <p class="subtitle">Account, workspace, and product configuration.</p>
+    
+    <div class="subsection">
+      <h3>Components</h3>
+      <div class="subsection-content">
+        Left tab list (Profile, Workspace, Team, Notifications, Billing, Publishing Defaults, Timezone & Calendar, AI Recommendations), per-tab form panels, toggle/select controls.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Data Required</h3>
+      <div class="subsection-content">
+        User profile, workspace metadata, member list + roles (Team), notification preferences, billing/plan info, default publish mode, timezone, recommendation-engine weighting preferences.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>User Actions</h3>
+      <div class="subsection-content">
+        Edit profile fields, change workspace name, invite/remove members (Team), toggle notification types, manage plan (Billing), set default publish mode + auto-apply-recommended toggle, set timezone, adjust AI weighting toggles (e.g., weight engagement over views) and recommendation history window.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Validation Rules</h3>
+      <div class="subsection-content">
+        Email format; workspace slug uniqueness; timezone must be valid IANA string; role changes blocked for the sole Owner (can't demote/remove the last owner).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>States</h3>
+      <div class="subsection-content">
+        <span class="state-badge loading">Loading</span> Tab content skeleton per section.<br><br>
+        <span class="state-badge empty">Empty</span> Team tab with only the owner → "Invite your first teammate".<br><br>
+        <span class="state-badge error">Error</span> Inline field errors; save-failure toast keeps unsaved edits in the form (don't discard on failure).
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>API Endpoints</h3>
+      <div class="api-list">
+        <div class="api-item get">GET /api/me</div>
+        <div class="api-item patch">PATCH /api/me</div>
+        <div class="api-item get">GET /api/workspace</div>
+        <div class="api-item patch">PATCH /api/workspace</div>
+        <div class="api-item get">GET /api/workspace/members</div>
+        <div class="api-item post">POST /api/workspace/members</div>
+        <div class="api-item delete">DELETE /api/workspace/members/:id</div>
+        <div class="api-item get">GET /api/settings/notifications</div>
+        <div class="api-item patch">PATCH /api/settings/notifications</div>
+        <div class="api-item get">GET /api/billing</div>
+        <div class="api-item get">GET /api/settings/publishing</div>
+        <div class="api-item patch">PATCH /api/settings/publishing</div>
+        <div class="api-item get">GET /api/settings/ai</div>
+        <div class="api-item patch">PATCH /api/settings/ai</div>
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Edge Cases</h3>
+      <div class="subsection-content">
+        Last-owner protection; invite sent to an email already a member; downgrading plan while over its account-connection limit (block with explanation); AI weighting changes should trigger a recommendation recompute, not apply silently until next scheduled run.
+      </div>
+    </div>
+    
+    <div class="subsection">
+      <h3>Implementation Scope</h3>
+      <div class="highlight-box">
+        <p><strong>Mock in v1:</strong> Billing tab can show a static plan summary without live payment-provider integration; Team invites can be stubbed (UI complete, email send deferred).</p>
+        <p style="margin-top: 10px;"><strong>Production-ready in v1:</strong> Profile, Publishing Defaults, Timezone, and AI Recommendation preference persistence — these directly affect other pages' behavior.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="footer">
+    <p>PostPilot MVP Implementation Checklist • Companion to Engineering Spec • For internal engineering use</p>
+  </div>
+</div>
+</div>
+
+<div id="markdown-view" class="view hidden">
+  <div class="container">
+    <textarea id="markdown-content" style="width: 100%; min-height: 800px; padding: 20px; border: 1px solid #e6e4df; border-radius: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.6; resize: vertical;" readonly></textarea>
+  </div>
+</div>
+
+<script>
+// Markdown content
+const markdownContent = `# PostPilot — Page-by-Page Implementation Checklist (MVP)
+
+Companion to \`PostPilot Engineering Spec\`. One section per route. "Mock in v1" = acceptable to fake/stub for demo; "Production-ready in v1" = must be real for launch.
+
+---
+
+## Dashboard — \`/app\`
+
+**Purpose:** Fast overview of connected platforms, upcoming posts, recent performance, and best posting-time guidance; primary landing page.
+
+**Components:** StatCard ×5–6, BestTimeCard (hero, 3-slot), PostCard list (Upcoming Posts), TrendChartCard (views bar chart), InsightNote list, EmptyState (no accounts / no posts / no analytics).
+
+**Data required:** workspace KPIs (scheduled this week, published this month, total views, avg engagement, top platform), top-3 recommendation slots + confidence, next 3–5 upcoming PostTargets (thumbnail, title, time, platforms, status), 12–14pt views trend, top post + top day, 3 rule-derived insight strings.
+
+**User actions:** click "Create Post" CTA → composer; click a Best-Time CTA → prefill schedule in composer; click an upcoming post → calendar/detail; click "View calendar/analytics/recommendations" links.
+
+**Validation rules:** none (read-only page).
+
+**States:** 
+- Loading — skeleton KPI cards + skeleton list. 
+- Empty — no accounts connected → "Connect your first account" CTA; accounts connected but 0 posts → "Upload your first video"; posts exist but <90 days / insufficient data → "No analytics yet — publish content to start receiving recommendations" in place of BestTimeCard. 
+- Error — KPI panel shows retry state independently per Suspense boundary (one failed widget shouldn't blank the page).
+
+**API endpoints:** GET /api/analytics/overview, GET /api/recommendations?platform=combined, GET /api/calendar?from=today&to=+7d, GET /api/accounts.
+
+**Edge cases:** brand-new workspace with zero data; account disconnected mid-session (KPIs should degrade, not error); mixed-status upcoming posts (draft + scheduled + needs-review in same list); very large view counts (format as 128.4K / 1.2M).
+
+**Mock in v1:** insight strings (rule templates over real numbers is fine to start; no ML needed). **Production-ready in v1:** KPI numbers, upcoming posts list, best-time hero (even if heuristic), all empty states.
+
+---
+
+## Create Post / Composer — \`/app/create/[draftId]\`
+
+**Purpose:** Create one post and adapt it to YouTube + TikTok in a single workflow; schedule, draft, or publish immediately.
+
+**Components:** MediaDropzone, BaseContentForm, PlatformSelector (toggle cards), PlatformFieldPanel ×2 (YouTube/TikTok tabs), SmartAdaptationPanel, ScheduleControl, PlatformPreview (switchable), footer action bar.
+
+**Data required:** draft (if editing existing), connected accounts + capabilities, media upload state, current recommendation slot (for "use recommended time"), platform character/field limits.
+
+**User actions:** drag-drop or select video; edit base title/caption/tags/campaign; toggle platforms on/off; edit per-platform fields; apply a smart-adaptation suggestion; choose now/draft/schedule; pick date/time/timezone or accept recommended time; switch preview platform; Save Draft / Schedule / Publish Now.
+
+**Validation rules:** internal title required; ≥1 platform selected; media upload complete before schedule/publish; YouTube — title 1–100 chars required, description ≤5000, made-for-kids required boolean; TikTok — caption ≤2200 (warn >150), privacy required; schedule time must be future + platform min lead time; valid IANA timezone. Warnings (non-blocking): caption too long for TikTok, YouTube title missing, aspect-ratio mismatch, identical copy across platforms.
+
+**States:** 
+- Loading — media upload progress bar, draft fetch skeleton. 
+- Empty — no media yet → dropzone prompt; no accounts connected → banner "Connect an account to publish" with link to Accounts. 
+- Error — upload failure (retry chunk), validation errors inline per field, publish-now failure toast with link to failed target.
+
+**API endpoints:** POST /api/media/presign, POST /api/media/:id/complete, POST /api/posts, PATCH /api/posts/:id, POST /api/posts/:id/schedule, POST /api/posts/:id/publish-now, GET /api/recommendations/apply context, GET /api/accounts.
+
+**Edge cases:** platform disconnected while composing (disable its panel + warn); media exceeds platform duration/size limit; user deselects a platform after customizing it (preserve overrides in case re-selected); scheduling in the past due to timezone mix-up; duplicate rapid-click on Publish Now (idempotency key).
+
+**Mock in v1:** hashtag/caption AI suggestions can be simple heuristic rules, not a real model; custom-thumbnail upload can be a placeholder control. **Production-ready in v1:** upload pipeline, validation, platform toggle/override logic, scheduling, publish-now, preview accuracy.
+
+---
+
+## Calendar — \`/app/calendar\`
+
+**Purpose:** Visualize and rearrange the content pipeline; editorial command center.
+
+**Components:** CalendarGrid (month/week/agenda), view-mode switcher, filter bar (platform/status/campaign), day cell with PostChip, DetailDrawer (preview, time, platforms, edit/duplicate/cancel), recommended-window highlight overlay.
+
+**Data required:** PostTargets in visible range (thumbnail, title, time, platforms, status), recommendation heatmap (for day/window highlighting), filter facet values.
+
+**User actions:** switch month/week/agenda; drag a post to a new day/time; click a post → open drawer; filter by platform/status/campaign; from drawer: edit (→ composer), duplicate, cancel scheduled post.
+
+**Validation rules:** rescheduled time must be future + platform lead time; cannot drag a Published or Failed post (read-only in those states).
+
+**States:** 
+- Loading — grid skeleton per visible range. 
+- Empty — no posts in range → "Nothing scheduled — plan your next post" with Create Post CTA. 
+- Error — drag-reschedule failure reverts the chip with a toast.
+
+**API endpoints:** GET /api/calendar?from&to, PATCH /api/targets/:id/reschedule, POST /api/targets/:id/cancel, POST /api/posts/:id/duplicate, GET /api/recommendations?platform=combined.
+
+**Edge cases:** post targeting multiple platforms shown as one chip with both badges; overlapping posts same day/time (stack, don't clip); drag across month boundary in month view; cancelling a post that's mid-publish (lock while status=publishing).
+
+**Mock in v1:** week-view hourly grid can initially reuse month-view data without a distinct hourly layout. **Production-ready in v1:** month view, agenda view, drag-to-reschedule, detail drawer, filters, status colors.
+
+---
+
+## Content Library — \`/app/library\`
+
+**Purpose:** Central store of all drafts, uploaded media, and content assets; entry point to reuse/repurpose.
+
+**Components:** search input, filter bar (status/platform/type/campaign/date), content grid (PostCard variant with thumbnail + metadata), "top performer" / "needs adaptation" tags, EmptyState.
+
+**Data required:** paginated list of Posts with status, platforms, last-edited date, scheduled date if any, and a performance tag computed from analytics (top performer threshold).
+
+**User actions:** search by title; filter; open an item → composer (pre-filled); duplicate an item.
+
+**Validation rules:** none (read/browse page); search input debounced.
+
+**States:** 
+- Loading — grid skeleton. 
+- Empty — no content yet → "Upload your first video" CTA; filtered-to-zero → "No content matches these filters" with clear-filters action. 
+- Error — failed page fetch → retry button, keep previously loaded items visible.
+
+**API endpoints:** GET /api/posts?status=&platform=&campaign=&q=&cursor=.
+
+**Edge cases:** very large libraries (cursor pagination, not offset); item with no thumbnail yet (processing state); item scheduled but its media was deleted (should not happen — guard on delete).
+
+**Mock in v1:** "top performer" threshold can be a simple percentile rule rather than a tuned model. **Production-ready in v1:** search, filters, pagination, status accuracy, open-in-composer.
+
+---
+
+## Analytics — \`/app/analytics\`
+
+**Purpose:** Cross-platform performance dashboard; understand what's working.
+
+**Components:** platform filter tabs, date-range picker, compare-to-previous toggle, StatCard ×5, TrendChartCard ×2 (views, engagement), platform-comparison bar widget, content performance table (sortable), PlatformBadge/StatusBadge in rows.
+
+**Data required:** KPI set + period-over-period deltas, two time series (views, engagement), per-platform view totals, paginated recent-post performance rows (views/likes/comments/shares/watch time/engagement/status).
+
+**User actions:** switch platform filter; change date range; toggle comparison; sort/paginate the table; click a row → post detail or library.
+
+**Validation rules:** date range must be valid (from ≤ to); range capped at data availability (e.g. disable beyond 90 days if that's the retention window in v1).
+
+**States:** 
+- Loading — chart + table skeletons. 
+- Empty — no published posts yet → "No analytics yet — connect platforms and publish content to start receiving recommendations". 
+- Degraded — stale-data badge if last sync >24h; failed fetch shows retry without clearing cached view.
+
+**API endpoints:** GET /api/analytics/overview, GET /api/analytics/timeseries?metric=&interval=, GET /api/analytics/posts?cursor=.
+
+**Edge cases:** post with data on only one platform (don't show N/A as 0); very new post with partial-day data skewing rates; TikTok/YouTube metric field mismatches (normalize into common schema, show "—" for unsupported fields per platform).
+
+**Mock in v1:** watch-time/avg-watch-duration can be YouTube-only at first if TikTok tier doesn't expose it — label clearly rather than fake a number. **Production-ready in v1:** KPI accuracy, both trend charts, platform comparison, the performance table with real pagination/sorting.
+
+---
+
+## Recommendations — \`/app/recommendations\`
+
+**Purpose:** Turn analytics into concrete best-time scheduling guidance; the hero differentiator.
+
+**Components:** BestTimeCard ×3 (YouTube/TikTok/Combined) with confidence + sample size, HeatmapCard with platform tabs (YouTube/TikTok/Combined), CalculationExplainer panel, RecommendedActions list, one-click action buttons (schedule/apply/export).
+
+**Data required:** best (day, hour) + confidence + sample size per platform and combined; full day×hour score grid per tab; plain-language method description; 2–3 templated recommended-action strings; export payload.
+
+**User actions:** switch heatmap tab; hover a cell for detail; "Schedule next post at best time" → opens composer prefilled; "Apply best time to selected draft" → picks a draft, applies slot; "Export report" → downloads PDF/CSV.
+
+**Validation rules:** applying a time still runs the composer's schedule validation (future time, lead time, timezone).
+
+**States:** 
+- Loading — heatmap + card skeletons. 
+- Empty/cold-start — insufficient history (below sample-size threshold) → show benchmark-based recommendation clearly labeled "based on general benchmarks, not yet your own data" instead of hiding the feature. 
+- Error — recompute failure keeps last-known-good recommendation with a "last updated" timestamp rather than blanking.
+
+**API endpoints:** GET /api/recommendations?platform=youtube|tiktok|combined, POST /api/recommendations/apply, GET /api/recommendations/export.
+
+**Edge cases:** ties between two equally-strong slots (pick most recent/higher sample size, don't flicker); very sparse data producing noisy heatmap (apply the empirical-Bayes shrinkage from the spec so weak cells don't look falsely hot); user has only one platform connected (hide Combined tab, or show it disabled with explanation).
+
+**Mock in v1:** cold-start benchmark values can be static per-category constants shipped at launch. **Production-ready in v1:** the heuristic scoring itself, confidence/sample-size display, heatmap rendering, apply-to-composer flow.
+
+---
+
+## Accounts — \`/app/accounts\`
+
+**Purpose:** Manage platform connections and account health.
+
+**Components:** ConnectionCard ×2 (YouTube, TikTok) with avatar/handle, status badge, last-synced time, capability chips (publishing/analytics/recommendations), action buttons (connect/reconnect/disconnect/test); "Coming soon" grid (Instagram, LinkedIn, X, Facebook).
+
+**Data required:** per-account status, handle/avatar, lastSyncedAt, capability flags, scope/permission issues.
+
+**User actions:** Connect (starts OAuth redirect); Reconnect (re-run OAuth on a flagged account); Disconnect (confirm dialog, then revoke); Test connection (ping, shows pass/fail toast).
+
+**Validation rules:** disconnect requires confirmation if account has scheduled posts (warn they'll be cancelled/paused); reconnect must match the same external account (prevent silently swapping identities without warning).
+
+**States:** 
+- Loading — card skeletons during initial fetch. 
+- Empty — nothing connected → prominent "Connect your first account" empty state (blocks most of the app functionally). 
+- Error — test-connection failure shows the platform's error reason inline; disconnect failure keeps the card in its prior state with a toast.
+
+**API endpoints:** GET /api/accounts, GET /api/accounts/:provider/connect, GET /api/accounts/:provider/callback, POST /api/accounts/:id/test, DELETE /api/accounts/:id.
+
+**Edge cases:** OAuth callback error/deny (return to page with a dismissible error, not a crash); account connected in another browser tab mid-session (poll or refetch on focus); reconnect flow started but abandoned (leave prior state untouched until callback completes).
+
+**Mock in v1:** "coming soon" platform cards are static, non-interactive (just visual roadmap signaling). **Production-ready in v1:** full OAuth connect/reconnect/disconnect/test for YouTube + TikTok, accurate capability/health display.
+
+---
+
+## Settings — \`/app/settings/*\`
+
+**Purpose:** Account, workspace, and product configuration.
+
+**Components:** left tab list (Profile, Workspace, Team, Notifications, Billing, Publishing Defaults, Timezone & Calendar, AI Recommendations), per-tab form panels, toggle/select controls.
+
+**Data required:** user profile, workspace metadata, member list + roles (Team), notification preferences, billing/plan info, default publish mode, timezone, recommendation-engine weighting preferences.
+
+**User actions:** edit profile fields, change workspace name, invite/remove members (Team), toggle notification types, manage plan (Billing), set default publish mode + auto-apply-recommended toggle, set timezone, adjust AI weighting toggles (e.g. weight engagement over views) and recommendation history window.
+
+**Validation rules:** email format; workspace slug uniqueness; timezone must be valid IANA string; role changes blocked for the sole Owner (can't demote/remove the last owner).
+
+**States:** 
+- Loading — tab content skeleton per section. 
+- Empty — Team tab with only the owner → "Invite your first teammate". 
+- Error — inline field errors; save-failure toast keeps unsaved edits in the form (don't discard on failure).
+
+**API endpoints:** GET/PATCH /api/me, GET/PATCH /api/workspace, GET/POST/DELETE /api/workspace/members, GET/PATCH /api/settings/notifications, GET /api/billing, GET/PATCH /api/settings/publishing, GET/PATCH /api/settings/ai.
+
+**Edge cases:** last-owner protection; invite sent to an email already a member; downgrading plan while over its account-connection limit (block with explanation); AI weighting changes should trigger a recommendation recompute, not apply silently until next scheduled run.
+
+**Mock in v1:** Billing tab can show a static plan summary without live payment-provider integration; Team invites can be stubbed (UI complete, email send deferred). **Production-ready in v1:** Profile, Publishing Defaults, Timezone, and AI Recommendation preference persistence — these directly affect other pages' behavior.`;
+
+// Populate markdown textarea
+document.getElementById('markdown-content').value = markdownContent;
+
+// Switch view function
+function switchView(view) {
+  const htmlView = document.getElementById('html-view');
+  const markdownView = document.getElementById('markdown-view');
+  const buttons = document.querySelectorAll('.view-toggle button');
+  
+  buttons.forEach(btn => btn.classList.remove('active'));
+  
+  if (view === 'html') {
+    htmlView.classList.remove('hidden');
+    markdownView.classList.add('hidden');
+    buttons[0].classList.add('active');
+  } else {
+    htmlView.classList.add('hidden');
+    markdownView.classList.remove('hidden');
+    buttons[1].classList.add('active');
+  }
+}
+</script>
+
+</body>
+</html>

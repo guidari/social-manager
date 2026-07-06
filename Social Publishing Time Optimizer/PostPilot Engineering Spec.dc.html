@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  doc-page:not(:defined){visibility:hidden}
+  body{margin:0;background:#f2f1ee;}
+  h1,h2,h3,h4{font-family:'Inter',sans-serif; color:#14151a; letter-spacing:-0.02em; margin:0;}
+  p,li,td,th{font-family:'Inter',sans-serif; color:#2c2e36; line-height:1.6;}
+  code,.mono{font-family:'IBM Plex Mono',monospace;}
+  table{border-collapse:collapse; width:100%;}
+</style>
+</helmet>
+
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="letter" margin="0.72in" hint-size="100%,100%">
+
+  <div slot="header" style="display:flex; align-items:center; justify-content:space-between; font-family:'Inter',sans-serif; font-size:9.5px; color:#9a9aa0; padding-top:6px; border-bottom:1px solid #eceae6; padding-bottom:6px;">
+    <span style="font-weight:700; color:#3D5AFE;">PostPilot</span>
+    <span>Product &amp; Engineering Specification · v1.0 (MVP)</span>
+  </div>
+  <div slot="footer" style="display:flex; align-items:center; justify-content:space-between; font-family:'Inter',sans-serif; font-size:9.5px; color:#b0b0b6; padding-top:6px; border-top:1px solid #eceae6;">
+    <span>Confidential — internal engineering use</span>
+    <span>YouTube + TikTok · MVP scope</span>
+  </div>
+
+  <!-- ===================== COVER ===================== -->
+  <div style="padding:26px 0 8px;">
+    <div style="display:inline-flex; align-items:center; gap:9px; margin-bottom:26px;">
+      <div style="width:32px; height:32px; border-radius:9px; background:#3D5AFE; position:relative;">
+        <div style="position:absolute; left:9px; top:7px; width:0; height:0; border-top:9px solid transparent; border-bottom:9px solid transparent; border-left:13px solid #fff;"></div>
+      </div>
+      <div style="font-size:18px; font-weight:800;">PostPilot</div>
+    </div>
+    <div style="font-size:12px; font-weight:700; color:#3D5AFE; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;">Developer-Ready Product Specification</div>
+    <h1 style="font-size:34px; line-height:1.1; margin-bottom:14px;">Multi-Platform Social Publishing &amp; Posting-Time Optimization</h1>
+    <p style="font-size:14px; color:#5c5e68; max-width:80%;">An implementation-oriented spec for the PostPilot MVP: a web app that plans, schedules, publishes, and optimizes posting times across YouTube and TikTok from one workspace. This document translates the interactive prototype into structure, architecture, APIs, integrations, and a phased build roadmap.</p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0; margin-top:26px; border:1px solid #e6e4df; border-radius:10px; overflow:hidden;">
+      <div style="padding:14px 16px; border-right:1px solid #e6e4df; border-bottom:1px solid #e6e4df;"><div style="font-size:10px; font-weight:700; color:#9a9aa0; text-transform:uppercase; letter-spacing:0.05em;">MVP Platforms</div><div style="font-size:13px; font-weight:600; margin-top:3px;">YouTube · TikTok</div></div>
+      <div style="padding:14px 16px; border-bottom:1px solid #e6e4df;"><div style="font-size:10px; font-weight:700; color:#9a9aa0; text-transform:uppercase; letter-spacing:0.05em;">Primary Persona</div><div style="font-size:13px; font-weight:600; margin-top:3px;">Solo creator (multi-account ready)</div></div>
+      <div style="padding:14px 16px; border-right:1px solid #e6e4df;"><div style="font-size:10px; font-weight:700; color:#9a9aa0; text-transform:uppercase; letter-spacing:0.05em;">Stack</div><div style="font-size:13px; font-weight:600; margin-top:3px;">Next.js · TS · Prisma · Postgres · Redis/BullMQ</div></div>
+      <div style="padding:14px 16px;"><div style="font-size:10px; font-weight:700; color:#9a9aa0; text-transform:uppercase; letter-spacing:0.05em;">Roadmap</div><div style="font-size:13px; font-weight:600; margin-top:3px;">6 phases to MVP</div></div>
+    </div>
+  </div>
+
+  <div style="height:1px; background:#e6e4df; margin:28px 0;"></div>
+
+  <!-- ===================== 1. PRODUCT STRUCTURE ===================== -->
+  <h2 style="font-size:22px; margin-bottom:4px;">1 · Product Structure</h2>
+  <p style="font-size:11px; color:#9a9aa0; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; margin-bottom:16px;">Sitemap · features · flows · roles</p>
+
+  <h3 style="font-size:15px; margin-bottom:10px;">1.1 Route map</h3>
+  <div style="border:1px solid #e6e4df; border-radius:10px; overflow:hidden; margin-bottom:20px;">
+    <table style="font-size:12px;">
+      <thead><tr style="background:#faf9f7;">
+        <th style="text-align:left; padding:9px 14px; font-weight:700; border-bottom:1px solid #e6e4df; width:34%;">Route</th>
+        <th style="text-align:left; padding:9px 14px; font-weight:700; border-bottom:1px solid #e6e4df;">Screen / purpose</th>
+        <th style="text-align:left; padding:9px 14px; font-weight:700; border-bottom:1px solid #e6e4df; width:16%;">Auth</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="mono" style="padding:8px 14px; border-bottom:1px solid #f0eee9;">/login · /signup</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Auth entry, OAuth + email</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; color:#9a9aa0;">public</td></tr>
+        <tr><td class="mono" style="padding:8px 14px; border-bottom:1px solid #f0eee9;">/onboarding</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">First-run: connect accounts, timezone</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">member</td></tr>
+        <tr><td class="mono" style="padding:8px 14px; border-bottom:1px solid #f0eee9;">/app (dashboard)</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Home: KPIs, best-time hero, upcoming, insights</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">member</td></tr>
+        <tr><td class="mono" style="padding:8px 14px; border-bottom:1px solid #f0eee9;">/app/create · /app/create/[draftId]</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Unified composer + per-platform adaptation</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">editor</td></tr>
+        <tr><td class="mono" style="padding:8px 14px; border-bottom:1px solid #f0eee9;">/app/calendar</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Month/week/agenda planner + detail drawer</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">member</td></tr>
+        <tr><td class="mono" style="padding:8px 14px; border-bottom:1px solid #f0eee9;">/app/library</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Content library grid + filters</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">member</td></tr>
+        <tr><td class="mono" style="padding:8px 14px; border-bottom:1px solid #f0eee9;">/app/analytics</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Cross-platform performance dashboard</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">member</td></tr>
+        <tr><td class="mono" style="padding:8px 14px; border-bottom:1px solid #f0eee9;">/app/recommendations</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Best posting time heatmaps + actions</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">member</td></tr>
+        <tr><td class="mono" style="padding:8px 14px; border-bottom:1px solid #f0eee9;">/app/accounts</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Connected integrations + health</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">admin</td></tr>
+        <tr><td class="mono" style="padding:8px 14px;">/app/settings/*</td><td style="padding:8px 14px;">Profile, workspace, team, billing, publishing, timezone, AI prefs</td><td style="padding:8px 14px; color:#9a9aa0;">varies</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font-size:15px; margin-bottom:10px;">1.2 Page-by-page feature breakdown</h3>
+  <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+    <div style="border:1px solid #e6e4df; border-radius:9px; padding:13px 16px; break-inside:avoid;">
+      <div style="font-size:13px; font-weight:700; margin-bottom:5px;">Dashboard</div>
+      <p style="font-size:12px; margin:0;">6 KPI cards (scheduled/week, published/month, total views, avg engagement, top platform, next window); Best-Time hero (YT / TikTok / cross-platform slots + confidence + CTA); Upcoming Posts panel (thumb, title, time, platform badges, status); Performance snapshot (views trend, top post, top day); Quick Insights assistant panel (rule-derived, non-chat).</p>
+    </div>
+    <div style="border:1px solid #e6e4df; border-radius:9px; padding:13px 16px; break-inside:avoid;">
+      <div style="font-size:13px; font-weight:700; margin-bottom:5px;">Create Post / Composer</div>
+      <p style="font-size:12px; margin:0;">Media upload (drag-drop, progress, preview); base content form; platform selection cards (toggle YT/TikTok); per-platform accordion/tabs (YT: title, description, visibility, made-for-kids, tags, thumbnail; TikTok: caption+char count, privacy, comment/duet/stitch); smart adaptation panel (shorten/hashtags/warnings); scheduling module (now/draft/schedule + date/time/tz + "use recommended"); switchable YT/TikTok live previews; footer actions.</p>
+    </div>
+    <div style="border:1px solid #e6e4df; border-radius:9px; padding:13px 16px; break-inside:avoid;">
+      <div style="font-size:13px; font-weight:700; margin-bottom:5px;">Calendar</div>
+      <p style="font-size:12px; margin:0;">Month / week / agenda views; drag-to-reschedule; per-day post chips with platform+status color; filters (platform, status, campaign); recommended-window highlighting; detail drawer (preview, time, platforms, edit/duplicate).</p>
+    </div>
+    <div style="border:1px solid #e6e4df; border-radius:9px; padding:13px 16px; break-inside:avoid;">
+      <div style="font-size:13px; font-weight:700; margin-bottom:5px;">Analytics</div>
+      <p style="font-size:12px; margin:0;">Platform + date filters, compare-to-previous toggle; 5 KPI cards; views &amp; engagement trend charts; performance-by-platform bars; recent-post performance table (views/likes/comments/engagement/status).</p>
+    </div>
+    <div style="border:1px solid #e6e4df; border-radius:9px; padding:13px 16px; break-inside:avoid;">
+      <div style="font-size:13px; font-weight:700; margin-bottom:5px;">Recommendations</div>
+      <p style="font-size:12px; margin:0;">Hero cards (best YT/TikTok/shared time + confidence + sample size); day×hour heatmap with YT/TikTok/Combined tabs; "how it's calculated" explainer; recommended actions; one-click schedule / apply-to-draft / export.</p>
+    </div>
+    <div style="border:1px solid #e6e4df; border-radius:9px; padding:13px 16px; break-inside:avoid;">
+      <div style="font-size:13px; font-weight:700; margin-bottom:5px;">Library · Accounts · Settings</div>
+      <p style="font-size:12px; margin:0;">Library: searchable grid, status filters, top-performer tags, open-in-composer. Accounts: connection cards with capability flags + health + reconnect, "coming soon" platforms. Settings: profile, workspace, team, notifications, billing, publishing defaults, timezone, AI prefs.</p>
+    </div>
+  </div>
+
+  <h3 style="font-size:15px; margin-bottom:10px;">1.3 Core user flows</h3>
+  <div style="border-left:3px solid #3D5AFE; padding:2px 0 2px 16px; margin-bottom:8px;">
+    <div style="font-size:12.5px; font-weight:700; margin-bottom:3px;">Onboarding → first publish</div>
+    <p style="font-size:12px; margin:0;">Sign up → set timezone → connect YouTube (OAuth) → connect TikTok (OAuth) → land on empty dashboard → Create Post → upload video → adapt per platform → open Recommendations / accept suggested time → schedule → confirmation → appears in Calendar.</p>
+  </div>
+  <div style="border-left:3px solid #0E9F6E; padding:2px 0 2px 16px; margin-bottom:8px;">
+    <div style="font-size:12.5px; font-weight:700; margin-bottom:3px;">Recommendation-driven scheduling</div>
+    <p style="font-size:12px; margin:0;">Recommendations → pick best window → "Apply best time to draft" → composer opens with time prefilled → confirm → job enqueued.</p>
+  </div>
+  <div style="border-left:3px solid #E8734A; padding:2px 0 2px 16px; margin-bottom:8px;">
+    <div style="font-size:12.5px; font-weight:700; margin-bottom:3px;">Publish lifecycle</div>
+    <p style="font-size:12px; margin:0;">Draft → Scheduled → (worker fires) Publishing → Published / Failed → analytics ingested over next 24–72h → feeds recommendation recompute.</p>
+  </div>
+  <div style="border-left:3px solid #E8A23D; padding:2px 0 2px 16px; margin-bottom:20px;">
+    <div style="font-size:12.5px; font-weight:700; margin-bottom:3px;">Reconnect / token-expiry recovery</div>
+    <p style="font-size:12px; margin:0;">Sync job hits 401 → account flagged <span class="mono">needs_review</span> → dashboard/accounts banner → user re-runs OAuth → tokens refreshed → queued jobs resume.</p>
+  </div>
+
+  <h3 style="font-size:15px; margin-bottom:10px;">1.4 Roles &amp; permissions</h3>
+  <p style="font-size:12px; margin-bottom:10px;">MVP is single-workspace/solo, but model roles now so agency/team scope is additive. Roles are per-workspace membership.</p>
+  <div style="border:1px solid #e6e4df; border-radius:10px; overflow:hidden; margin-bottom:6px;">
+    <table style="font-size:12px;">
+      <thead><tr style="background:#faf9f7;">
+        <th style="text-align:left; padding:8px 14px; font-weight:700; border-bottom:1px solid #e6e4df;">Role</th>
+        <th style="text-align:left; padding:8px 14px; font-weight:700; border-bottom:1px solid #e6e4df;">Can</th>
+        <th style="text-align:left; padding:8px 14px; font-weight:700; border-bottom:1px solid #e6e4df;">Cannot</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Owner</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Everything + billing + delete workspace</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; color:#9a9aa0;">—</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Admin</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Manage integrations, members, settings</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Billing, delete workspace</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Editor</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Create/edit/schedule/publish content</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Manage accounts / members</td></tr>
+        <tr><td style="padding:8px 14px; font-weight:600;">Reviewer</td><td style="padding:8px 14px;">View, comment, approve (needs_review → scheduled)</td><td style="padding:8px 14px;">Edit media, publish directly</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:11px; color:#9a9aa0;">Enforce with a single <span class="mono">can(user, action, resource)</span> policy helper checked in every API route + server action; never trust the client.</p>
+
+  <div style="height:1px; background:#e6e4df; margin:28px 0;"></div>
+
+  <!-- ===================== 2. FRONTEND ARCHITECTURE ===================== -->
+  <h2 style="font-size:22px; margin-bottom:4px;">2 · Frontend Architecture</h2>
+  <p style="font-size:11px; color:#9a9aa0; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; margin-bottom:16px;">Next.js · component tree · state · forms · states</p>
+
+  <h3 style="font-size:15px; margin-bottom:10px;">2.1 Stack</h3>
+  <div style="border:1px solid #e6e4df; border-radius:10px; overflow:hidden; margin-bottom:20px;">
+    <table style="font-size:12px;">
+      <tbody>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600; width:26%;">Framework</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Next.js 14+ App Router, React Server Components; route handlers for the API layer; server actions for mutations where a full endpoint is overkill.</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Language</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">TypeScript, <span class="mono">strict</span>. Shared types generated from Prisma + Zod schemas (single source of truth).</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Styling / UI</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Tailwind + shadcn/ui (Radix primitives). Design tokens from prototype: indigo <span class="mono">#3D5AFE</span> primary, warm neutral <span class="mono">#FAF9F7</span> surface, Inter type.</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Server state</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">TanStack Query for client fetching/caching/optimistic updates; RSC for initial loads.</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Client state</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Zustand for composer draft state + calendar view; URL search params for filters (shareable/back-button safe).</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Forms</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">react-hook-form + Zod resolver; same Zod schema reused server-side.</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Charts</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Recharts (or visx) for trends; custom CSS-grid heatmap for recommendations.</td></tr>
+        <tr><td style="padding:8px 14px; font-weight:600;">Uploads</td><td style="padding:8px 14px;">Direct-to-S3 presigned multipart via uppy/tus for resumable large video.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font-size:15px; margin-bottom:10px;">2.2 Reusable component library</h3>
+  <p style="font-size:12px; margin-bottom:8px;">Wrap shadcn primitives in a thin <span class="mono">/components/ui</span> layer, then build domain components in <span class="mono">/components/app</span>:</p>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 20px; margin-bottom:20px;">
+    <div style="font-size:11.5px;"><span style="font-weight:700; color:#3D5AFE;">Primitives:</span> Button, Card, Badge, Table, Tabs, Dialog/Modal, Sheet (drawer), Tooltip, Popover, Select, Calendar/DatePicker, Toggle, Switch, Progress, Skeleton, Toast.</div>
+    <div style="font-size:11.5px;"><span style="font-weight:700; color:#0E9F6E;">Domain:</span> StatCard, PlatformBadge, StatusBadge, PostCard, BestTimeCard, InsightNote, HeatmapGrid, TrendChartCard, PlatformPreview (YT/TikTok), MediaDropzone, PlatformFieldPanel, ScheduleControl, ConnectionCard, EmptyState.</div>
+  </div>
+
+  <h3 style="font-size:15px; margin-bottom:10px;">2.3 Component hierarchy (key pages)</h3>
+  <div style="background:#faf9f7; border:1px solid #e6e4df; border-radius:10px; padding:14px 16px; margin-bottom:12px; break-inside:avoid;">
+    <div style="font-size:12px; font-weight:700; margin-bottom:6px;">Composer — <span class="mono" style="font-weight:400;">/app/create/[draftId]</span></div>
+    <pre class="mono" style="font-size:10.5px; line-height:1.5; margin:0; color:#3c3e46; white-space:pre-wrap;">&lt;ComposerLayout&gt;
+ ├─ &lt;MediaDropzone /&gt;                 // uppy, presigned upload, progress
+ ├─ &lt;BaseContentForm /&gt;               // rhf + zod (title, caption, tags, campaign)
+ ├─ &lt;PlatformSelector /&gt;              // toggles → drives which panels render
+ ├─ &lt;PlatformFieldPanel platform="youtube" /&gt;
+ ├─ &lt;PlatformFieldPanel platform="tiktok" /&gt;
+ ├─ &lt;SmartAdaptationPanel /&gt;          // suggestions + validation warnings
+ └─ &lt;aside&gt; (sticky)
+     ├─ &lt;ScheduleControl /&gt;           // now / draft / schedule + recommended time
+     └─ &lt;PlatformPreview switchable /&gt;</pre>
+  </div>
+  <div style="background:#faf9f7; border:1px solid #e6e4df; border-radius:10px; padding:14px 16px; margin-bottom:20px; break-inside:avoid;">
+    <div style="font-size:12px; font-weight:700; margin-bottom:6px;">Recommendations — <span class="mono" style="font-weight:400;">/app/recommendations</span></div>
+    <pre class="mono" style="font-size:10.5px; line-height:1.5; margin:0; color:#3c3e46; white-space:pre-wrap;">&lt;RecommendationsPage&gt;
+ ├─ &lt;BestTimeCard × 3 &gt;               // YT / TikTok / cross-platform
+ ├─ &lt;HeatmapCard&gt;
+ │   ├─ &lt;PlatformTabs /&gt;              // YT | TikTok | Combined
+ │   └─ &lt;HeatmapGrid days×hours /&gt;    // score → opacity
+ ├─ &lt;CalculationExplainer /&gt;
+ └─ &lt;RecommendedActions /&gt;           // one-click schedule / apply / export</pre>
+  </div>
+
+  <h3 style="font-size:15px; margin-bottom:10px;">2.4 Form architecture &amp; validation</h3>
+  <p style="font-size:12px; margin-bottom:10px;">One Zod schema per platform, composed into a discriminated union. The composer validates the shared base, then each active platform's sub-schema; publish is blocked until all active platforms pass.</p>
+  <div style="border:1px solid #e6e4df; border-radius:10px; overflow:hidden; margin-bottom:20px;">
+    <table style="font-size:11.5px;">
+      <thead><tr style="background:#faf9f7;">
+        <th style="text-align:left; padding:8px 14px; font-weight:700; border-bottom:1px solid #e6e4df; width:20%;">Screen</th>
+        <th style="text-align:left; padding:8px 14px; font-weight:700; border-bottom:1px solid #e6e4df;">Validation rules</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Composer (base)</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Internal title required; ≥1 platform selected; media attached &amp; upload complete before schedule.</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">YouTube panel</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Title 1–100 chars (required); description ≤5000; visibility enum; made-for-kids boolean required; ≤500 tag chars; aspect-ratio check on media.</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">TikTok panel</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Caption ≤2200 but warn &gt;150; privacy enum; duration ≤ account max; vertical aspect warning.</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Schedule</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Scheduled time must be future + ≥ platform min lead time; valid IANA timezone.</td></tr>
+        <tr><td style="padding:8px 14px; font-weight:600;">Auth / settings</td><td style="padding:8px 14px;">Email format, password strength, unique workspace slug.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:12px; margin-bottom:10px;">Warnings (soft, non-blocking) vs errors (hard, block publish) are distinct: the SmartAdaptationPanel surfaces warnings like "TikTok caption longer than recommended", "YouTube title missing", "asset may not match platform aspect ratio".</p>
+
+  <h3 style="font-size:15px; margin-bottom:10px;">2.5 Responsive &amp; state coverage</h3>
+  <p style="font-size:12px; margin-bottom:10px;">Desktop-first (primary), but every page collapses gracefully: sidebar → icon rail → drawer; multi-column composer/analytics stack to single column; tables become stacked cards under <span class="mono">md</span>. Calendar drops to agenda list on mobile.</p>
+  <div style="border:1px solid #e6e4df; border-radius:10px; overflow:hidden; margin-bottom:6px;">
+    <table style="font-size:11.5px;">
+      <thead><tr style="background:#faf9f7;">
+        <th style="text-align:left; padding:8px 14px; font-weight:700; border-bottom:1px solid #e6e4df; width:16%;">State</th>
+        <th style="text-align:left; padding:8px 14px; font-weight:700; border-bottom:1px solid #e6e4df;">Treatment</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600; color:#3D5AFE;">Loading</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Skeletons matching card/table/chart shapes; RSC streaming with Suspense boundaries per panel.</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600; color:#0E9F6E;">Empty</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">"Connect your first account", "Upload your first video", "No analytics yet — publish content to start receiving recommendations". Each with a primary CTA.</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600; color:#C22F2F;">Error</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Inline field errors; page-level error boundary with retry; toast for mutation failures; publish-failure banner links to the failed post.</td></tr>
+        <tr><td style="padding:8px 14px; font-weight:600; color:#9A6414;">Degraded</td><td style="padding:8px 14px;">Stale analytics badge when last sync &gt; 24h; "reconnect required" banner when tokens expire.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="height:1px; background:#e6e4df; margin:28px 0;"></div>
+
+  <!-- ===================== 3. BACKEND ARCHITECTURE ===================== -->
+  <h2 style="font-size:22px; margin-bottom:4px;">3 · Backend Architecture</h2>
+  <p style="font-size:11px; color:#9a9aa0; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; margin-bottom:16px;">Services · schema · jobs · scheduler · recommendation engine</p>
+
+  <h3 style="font-size:15px; margin-bottom:10px;">3.1 Service topology</h3>
+  <p style="font-size:12px; margin-bottom:10px;">A modular monolith to start — one Next.js app for API + UI, one separate long-running Node worker process. Split into services only when a boundary proves it needs to scale independently.</p>
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
+    <div style="border:1px solid #e6e4df; border-radius:9px; padding:12px 14px;"><div style="font-size:12px; font-weight:700; margin-bottom:4px;">Web / API (Next.js)</div><p style="font-size:11px; margin:0;">Auth, CRUD, presigned uploads, enqueues jobs. Stateless, horizontally scalable.</p></div>
+    <div style="border:1px solid #e6e4df; border-radius:9px; padding:12px 14px;"><div style="font-size:12px; font-weight:700; margin-bottom:4px;">Worker (Node + BullMQ)</div><p style="font-size:11px; margin:0;">Publishing, analytics sync, recommendation recompute, token refresh, notifications.</p></div>
+    <div style="border:1px solid #e6e4df; border-radius:9px; padding:12px 14px;"><div style="font-size:12px; font-weight:700; margin-bottom:4px;">Datastores</div><p style="font-size:11px; margin:0;">Postgres (source of truth via Prisma), Redis (BullMQ queues + cache), S3 (media).</p></div>
+  </div>
+
+  <h3 style="font-size:15px; margin-bottom:10px;">3.2 Database schema (Prisma-oriented)</h3>
+  <div style="border:1px solid #e6e4df; border-radius:10px; overflow:hidden; margin-bottom:12px;">
+    <table style="font-size:11px;">
+      <thead><tr style="background:#faf9f7;">
+        <th style="text-align:left; padding:8px 12px; font-weight:700; border-bottom:1px solid #e6e4df; width:20%;">Entity</th>
+        <th style="text-align:left; padding:8px 12px; font-weight:700; border-bottom:1px solid #e6e4df;">Key fields</th>
+        <th style="text-align:left; padding:8px 12px; font-weight:700; border-bottom:1px solid #e6e4df; width:24%;">Relationships</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">User</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">id, email, name, avatarUrl, passwordHash?, timezone</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">has many Membership</td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Workspace</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">id, name, slug, plan, defaultTimezone</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">has many Membership, SocialAccount, Post</td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Membership</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">id, userId, workspaceId, role (enum)</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">User ↔ Workspace join</td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">SocialAccount</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">id, workspaceId, provider (youtube/tiktok), handle, externalId, status, scopes[], lastSyncedAt, capabilities</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">has one OAuthToken; has many PostTarget, MetricSnapshot</td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">OAuthToken</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">id, socialAccountId, accessToken (enc), refreshToken (enc), expiresAt, scope</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">1–1 SocialAccount</td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">MediaAsset</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">id, workspaceId, s3Key, mime, sizeBytes, durationSec, width, height, status</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">used by Post</td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Post</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">id, workspaceId, authorId, internalTitle, baseCaption, tags[], campaign, status, mediaAssetId</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">has many PostTarget</td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">PostTarget</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">id, postId, socialAccountId, platform, overrides (jsonb: title/desc/caption/privacy…), scheduledAt, status, externalPostId, publishedAt, failureReason</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Post ↔ SocialAccount; the unit the scheduler acts on</td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">MetricSnapshot</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">id, postTargetId, capturedAt, views, likes, comments, shares, watchTimeSec, engagementRate</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">time series per PostTarget</td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Recommendation</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">id, workspaceId, platform (or combined), dayOfWeek, hour, score, confidence, sampleSize, computedAt</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">rebuilt by recompute job</td></tr>
+        <tr><td class="mono" style="padding:7px 12px;">AuditLog / Notification</td><td style="padding:7px 12px;">actor, action, resource, meta, createdAt / userId, type, read</td><td style="padding:7px 12px;">cross-cutting</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:11px; color:#9a9aa0; margin-bottom:20px;">Indexes: <span class="mono">PostTarget(status, scheduledAt)</span> for the scheduler poll; <span class="mono">MetricSnapshot(postTargetId, capturedAt)</span>; <span class="mono">Recommendation(workspaceId, platform)</span>. Tokens encrypted at rest (KMS/libsodium), never returned to the client.</p>
+
+  <h3 style="font-size:15px; margin-bottom:10px;">3.3 Background jobs (BullMQ queues)</h3>
+  <div style="border:1px solid #e6e4df; border-radius:10px; overflow:hidden; margin-bottom:20px;">
+    <table style="font-size:11.5px;">
+      <thead><tr style="background:#faf9f7;">
+        <th style="text-align:left; padding:8px 14px; font-weight:700; border-bottom:1px solid #e6e4df; width:24%;">Queue</th>
+        <th style="text-align:left; padding:8px 14px; font-weight:700; border-bottom:1px solid #e6e4df;">Trigger &amp; behavior</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="mono" style="padding:8px 14px; border-bottom:1px solid #f0eee9;">publish</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Delayed job per PostTarget scheduled at exact time; uploads media + creates post via platform API; retries w/ backoff; sets Published/Failed.</td></tr>
+        <tr><td class="mono" style="padding:8px 14px; border-bottom:1px solid #f0eee9;">analytics-sync</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Repeatable (hourly for &lt;72h-old posts, then daily) — pulls metrics, writes MetricSnapshot.</td></tr>
+        <tr><td class="mono" style="padding:8px 14px; border-bottom:1px solid #f0eee9;">recompute-recommendations</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Weekly per workspace + on-demand after N new snapshots; rebuilds Recommendation rows.</td></tr>
+        <tr><td class="mono" style="padding:8px 14px; border-bottom:1px solid #f0eee9;">token-refresh</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Runs ahead of expiresAt; refreshes OAuth tokens; flags account on failure.</td></tr>
+        <tr><td class="mono" style="padding:8px 14px;">media-probe / notify</td><td style="padding:8px 14px;">ffprobe uploaded media for duration/aspect; fan-out notifications (publish success/fail, review requests).</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font-size:15px; margin-bottom:10px;">3.4 Scheduler architecture</h3>
+  <p style="font-size:12px; margin-bottom:8px;">Use <span class="mono">BullMQ delayed jobs</span> as the primary mechanism: when a PostTarget is scheduled, enqueue a <span class="mono">publish</span> job with <span class="mono">delay = scheduledAt − now</span> and <span class="mono">jobId = postTarget.id</span> (idempotent; rescheduling removes + re-adds). A safety-net cron ("sweeper") runs every minute to enqueue any <span class="mono">status=scheduled &amp;&amp; scheduledAt&lt;=now</span> targets missed due to downtime. The worker claims a job, re-checks DB state (guard against double-publish / cancellation), performs upload+publish, and transitions status atomically. All external calls are idempotent-keyed so retries never double-post.</p>
+  <div style="background:#faf9f7; border:1px solid #e6e4df; border-radius:9px; padding:12px 15px; margin-bottom:20px; break-inside:avoid;">
+    <pre class="mono" style="font-size:10.5px; line-height:1.55; margin:0; color:#3c3e46; white-space:pre-wrap;">schedule(target) → publishQueue.add('publish', {targetId}, {delay, jobId: targetId, attempts:5, backoff:{type:'exponential', delay:30_000}})
+worker: load target → assert status==scheduled → set 'publishing'
+        → upload media → platform.createPost() → store externalPostId → set 'published'
+        → schedule analytics-sync(target) at +1h
+   catch → increment attempt; on final fail set 'failed' + failureReason + notify</pre>
+  </div>
+
+  <h3 style="font-size:15px; margin-bottom:10px;">3.5 Analytics ingestion</h3>
+  <p style="font-size:12px; margin-bottom:20px;">After publish, the <span class="mono">analytics-sync</span> repeatable job polls each platform's analytics endpoint on a decaying cadence (t+1h, +3h, +12h, +24h, then daily to 90d). Each poll writes an immutable <span class="mono">MetricSnapshot</span> so we keep the full growth curve (enables "first-24h view velocity" insights). A nightly rollup aggregates snapshots into per-post latest + per-workspace daily totals for fast dashboard reads. Platform rate limits are respected via per-provider concurrency + a token-bucket limiter in Redis.</p>
+
+  <h3 style="font-size:15px; margin-bottom:10px;">3.6 Recommendation engine (best posting time)</h3>
+  <p style="font-size:12px; margin-bottom:10px;">MVP is a transparent, explainable heuristic — not a black-box ML model. This matches the "smarter than a scheduler, not gimmicky AI" positioning and is defensible in the UI's explainer panel.</p>
+  <div style="border:1px solid #e6e4df; border-radius:10px; overflow:hidden; margin-bottom:10px;">
+    <table style="font-size:11.5px;">
+      <tbody>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600; width:22%;">Input</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Last 90 days of MetricSnapshots joined to PostTarget.publishedAt (converted to workspace timezone).</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Bucketing</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Map each post to a (dayOfWeek × hour) cell, per platform.</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Score</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Weighted, normalized blend: <span class="mono">0.4·engagementRate + 0.35·viewsVelocity24h + 0.25·watchTime</span> (weights configurable in AI settings), z-scored within platform.</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Confidence</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Function of sample size per cell + variance; sparse cells shrink toward the platform mean (empirical-Bayes) to avoid overfitting 1–2 posts.</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Combined slot</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Cross-platform = argmax of the harmonic mean of per-platform cell scores (rewards slots good for both, not just one).</td></tr>
+        <tr><td style="padding:8px 14px; font-weight:600;">Output</td><td style="padding:8px 14px;">Persist full grid → Recommendation rows; hero cards read top cell per platform + combined. Recompute weekly / on-demand.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:11px; color:#9a9aa0; margin-bottom:0;">Cold-start: before enough first-party data, seed with platform/category benchmarks and label recommendations "based on general benchmarks" until sample size crosses a threshold. Post-MVP: swap the heuristic for a gradient-boosted model behind the same Recommendation table + API — no frontend change.</p>
+
+  <div style="height:1px; background:#e6e4df; margin:28px 0;"></div>
+
+  <!-- ===================== 4. API DESIGN ===================== -->
+  <h2 style="font-size:22px; margin-bottom:4px;">4 · API Design</h2>
+  <p style="font-size:11px; color:#9a9aa0; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; margin-bottom:14px;">REST under /api · JSON · Zod-validated · workspace-scoped</p>
+  <p style="font-size:12px; margin-bottom:16px;">All authenticated routes require a session and resolve the active <span class="mono">workspaceId</span> from the session/header; every handler runs the <span class="mono">can()</span> policy check. Payloads below are abbreviated to the significant fields.</p>
+
+  <!-- Auth -->
+  <div style="font-size:12px; font-weight:700; color:#3D5AFE; margin-bottom:8px; letter-spacing:0.03em;">AUTH</div>
+  <div style="border:1px solid #e6e4df; border-radius:10px; overflow:hidden; margin-bottom:16px;">
+    <table style="font-size:11px;">
+      <thead><tr style="background:#faf9f7;">
+        <th style="text-align:left; padding:7px 12px; font-weight:700; border-bottom:1px solid #e6e4df; width:8%;">M</th>
+        <th style="text-align:left; padding:7px 12px; font-weight:700; border-bottom:1px solid #e6e4df; width:27%;">Path</th>
+        <th style="text-align:left; padding:7px 12px; font-weight:700; border-bottom:1px solid #e6e4df;">Purpose · request → response</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#0A7A55; font-weight:600;">POST</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/auth/signup</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Create account. <span class="mono">{email,password,name}</span> → <span class="mono">{user, workspace, session}</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#0A7A55; font-weight:600;">POST</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/auth/login</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;"><span class="mono">{email,password}</span> → <span class="mono">{user, session}</span> (sets httpOnly cookie)</td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#0A7A55; font-weight:600;">POST</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/auth/logout</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Invalidate session → <span class="mono">204</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; color:#2A6FDB; font-weight:600;">GET</td><td class="mono" style="padding:7px 12px;">/api/me</td><td style="padding:7px 12px;">→ <span class="mono">{user, memberships, activeWorkspace}</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Accounts -->
+  <div style="font-size:12px; font-weight:700; color:#3D5AFE; margin-bottom:8px; letter-spacing:0.03em;">SOCIAL ACCOUNTS &amp; INTEGRATIONS</div>
+  <div style="border:1px solid #e6e4df; border-radius:10px; overflow:hidden; margin-bottom:16px;">
+    <table style="font-size:11px;">
+      <thead><tr style="background:#faf9f7;">
+        <th style="text-align:left; padding:7px 12px; font-weight:700; border-bottom:1px solid #e6e4df; width:8%;">M</th>
+        <th style="text-align:left; padding:7px 12px; font-weight:700; border-bottom:1px solid #e6e4df; width:34%;">Path</th>
+        <th style="text-align:left; padding:7px 12px; font-weight:700; border-bottom:1px solid #e6e4df;">Purpose · request → response</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#2A6FDB; font-weight:600;">GET</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/accounts</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">List connections + health → <span class="mono">[{id,provider,handle,status,capabilities,lastSyncedAt}]</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#2A6FDB; font-weight:600;">GET</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/accounts/:provider/connect</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Begin OAuth → 302 to provider consent (state stored)</td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#2A6FDB; font-weight:600;">GET</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/accounts/:provider/callback</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">OAuth redirect; exchange code, store enc tokens → 302 /app/accounts</td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#0A7A55; font-weight:600;">POST</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/accounts/:id/test</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Ping platform w/ token → <span class="mono">{ok, scopes, error?}</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; color:#C22F2F; font-weight:600;">DELETE</td><td class="mono" style="padding:7px 12px;">/api/accounts/:id</td><td style="padding:7px 12px;">Disconnect, revoke, purge tokens → <span class="mono">204</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Media + Posts -->
+  <div style="font-size:12px; font-weight:700; color:#3D5AFE; margin-bottom:8px; letter-spacing:0.03em;">MEDIA &amp; POSTS (DRAFT CRUD)</div>
+  <div style="border:1px solid #e6e4df; border-radius:10px; overflow:hidden; margin-bottom:16px;">
+    <table style="font-size:11px;">
+      <thead><tr style="background:#faf9f7;">
+        <th style="text-align:left; padding:7px 12px; font-weight:700; border-bottom:1px solid #e6e4df; width:8%;">M</th>
+        <th style="text-align:left; padding:7px 12px; font-weight:700; border-bottom:1px solid #e6e4df; width:28%;">Path</th>
+        <th style="text-align:left; padding:7px 12px; font-weight:700; border-bottom:1px solid #e6e4df;">Purpose · request → response</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#0A7A55; font-weight:600;">POST</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/media/presign</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;"><span class="mono">{filename,mime,sizeBytes}</span> → <span class="mono">{uploadUrls[],mediaAssetId}</span> (multipart)</td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#0A7A55; font-weight:600;">POST</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/media/:id/complete</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Finalize multipart; enqueue media-probe → <span class="mono">{mediaAsset}</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#2A6FDB; font-weight:600;">GET</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/posts</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">List/filter (status,platform,campaign,q) → <span class="mono">[Post]</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#0A7A55; font-weight:600;">POST</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/posts</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Create draft. <span class="mono">{internalTitle,baseCaption,tags,mediaAssetId,targets:[{platform,accountId,overrides}]}</span> → <span class="mono">{post}</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#2A6FDB; font-weight:600;">GET</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/posts/:id</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">→ <span class="mono">{post, targets, media}</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#9A6414; font-weight:600;">PATCH</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/posts/:id</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Update draft / per-target overrides → <span class="mono">{post}</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#0A7A55; font-weight:600;">POST</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/posts/:id/duplicate</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Clone as new draft → <span class="mono">{post}</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; color:#C22F2F; font-weight:600;">DELETE</td><td class="mono" style="padding:7px 12px;">/api/posts/:id</td><td style="padding:7px 12px;">→ <span class="mono">204</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Scheduling -->
+  <div style="font-size:12px; font-weight:700; color:#3D5AFE; margin-bottom:8px; letter-spacing:0.03em;">SCHEDULING &amp; PUBLISHING</div>
+  <div style="border:1px solid #e6e4df; border-radius:10px; overflow:hidden; margin-bottom:16px;">
+    <table style="font-size:11px;">
+      <thead><tr style="background:#faf9f7;">
+        <th style="text-align:left; padding:7px 12px; font-weight:700; border-bottom:1px solid #e6e4df; width:8%;">M</th>
+        <th style="text-align:left; padding:7px 12px; font-weight:700; border-bottom:1px solid #e6e4df; width:30%;">Path</th>
+        <th style="text-align:left; padding:7px 12px; font-weight:700; border-bottom:1px solid #e6e4df;">Purpose · request → response</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#0A7A55; font-weight:600;">POST</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/posts/:id/schedule</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;"><span class="mono">{targets:[{targetId,scheduledAt,timezone}]}</span> → enqueues jobs → <span class="mono">{targets:[{status:'scheduled'}]}</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#0A7A55; font-weight:600;">POST</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/posts/:id/publish-now</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Enqueue immediate publish → <span class="mono">{targets}</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#9A6414; font-weight:600;">PATCH</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/targets/:id/reschedule</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Drag-drop calendar move. <span class="mono">{scheduledAt}</span> → re-adds delayed job → <span class="mono">{target}</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#C22F2F; font-weight:600;">POST</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/targets/:id/cancel</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Cancel scheduled → removes job → <span class="mono">{status:'draft'}</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; color:#2A6FDB; font-weight:600;">GET</td><td class="mono" style="padding:7px 12px;">/api/calendar</td><td style="padding:7px 12px;">Range query <span class="mono">?from&amp;to</span> → targets grouped by day for calendar</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Analytics + Recs -->
+  <div style="font-size:12px; font-weight:700; color:#3D5AFE; margin-bottom:8px; letter-spacing:0.03em;">ANALYTICS &amp; RECOMMENDATIONS</div>
+  <div style="border:1px solid #e6e4df; border-radius:10px; overflow:hidden; margin-bottom:6px;">
+    <table style="font-size:11px;">
+      <thead><tr style="background:#faf9f7;">
+        <th style="text-align:left; padding:7px 12px; font-weight:700; border-bottom:1px solid #e6e4df; width:8%;">M</th>
+        <th style="text-align:left; padding:7px 12px; font-weight:700; border-bottom:1px solid #e6e4df; width:30%;">Path</th>
+        <th style="text-align:left; padding:7px 12px; font-weight:700; border-bottom:1px solid #e6e4df;">Purpose · request → response</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#2A6FDB; font-weight:600;">GET</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/analytics/overview</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;"><span class="mono">?platform&amp;from&amp;to&amp;compare</span> → <span class="mono">{kpis, deltas}</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#2A6FDB; font-weight:600;">GET</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/analytics/timeseries</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;"><span class="mono">?metric=views|engagement&amp;interval=day</span> → <span class="mono">[{date,value}]</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#2A6FDB; font-weight:600;">GET</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/analytics/posts</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;">Per-post performance table → <span class="mono">[{post,platform,views,likes,comments,shares,engagementRate}]</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#2A6FDB; font-weight:600;">GET</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/recommendations</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;"><span class="mono">?platform=youtube|tiktok|combined</span> → <span class="mono">{heatmap:[{day,hour,score}], best:{day,hour,confidence,sampleSize}}</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9; color:#0A7A55; font-weight:600;">POST</td><td class="mono" style="padding:7px 12px; border-bottom:1px solid #f0eee9;">/api/recommendations/apply</td><td style="padding:7px 12px; border-bottom:1px solid #f0eee9;"><span class="mono">{draftId, slot}</span> → prefills draft schedule → <span class="mono">{target}</span></td></tr>
+        <tr><td class="mono" style="padding:7px 12px; color:#2A6FDB; font-weight:600;">GET</td><td class="mono" style="padding:7px 12px;">/api/recommendations/export</td><td style="padding:7px 12px;">→ PDF/CSV report of current recommendations</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:11px; color:#9a9aa0; margin-bottom:20px;">Conventions: cursor pagination (<span class="mono">?cursor&amp;limit</span>), consistent error envelope <span class="mono">{error:{code,message,fields?}}</span>, idempotency keys on publish/schedule, rate limiting per workspace.</p>
+
+  <div style="height:1px; background:#e6e4df; margin:28px 0;"></div>
+
+  <!-- ===================== 5. INTEGRATIONS ===================== -->
+  <h2 style="font-size:22px; margin-bottom:4px;">5 · Third-Party Integrations</h2>
+  <p style="font-size:11px; color:#9a9aa0; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; margin-bottom:16px;">OAuth · publishing · analytics · sync · failure handling</p>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:8px;">
+    <!-- YouTube -->
+    <div style="border:1px solid #e6e4df; border-radius:12px; padding:16px 18px; break-inside:avoid;">
+      <div style="display:flex; align-items:center; gap:9px; margin-bottom:12px;">
+        <div style="width:30px; height:30px; border-radius:8px; background:rgba(255,59,48,0.1); display:flex; align-items:center; justify-content:center;"><div style="width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:9px solid #FF3B30;"></div></div>
+        <div style="font-size:14px; font-weight:700;">YouTube (Data API v3)</div>
+      </div>
+      <div style="font-size:11px; line-height:1.6;">
+        <p style="margin:0 0 7px;"><b>OAuth:</b> Google OAuth 2.0 authorization-code + PKCE, <span class="mono">access_type=offline</span> for refresh token. Scopes: <span class="mono">youtube.upload</span>, <span class="mono">youtube.readonly</span>, <span class="mono">yt-analytics.readonly</span>.</p>
+        <p style="margin:0 0 7px;"><b>Tokens:</b> short-lived access + long-lived refresh; refresh proactively before expiry.</p>
+        <p style="margin:0 0 7px;"><b>Publish:</b> resumable upload to <span class="mono">videos.insert</span> (media + snippet: title/description/tags + status: privacy, madeForKids); store returned videoId as externalPostId. Custom thumbnail via <span class="mono">thumbnails.set</span>.</p>
+        <p style="margin:0 0 7px;"><b>Analytics:</b> YouTube Analytics API — views, estimatedMinutesWatched, likes, comments, shares, averageViewDuration per video/day.</p>
+        <p style="margin:0;"><b>Sync jobs:</b> per-video metric pull on decaying cadence; quota-aware batching (Data API has strict daily quota units).</p>
+      </div>
+    </div>
+    <!-- TikTok -->
+    <div style="border:1px solid #e6e4df; border-radius:12px; padding:16px 18px; break-inside:avoid;">
+      <div style="display:flex; align-items:center; gap:9px; margin-bottom:12px;">
+        <div style="width:30px; height:30px; border-radius:8px; background:rgba(20,21,26,0.08); display:flex; align-items:center; justify-content:center;"><div style="width:12px;height:12px;border-radius:4px;background:#14151a;"></div></div>
+        <div style="font-size:14px; font-weight:700;">TikTok (Content Posting API)</div>
+      </div>
+      <div style="font-size:11px; line-height:1.6;">
+        <p style="margin:0 0 7px;"><b>OAuth:</b> TikTok Login Kit OAuth 2.0 authorization-code. Scopes: <span class="mono">video.upload</span> / <span class="mono">video.publish</span>, <span class="mono">user.info.basic</span>, <span class="mono">video.list</span> (+ insights where available).</p>
+        <p style="margin:0 0 7px;"><b>Tokens:</b> access + refresh (client_key/secret); handle scope-review status per app approval.</p>
+        <p style="margin:0 0 7px;"><b>Publish:</b> initialize upload → chunked video upload → publish with caption, privacy_level, comment/duet/stitch flags; poll <span class="mono">publish status</span> until success; store publish_id / video_id.</p>
+        <p style="margin:0 0 7px;"><b>Analytics:</b> video metrics — views, likes, comments, shares, watch time / avg watch (subject to API access tier).</p>
+        <p style="margin:0;"><b>Sync jobs:</b> poll publish status right after post; metric pulls on decaying cadence; respect per-app rate limits.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="border:1px solid #e6e4df; border-radius:10px; overflow:hidden; margin-bottom:6px;">
+    <table style="font-size:11.5px;">
+      <thead><tr style="background:#faf9f7;">
+        <th style="text-align:left; padding:8px 14px; font-weight:700; border-bottom:1px solid #e6e4df; width:28%;">Failure case</th>
+        <th style="text-align:left; padding:8px 14px; font-weight:700; border-bottom:1px solid #e6e4df;">Handling</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Token expired / revoked (401)</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Flag account <span class="mono">needs_review</span>, pause its jobs, banner + reconnect CTA, notify user.</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Rate limit / quota (429)</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Exponential backoff + Redis token bucket; defer sync, never drop publish.</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Upload / processing failure</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Retry (5 attempts); on final fail set target <span class="mono">failed</span> + human-readable failureReason.</td></tr>
+        <tr><td style="padding:8px 14px; border-bottom:1px solid #f0eee9; font-weight:600;">Content policy rejection</td><td style="padding:8px 14px; border-bottom:1px solid #f0eee9;">Surface platform message verbatim; no retry; mark failed.</td></tr>
+        <tr><td style="padding:8px 14px; font-weight:600;">Partial multi-platform publish</td><td style="padding:8px 14px;">Per-target status is independent — one platform succeeding never blocks or rolls back the other; UI shows mixed state.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:11px; color:#9a9aa0; margin-bottom:0;">Abstract both behind a common <span class="mono">PlatformAdapter</span> interface (<span class="mono">connect / publish / fetchMetrics / refreshToken</span>) so future Instagram/LinkedIn/X/Facebook adapters drop in without touching the scheduler or UI.</p>
+
+  <div style="height:1px; background:#e6e4df; margin:28px 0;"></div>
+
+  <!-- ===================== 6. ROADMAP ===================== -->
+  <h2 style="font-size:22px; margin-bottom:4px;">6 · MVP Build Roadmap</h2>
+  <p style="font-size:11px; color:#9a9aa0; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; margin-bottom:16px;">6 phases · goals · FE/BE tasks · dependencies · deliverables</p>
+
+  <div style="display:flex; flex-direction:column; gap:12px;">
+    <div style="border:1px solid #e6e4df; border-radius:11px; overflow:hidden; break-inside:avoid;">
+      <div style="background:#3D5AFE; color:#fff; padding:10px 16px; display:flex; align-items:center; gap:10px;"><span style="font-size:11px; font-weight:800; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:999px;">PHASE 1</span><span style="font-size:13.5px; font-weight:700;">Foundations</span></div>
+      <div style="padding:13px 16px; font-size:11.5px; line-height:1.6;">
+        <p style="margin:0 0 5px;"><b>Goal:</b> App skeleton, auth, workspace model, design system, CI/CD.</p>
+        <p style="margin:0 0 5px;"><b>Frontend:</b> Next.js + Tailwind + shadcn setup, layout shell (sidebar + top bar), auth pages, design tokens, component-library primitives, empty-state components.</p>
+        <p style="margin:0 0 5px;"><b>Backend:</b> Prisma schema (User/Workspace/Membership), auth (NextAuth or custom sessions), <span class="mono">can()</span> policy layer, Postgres + Redis provisioned, worker process scaffold.</p>
+        <p style="margin:0 0 5px;"><b>Dependencies:</b> none.</p>
+        <p style="margin:0;"><b>Deliverable:</b> User can sign up, log in, land on an empty authenticated dashboard.</p>
+      </div>
+    </div>
+
+    <div style="border:1px solid #e6e4df; border-radius:11px; overflow:hidden; break-inside:avoid;">
+      <div style="background:#14151a; color:#fff; padding:10px 16px; display:flex; align-items:center; gap:10px;"><span style="font-size:11px; font-weight:800; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:999px;">PHASE 2</span><span style="font-size:13.5px; font-weight:700;">Account Connections</span></div>
+      <div style="padding:13px 16px; font-size:11.5px; line-height:1.6;">
+        <p style="margin:0 0 5px;"><b>Goal:</b> Connect &amp; manage YouTube + TikTok with healthy token lifecycle.</p>
+        <p style="margin:0 0 5px;"><b>Frontend:</b> Accounts page, connection cards + capability flags + health, connect/reconnect/disconnect/test flows, "coming soon" section, onboarding step.</p>
+        <p style="margin:0 0 5px;"><b>Backend:</b> PlatformAdapter interface, YT + TikTok OAuth (connect/callback), encrypted OAuthToken storage, token-refresh queue, test-connection endpoint.</p>
+        <p style="margin:0 0 5px;"><b>Dependencies:</b> Phase 1; approved YT/TikTok developer apps + scopes.</p>
+        <p style="margin:0;"><b>Deliverable:</b> User connects both platforms; tokens auto-refresh; health visible.</p>
+      </div>
+    </div>
+
+    <div style="border:1px solid #e6e4df; border-radius:11px; overflow:hidden; break-inside:avoid;">
+      <div style="background:#0E9F6E; color:#fff; padding:10px 16px; display:flex; align-items:center; gap:10px;"><span style="font-size:11px; font-weight:800; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:999px;">PHASE 3</span><span style="font-size:13.5px; font-weight:700;">Composer + Drafts</span></div>
+      <div style="padding:13px 16px; font-size:11.5px; line-height:1.6;">
+        <p style="margin:0 0 5px;"><b>Goal:</b> Create one post, adapt per platform, save as draft, publish now.</p>
+        <p style="margin:0 0 5px;"><b>Frontend:</b> Composer layout, MediaDropzone (resumable upload), base form + per-platform panels (rhf+zod), platform selector, previews, smart-adaptation warnings, Content Library grid.</p>
+        <p style="margin:0 0 5px;"><b>Backend:</b> Media presign/complete + probe, Post/PostTarget CRUD, publish queue + worker publish path (immediate), per-platform validation, duplicate.</p>
+        <p style="margin:0 0 5px;"><b>Dependencies:</b> Phase 2 (needs connected accounts + adapters).</p>
+        <p style="margin:0;"><b>Deliverable:</b> User uploads a video, customizes for YT + TikTok, publishes immediately to both.</p>
+      </div>
+    </div>
+
+    <div style="border:1px solid #e6e4df; border-radius:11px; overflow:hidden; break-inside:avoid;">
+      <div style="background:#E8734A; color:#fff; padding:10px 16px; display:flex; align-items:center; gap:10px;"><span style="font-size:11px; font-weight:800; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:999px;">PHASE 4</span><span style="font-size:13.5px; font-weight:700;">Scheduling + Calendar</span></div>
+      <div style="padding:13px 16px; font-size:11.5px; line-height:1.6;">
+        <p style="margin:0 0 5px;"><b>Goal:</b> Schedule posts for the future and manage the pipeline visually.</p>
+        <p style="margin:0 0 5px;"><b>Frontend:</b> ScheduleControl (date/time/tz), Calendar month/week/agenda, drag-to-reschedule, detail drawer, filters, status system.</p>
+        <p style="margin:0 0 5px;"><b>Backend:</b> Delayed publish jobs + sweeper cron, schedule/reschedule/cancel endpoints, calendar range query, idempotent status transitions, publish-failure notifications.</p>
+        <p style="margin:0 0 5px;"><b>Dependencies:</b> Phase 3 (publish path).</p>
+        <p style="margin:0;"><b>Deliverable:</b> User schedules to both platforms; posts auto-publish at the right time; calendar reflects state.</p>
+      </div>
+    </div>
+
+    <div style="border:1px solid #e6e4df; border-radius:11px; overflow:hidden; break-inside:avoid;">
+      <div style="background:#7C5CFF; color:#fff; padding:10px 16px; display:flex; align-items:center; gap:10px;"><span style="font-size:11px; font-weight:800; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:999px;">PHASE 5</span><span style="font-size:13.5px; font-weight:700;">Analytics Dashboard</span></div>
+      <div style="padding:13px 16px; font-size:11.5px; line-height:1.6;">
+        <p style="margin:0 0 5px;"><b>Goal:</b> Ingest cross-platform performance and present it clearly.</p>
+        <p style="margin:0 0 5px;"><b>Frontend:</b> Analytics page (KPIs + deltas, trend charts, platform comparison, post table), dashboard performance snapshot, stale-data states.</p>
+        <p style="margin:0 0 5px;"><b>Backend:</b> analytics-sync repeatable jobs, MetricSnapshot storage, nightly rollups, overview/timeseries/posts endpoints, quota-aware fetching.</p>
+        <p style="margin:0 0 5px;"><b>Dependencies:</b> Phase 3–4 (published posts to measure).</p>
+        <p style="margin:0;"><b>Deliverable:</b> Real metrics flow in and render across dashboard + analytics.</p>
+      </div>
+    </div>
+
+    <div style="border:1px solid #e6e4df; border-radius:11px; overflow:hidden; break-inside:avoid;">
+      <div style="background:linear-gradient(90deg,#3D5AFE,#7C5CFF); color:#fff; padding:10px 16px; display:flex; align-items:center; gap:10px;"><span style="font-size:11px; font-weight:800; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:999px;">PHASE 6</span><span style="font-size:13.5px; font-weight:700;">Posting-Time Recommendations</span></div>
+      <div style="padding:13px 16px; font-size:11.5px; line-height:1.6;">
+        <p style="margin:0 0 5px;"><b>Goal:</b> Turn analytics into actionable best-time guidance — the hero feature.</p>
+        <p style="margin:0 0 5px;"><b>Frontend:</b> Recommendations page (hero cards, heatmap + tabs, explainer, actions), dashboard best-time hero, "use recommended time" in composer, export.</p>
+        <p style="margin:0 0 5px;"><b>Backend:</b> recompute-recommendations job (heuristic scoring + confidence), Recommendation table, recommendations + apply + export endpoints, cold-start benchmarks.</p>
+        <p style="margin:0 0 5px;"><b>Dependencies:</b> Phase 5 (needs MetricSnapshots).</p>
+        <p style="margin:0;"><b>Deliverable:</b> User sees per-platform + cross-platform best times and schedules directly from them.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:22px; background:#faf9f7; border:1px solid #e6e4df; border-radius:11px; padding:16px 18px; break-inside:avoid;">
+    <div style="font-size:13px; font-weight:700; margin-bottom:6px;">Post-MVP (noted, not built)</div>
+    <p style="font-size:11.5px; margin:0; color:#5c5e68;">Additional platform adapters (Instagram, LinkedIn, X, Facebook) · approval workflows &amp; team review · agency multi-client workspace switching · ML-based recommendation model · A/B posting-time testing · content repurposing suggestions. All are additive behind existing interfaces (PlatformAdapter, Recommendation table, role system) — no rearchitecting required.</p>
+  </div>
+
+</x-import>
+
+</x-dc>
+</body>
+</html>
