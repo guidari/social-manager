@@ -1,0 +1,7 @@
+.next
+node_modules
+public
+*.lock
+docs/
+Social Publishing Time Optimizer/
+.claude/
