@@ -1,0 +1,2380 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PostPilot — MVP Database Schema</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: linear-gradient(135deg, #f2f1ee 0%, #faf9f7 100%);
+        color: #2c2e36;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 40px;
+        padding-bottom: 28px;
+        border-bottom: 1px solid #e6e4df;
+      }
+      .logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #3d5afe;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .logo svg {
+        width: 24px;
+        height: 24px;
+        fill: #fff;
+      }
+      header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #14151a;
+      }
+      .subtitle {
+        font-size: 13px;
+        color: #9a9aa0;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-top: 8px;
+      }
+      .view-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 8px;
+        background: #fff;
+        border: 1px solid #e6e4df;
+        border-radius: 9px;
+        padding: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        z-index: 1000;
+      }
+      .view-toggle button {
+        padding: 8px 14px;
+        border: none;
+        background: transparent;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.2s;
+        color: #5c5e68;
+      }
+      .view-toggle button.active {
+        background: #3d5afe;
+        color: #fff;
+      }
+      .intro {
+        margin-bottom: 32px;
+        color: #5c5e68;
+        font-size: 14px;
+      }
+      .intro code {
+        font-family: "IBM Plex Mono", monospace;
+        background: #f5f5f7;
+        padding: 2px 6px;
+        border-radius: 4px;
+        color: #3c3e46;
+        font-size: 12.5px;
+      }
+      h2.section-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #9a9aa0;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin: 36px 0 16px;
+      }
+      .table-card {
+        background: #fff;
+        border: 1px solid #e6e4df;
+        border-radius: 12px;
+        padding: 24px 28px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        break-inside: avoid;
+      }
+      .table-card .tname {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 16px;
+        font-weight: 700;
+        color: #3d5afe;
+        background: #f0f0ff;
+        padding: 3px 10px;
+        border-radius: 6px;
+        display: inline-block;
+        margin-bottom: 10px;
+      }
+      .table-card .purpose {
+        font-size: 13.5px;
+        color: #2c2e36;
+        margin-bottom: 16px;
+      }
+      table.cols {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        margin-bottom: 14px;
+      }
+      table.cols th {
+        text-align: left;
+        padding: 7px 10px;
+        font-weight: 700;
+        border-bottom: 1px solid #e6e4df;
+        background: #faf9f7;
+      }
+      table.cols td {
+        padding: 6px 10px;
+        border-bottom: 1px solid #f0eee9;
+        vertical-align: top;
+      }
+      table.cols td.col {
+        font-family: "IBM Plex Mono", monospace;
+        font-weight: 600;
+        color: #14151a;
+        white-space: nowrap;
+      }
+      table.cols td.type {
+        font-family: "IBM Plex Mono", monospace;
+        color: #0a7a55;
+        white-space: nowrap;
+      }
+      .meta-row {
+        display: grid;
+        grid-template-columns: 110px 1fr;
+        gap: 6px 14px;
+        font-size: 12.5px;
+        margin-bottom: 6px;
+      }
+      .meta-row .label {
+        font-weight: 700;
+        color: #9a9aa0;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-size: 10.5px;
+        padding-top: 2px;
+      }
+      .meta-row .value code {
+        font-family: "IBM Plex Mono", monospace;
+        background: #f5f5f7;
+        padding: 1px 5px;
+        border-radius: 4px;
+        font-size: 11.5px;
+      }
+      .erd-block,
+      .prisma-block {
+        background: #14151a;
+        color: #d7d9e0;
+        border-radius: 12px;
+        padding: 22px 24px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11.5px;
+        line-height: 1.6;
+        overflow-x: auto;
+        white-space: pre;
+        margin-bottom: 24px;
+      }
+      .prisma-block {
+        font-size: 12px;
+      }
+      .prisma-block .kw {
+        color: #7c9cff;
+      }
+      .note-box {
+        background: #f0f0ff;
+        border-left: 3px solid #3d5afe;
+        padding: 14px 16px;
+        border-radius: 8px;
+        margin: 10px 0;
+        font-size: 12.5px;
+      }
+      .cascade-list {
+        font-size: 13px;
+      }
+      .cascade-list li {
+        margin-bottom: 10px;
+        margin-left: 18px;
+      }
+      .hidden {
+        display: none;
+      }
+      #markdown-content {
+        width: 100%;
+        min-height: 800px;
+        padding: 20px;
+        border: 1px solid #e6e4df;
+        border-radius: 12px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12.5px;
+        line-height: 1.6;
+        resize: vertical;
+        background: #fff;
+      }
+      .footer {
+        text-align: center;
+        padding: 40px 20px;
+        border-top: 1px solid #e6e4df;
+        color: #9a9aa0;
+        font-size: 12px;
+        margin-top: 20px;
+      }
+      @media (max-width: 768px) {
+        .container {
+          padding: 24px 16px;
+        }
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+        .table-card {
+          padding: 16px;
+        }
+        .view-toggle {
+          top: 12px;
+          right: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="view-toggle">
+      <button class="active" onclick="switchView('html')">HTML View</button>
+      <button onclick="switchView('markdown')">Markdown View</button>
+    </div>
+    <div id="html-view" class="view">
+      <div class="container">
+        <header>
+          <div class="logo">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="6,6 18,12 6,18" />
+            </svg>
+          </div>
+          <div>
+            <h1>PostPilot</h1>
+            <p class="subtitle">MVP Database Schema</p>
+          </div>
+        </header>
+        <p class="intro">
+          Companion to <code>PostPilot Engineering Spec</code> ·
+          <code>PostPilot Implementation Checklist</code>. PostgreSQL 15+, accessed via Prisma ORM.
+          All primary keys are <code>uuid</code>; all tables carry <code>created_at</code>/<code
+            >updated_at</code
+          >
+          unless noted. Timestamps stored in UTC.
+        </p>
+
+        <h2 class="section-title">Auth & Workspace</h2>
+        <div class="table-card">
+          <div class="tname">users</div>
+          <p class="purpose">
+            A person who can log in. Root identity for auth; may belong to multiple workspaces.
+          </p>
+          <table class="cols">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Type</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col">id</td>
+                <td class="type">uuid</td>
+                <td>PK</td>
+              </tr>
+              <tr>
+                <td class="col">email</td>
+                <td class="type">citext</td>
+                <td>unique, required</td>
+              </tr>
+              <tr>
+                <td class="col">password_hash</td>
+                <td class="type">text</td>
+                <td>nullable (OAuth-only users have none)</td>
+              </tr>
+              <tr>
+                <td class="col">name</td>
+                <td class="type">text</td>
+                <td>required</td>
+              </tr>
+              <tr>
+                <td class="col">avatar_url</td>
+                <td class="type">text</td>
+                <td>nullable</td>
+              </tr>
+              <tr>
+                <td class="col">timezone</td>
+                <td class="type">text</td>
+                <td>IANA string, default 'UTC'</td>
+              </tr>
+              <tr>
+                <td class="col">created_at</td>
+                <td class="type">timestamptz</td>
+                <td>default now()</td>
+              </tr>
+              <tr>
+                <td class="col">updated_at</td>
+                <td class="type">timestamptz</td>
+                <td>auto</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="meta-row">
+            <div class="label">Relationships</div>
+            <div class="value">
+              has many <code>workspace_members</code> (→ workspaces via join); has many
+              <code>audit_logs</code> (as actor).
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Indexes</div>
+            <div class="value">unique index on <code>email</code>.</div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Constraints</div>
+            <div class="value">
+              <code>email</code> unique + valid-format check; at least one of password_hash / linked
+              OAuth identity must exist (app layer).
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="tname">workspaces</div>
+          <p class="purpose">
+            The billing/ownership boundary. All content, accounts, and analytics are scoped to a
+            workspace.
+          </p>
+          <table class="cols">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Type</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col">id</td>
+                <td class="type">uuid</td>
+                <td>PK</td>
+              </tr>
+              <tr>
+                <td class="col">name</td>
+                <td class="type">text</td>
+                <td>required</td>
+              </tr>
+              <tr>
+                <td class="col">slug</td>
+                <td class="type">text</td>
+                <td>unique, required (URL-safe)</td>
+              </tr>
+              <tr>
+                <td class="col">plan</td>
+                <td class="type">text (enum)</td>
+                <td>free | pro | agency, default 'free'</td>
+              </tr>
+              <tr>
+                <td class="col">default_timezone</td>
+                <td class="type">text</td>
+                <td>IANA string, default 'UTC'</td>
+              </tr>
+              <tr>
+                <td class="col">created_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="col">updated_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="meta-row">
+            <div class="label">Relationships</div>
+            <div class="value">
+              has many <code>workspace_members</code>, <code>social_accounts</code>,
+              <code>content_drafts</code>, <code>recommendation_summaries</code>.
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Indexes</div>
+            <div class="value">unique index on <code>slug</code>.</div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Constraints</div>
+            <div class="value"><code>slug</code> unique, lowercase/alphanumeric-dash check.</div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="tname">workspace_members</div>
+          <p class="purpose">
+            Join table between users and workspaces; carries the role used by the can() policy
+            layer.
+          </p>
+          <table class="cols">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Type</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col">id</td>
+                <td class="type">uuid</td>
+                <td>PK</td>
+              </tr>
+              <tr>
+                <td class="col">workspace_id</td>
+                <td class="type">uuid</td>
+                <td>FK → workspaces.id, required</td>
+              </tr>
+              <tr>
+                <td class="col">user_id</td>
+                <td class="type">uuid</td>
+                <td>FK → users.id, required</td>
+              </tr>
+              <tr>
+                <td class="col">role</td>
+                <td class="type">text (enum)</td>
+                <td>owner | admin | editor | reviewer, required</td>
+              </tr>
+              <tr>
+                <td class="col">invited_email</td>
+                <td class="type">citext</td>
+                <td>nullable — pending invite before signup</td>
+              </tr>
+              <tr>
+                <td class="col">joined_at</td>
+                <td class="type">timestamptz</td>
+                <td>nullable until accepted</td>
+              </tr>
+              <tr>
+                <td class="col">created_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="col">updated_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="meta-row">
+            <div class="label">Relationships</div>
+            <div class="value">
+              belongs to <code>workspaces</code>; belongs to <code>users</code>.
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Indexes</div>
+            <div class="value">
+              unique composite on <code>(workspace_id, user_id)</code>; index on
+              <code>user_id</code>.
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Constraints</div>
+            <div class="value">
+              unique (workspace_id, user_id); exactly one 'owner' per workspace enforced at app
+              layer.
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="tname">social_accounts</div>
+          <p class="purpose">
+            A connected external platform account (YouTube channel, TikTok account) owned by a
+            workspace.
+          </p>
+          <table class="cols">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Type</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col">id</td>
+                <td class="type">uuid</td>
+                <td>PK</td>
+              </tr>
+              <tr>
+                <td class="col">workspace_id</td>
+                <td class="type">uuid</td>
+                <td>FK → workspaces.id, required</td>
+              </tr>
+              <tr>
+                <td class="col">provider</td>
+                <td class="type">text (enum)</td>
+                <td>youtube | tiktok, required</td>
+              </tr>
+              <tr>
+                <td class="col">external_account_id</td>
+                <td class="type">text</td>
+                <td>provider's own ID, required</td>
+              </tr>
+              <tr>
+                <td class="col">handle</td>
+                <td class="type">text</td>
+                <td>display handle/username</td>
+              </tr>
+              <tr>
+                <td class="col">avatar_url</td>
+                <td class="type">text</td>
+                <td>nullable</td>
+              </tr>
+              <tr>
+                <td class="col">status</td>
+                <td class="type">text (enum)</td>
+                <td>active | needs_review | disconnected, default 'active'</td>
+              </tr>
+              <tr>
+                <td class="col">capabilities</td>
+                <td class="type">jsonb</td>
+                <td>e.g. {"publish": true, "analytics": true}</td>
+              </tr>
+              <tr>
+                <td class="col">scopes</td>
+                <td class="type">text[]</td>
+                <td>granted OAuth scopes</td>
+              </tr>
+              <tr>
+                <td class="col">last_synced_at</td>
+                <td class="type">timestamptz</td>
+                <td>nullable</td>
+              </tr>
+              <tr>
+                <td class="col">created_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="col">updated_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="meta-row">
+            <div class="label">Relationships</div>
+            <div class="value">
+              belongs to <code>workspaces</code>; has one <code>account_tokens</code>; has many
+              <code>scheduled_posts</code>.
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Indexes</div>
+            <div class="value">
+              unique composite on <code>(workspace_id, provider, external_account_id)</code>; index
+              on <code>(workspace_id, status)</code>.
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Constraints</div>
+            <div class="value">unique (workspace_id, provider, external_account_id).</div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="tname">account_tokens</div>
+          <p class="purpose">
+            OAuth credentials and metadata for a social_accounts row. Isolated so encrypted secrets
+            never join into general reads.
+          </p>
+          <table class="cols">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Type</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col">id</td>
+                <td class="type">uuid</td>
+                <td>PK</td>
+              </tr>
+              <tr>
+                <td class="col">social_account_id</td>
+                <td class="type">uuid</td>
+                <td>FK → social_accounts.id, unique, required</td>
+              </tr>
+              <tr>
+                <td class="col">access_token_enc</td>
+                <td class="type">text</td>
+                <td>encrypted at rest (KMS/libsodium), required</td>
+              </tr>
+              <tr>
+                <td class="col">refresh_token_enc</td>
+                <td class="type">text</td>
+                <td>encrypted at rest, nullable</td>
+              </tr>
+              <tr>
+                <td class="col">token_type</td>
+                <td class="type">text</td>
+                <td>e.g. 'bearer'</td>
+              </tr>
+              <tr>
+                <td class="col">expires_at</td>
+                <td class="type">timestamptz</td>
+                <td>required</td>
+              </tr>
+              <tr>
+                <td class="col">scope</td>
+                <td class="type">text</td>
+                <td>raw scope string from provider</td>
+              </tr>
+              <tr>
+                <td class="col">last_refreshed_at</td>
+                <td class="type">timestamptz</td>
+                <td>nullable</td>
+              </tr>
+              <tr>
+                <td class="col">refresh_failure_count</td>
+                <td class="type">int</td>
+                <td>default 0</td>
+              </tr>
+              <tr>
+                <td class="col">created_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="col">updated_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="meta-row">
+            <div class="label">Relationships</div>
+            <div class="value">belongs to <code>social_accounts</code> (1–1).</div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Indexes</div>
+            <div class="value">
+              unique index on <code>social_account_id</code>; index on
+              <code>expires_at</code> (token-refresh queue).
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Constraints</div>
+            <div class="value">
+              unique social_account_id; tokens never exposed via API serialization.
+            </div>
+          </div>
+        </div>
+
+        <h2 class="section-title">Content & Media</h2>
+        <div class="table-card">
+          <div class="tname">content_drafts</div>
+          <p class="purpose">
+            The base, platform-agnostic content object created in the composer —
+            title/caption/tags/media before per-platform adaptation. The "Post" entity from the
+            product spec.
+          </p>
+          <table class="cols">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Type</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col">id</td>
+                <td class="type">uuid</td>
+                <td>PK</td>
+              </tr>
+              <tr>
+                <td class="col">workspace_id</td>
+                <td class="type">uuid</td>
+                <td>FK → workspaces.id, required</td>
+              </tr>
+              <tr>
+                <td class="col">author_id</td>
+                <td class="type">uuid</td>
+                <td>FK → users.id, required</td>
+              </tr>
+              <tr>
+                <td class="col">internal_title</td>
+                <td class="type">text</td>
+                <td>required (not shown on any platform)</td>
+              </tr>
+              <tr>
+                <td class="col">base_caption</td>
+                <td class="type">text</td>
+                <td>nullable</td>
+              </tr>
+              <tr>
+                <td class="col">tags</td>
+                <td class="type">text[]</td>
+                <td>default {}</td>
+              </tr>
+              <tr>
+                <td class="col">campaign</td>
+                <td class="type">text</td>
+                <td>nullable, freeform grouping label</td>
+              </tr>
+              <tr>
+                <td class="col">media_asset_id</td>
+                <td class="type">uuid</td>
+                <td>FK → media_assets.id, nullable</td>
+              </tr>
+              <tr>
+                <td class="col">status</td>
+                <td class="type">text (enum)</td>
+                <td>
+                  draft | scheduled | publishing | published | failed | needs_review — derived
+                  rollup
+                </td>
+              </tr>
+              <tr>
+                <td class="col">created_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="col">updated_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="meta-row">
+            <div class="label">Relationships</div>
+            <div class="value">
+              belongs to <code>workspaces</code>, <code>users</code> (author); belongs to
+              <code>media_assets</code>; has many <code>scheduled_posts</code>.
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Indexes</div>
+            <div class="value">
+              index on <code>(workspace_id, status)</code>; index on
+              <code>(workspace_id, campaign)</code>; GIN index on <code>tags</code>; full-text index
+              on <code>internal_title</code>.
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Constraints</div>
+            <div class="value">
+              "≥1 platform selected" and per-platform rules are app/Zod layer, not DB constraints.
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="tname">media_assets</div>
+          <p class="purpose">
+            An uploaded file (video, thumbnail image) stored in S3, independent of any specific
+            draft so it can be probed/reused.
+          </p>
+          <table class="cols">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Type</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col">id</td>
+                <td class="type">uuid</td>
+                <td>PK</td>
+              </tr>
+              <tr>
+                <td class="col">workspace_id</td>
+                <td class="type">uuid</td>
+                <td>FK → workspaces.id, required</td>
+              </tr>
+              <tr>
+                <td class="col">uploaded_by_id</td>
+                <td class="type">uuid</td>
+                <td>FK → users.id, required</td>
+              </tr>
+              <tr>
+                <td class="col">s3_key</td>
+                <td class="type">text</td>
+                <td>required</td>
+              </tr>
+              <tr>
+                <td class="col">mime_type</td>
+                <td class="type">text</td>
+                <td>required</td>
+              </tr>
+              <tr>
+                <td class="col">size_bytes</td>
+                <td class="type">bigint</td>
+                <td>required</td>
+              </tr>
+              <tr>
+                <td class="col">duration_sec</td>
+                <td class="type">numeric(10,2)</td>
+                <td>nullable until ffprobe completes</td>
+              </tr>
+              <tr>
+                <td class="col">width</td>
+                <td class="type">int</td>
+                <td>nullable</td>
+              </tr>
+              <tr>
+                <td class="col">height</td>
+                <td class="type">int</td>
+                <td>nullable</td>
+              </tr>
+              <tr>
+                <td class="col">status</td>
+                <td class="type">text (enum)</td>
+                <td>uploading | processing | ready | failed, default 'uploading'</td>
+              </tr>
+              <tr>
+                <td class="col">thumbnail_url</td>
+                <td class="type">text</td>
+                <td>nullable, generated preview</td>
+              </tr>
+              <tr>
+                <td class="col">created_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="col">updated_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="meta-row">
+            <div class="label">Relationships</div>
+            <div class="value">
+              belongs to <code>workspaces</code>, <code>users</code> (uploader); referenced by
+              <code>content_drafts.media_asset_id</code>.
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Indexes</div>
+            <div class="value">index on <code>(workspace_id, status)</code>.</div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Constraints</div>
+            <div class="value">
+              size_bytes > 0; deletion blocked at app layer if referenced by a non-terminal draft.
+            </div>
+          </div>
+        </div>
+
+        <h2 class="section-title">Scheduling & Publishing</h2>
+        <div class="table-card">
+          <div class="tname">scheduled_posts</div>
+          <p class="purpose">
+            The unit the scheduler and publisher act on — one row per (draft × target platform
+            account). Equivalent to "PostTarget" in the product spec.
+          </p>
+          <table class="cols">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Type</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col">id</td>
+                <td class="type">uuid</td>
+                <td>PK</td>
+              </tr>
+              <tr>
+                <td class="col">content_draft_id</td>
+                <td class="type">uuid</td>
+                <td>FK → content_drafts.id, required</td>
+              </tr>
+              <tr>
+                <td class="col">social_account_id</td>
+                <td class="type">uuid</td>
+                <td>FK → social_accounts.id, required</td>
+              </tr>
+              <tr>
+                <td class="col">platform</td>
+                <td class="type">text (enum)</td>
+                <td>youtube | tiktok, denormalized for fast filtering</td>
+              </tr>
+              <tr>
+                <td class="col">scheduled_at</td>
+                <td class="type">timestamptz</td>
+                <td>nullable (null while still a draft target)</td>
+              </tr>
+              <tr>
+                <td class="col">timezone</td>
+                <td class="type">text</td>
+                <td>IANA string used when time was picked</td>
+              </tr>
+              <tr>
+                <td class="col">status</td>
+                <td class="type">text (enum)</td>
+                <td>
+                  draft | scheduled | publishing | published | failed | cancelled | needs_review
+                </td>
+              </tr>
+              <tr>
+                <td class="col">external_post_id</td>
+                <td class="type">text</td>
+                <td>nullable, provider's ID once published</td>
+              </tr>
+              <tr>
+                <td class="col">published_at</td>
+                <td class="type">timestamptz</td>
+                <td>nullable</td>
+              </tr>
+              <tr>
+                <td class="col">failure_reason</td>
+                <td class="type">text</td>
+                <td>nullable</td>
+              </tr>
+              <tr>
+                <td class="col">created_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="col">updated_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="meta-row">
+            <div class="label">Relationships</div>
+            <div class="value">
+              belongs to <code>content_drafts</code>; belongs to <code>social_accounts</code>; has
+              one <code>post_platform_variants</code>; has many <code>publishing_jobs</code>,
+              <code>analytics_snapshots</code>.
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Indexes</div>
+            <div class="value">
+              composite index on <code>(status, scheduled_at)</code> — scheduler/sweeper poll; index
+              on <code>(social_account_id, status)</code>; index on <code>content_draft_id</code>.
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Constraints</div>
+            <div class="value">
+              scheduled_at required when status='scheduled'; unique (content_draft_id,
+              social_account_id).
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="tname">post_platform_variants</div>
+          <p class="purpose">
+            Platform-specific field overrides layered on top of the base draft
+            (title/description/visibility for YouTube; caption/privacy/duet-stitch for TikTok).
+            One-to-one with scheduled_posts.
+          </p>
+          <table class="cols">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Type</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col">id</td>
+                <td class="type">uuid</td>
+                <td>PK</td>
+              </tr>
+              <tr>
+                <td class="col">scheduled_post_id</td>
+                <td class="type">uuid</td>
+                <td>FK → scheduled_posts.id, unique, required</td>
+              </tr>
+              <tr>
+                <td class="col">title</td>
+                <td class="type">text</td>
+                <td>nullable (YouTube)</td>
+              </tr>
+              <tr>
+                <td class="col">description</td>
+                <td class="type">text</td>
+                <td>nullable (YouTube)</td>
+              </tr>
+              <tr>
+                <td class="col">caption</td>
+                <td class="type">text</td>
+                <td>nullable (TikTok)</td>
+              </tr>
+              <tr>
+                <td class="col">visibility</td>
+                <td class="type">text (enum)</td>
+                <td>public | unlisted | private, nullable (YouTube)</td>
+              </tr>
+              <tr>
+                <td class="col">privacy_level</td>
+                <td class="type">text (enum)</td>
+                <td>public | friends | private, nullable (TikTok)</td>
+              </tr>
+              <tr>
+                <td class="col">made_for_kids</td>
+                <td class="type">boolean</td>
+                <td>nullable (YouTube, required at publish time)</td>
+              </tr>
+              <tr>
+                <td class="col">allow_comments</td>
+                <td class="type">boolean</td>
+                <td>default true (TikTok)</td>
+              </tr>
+              <tr>
+                <td class="col">allow_duet</td>
+                <td class="type">boolean</td>
+                <td>default true (TikTok)</td>
+              </tr>
+              <tr>
+                <td class="col">allow_stitch</td>
+                <td class="type">boolean</td>
+                <td>default true (TikTok)</td>
+              </tr>
+              <tr>
+                <td class="col">custom_thumbnail_media_id</td>
+                <td class="type">uuid</td>
+                <td>FK → media_assets.id, nullable</td>
+              </tr>
+              <tr>
+                <td class="col">tags_override</td>
+                <td class="type">text[]</td>
+                <td>nullable, falls back to draft tags</td>
+              </tr>
+              <tr>
+                <td class="col">created_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="col">updated_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="meta-row">
+            <div class="label">Relationships</div>
+            <div class="value">
+              belongs to <code>scheduled_posts</code> (1–1); optionally belongs to
+              <code>media_assets</code> (thumbnail).
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Indexes</div>
+            <div class="value">unique index on <code>scheduled_post_id</code>.</div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Constraints</div>
+            <div class="value">
+              unique scheduled_post_id; made_for_kids NOT NULL enforced at publish-time validation,
+              not DB level.
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="tname">publishing_jobs</div>
+          <p class="purpose">
+            An execution record of the worker attempting to publish a scheduled_post — audit trail
+            behind the BullMQ publish queue, decoupled so history survives job completion/removal.
+          </p>
+          <table class="cols">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Type</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col">id</td>
+                <td class="type">uuid</td>
+                <td>PK</td>
+              </tr>
+              <tr>
+                <td class="col">scheduled_post_id</td>
+                <td class="type">uuid</td>
+                <td>FK → scheduled_posts.id, required</td>
+              </tr>
+              <tr>
+                <td class="col">queue_job_id</td>
+                <td class="type">text</td>
+                <td>BullMQ job id, nullable</td>
+              </tr>
+              <tr>
+                <td class="col">attempt</td>
+                <td class="type">int</td>
+                <td>default 1</td>
+              </tr>
+              <tr>
+                <td class="col">status</td>
+                <td class="type">text (enum)</td>
+                <td>queued | running | succeeded | failed, default 'queued'</td>
+              </tr>
+              <tr>
+                <td class="col">started_at</td>
+                <td class="type">timestamptz</td>
+                <td>nullable</td>
+              </tr>
+              <tr>
+                <td class="col">finished_at</td>
+                <td class="type">timestamptz</td>
+                <td>nullable</td>
+              </tr>
+              <tr>
+                <td class="col">error_message</td>
+                <td class="type">text</td>
+                <td>nullable</td>
+              </tr>
+              <tr>
+                <td class="col">created_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="meta-row">
+            <div class="label">Relationships</div>
+            <div class="value">belongs to <code>scheduled_posts</code>.</div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Indexes</div>
+            <div class="value">
+              index on <code>(scheduled_post_id, created_at)</code> — latest attempt lookup; index
+              on <code>status</code> for ops dashboards.
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Constraints</div>
+            <div class="value">attempt >= 1.</div>
+          </div>
+        </div>
+
+        <h2 class="section-title">Analytics & Recommendations & Audit</h2>
+        <div class="table-card">
+          <div class="tname">analytics_snapshots</div>
+          <p class="purpose">
+            An immutable point-in-time metrics read for a published scheduled_post, captured
+            repeatedly on a decaying cadence to build a growth curve. Equivalent to "MetricSnapshot"
+            in the product spec.
+          </p>
+          <table class="cols">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Type</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col">id</td>
+                <td class="type">uuid</td>
+                <td>PK</td>
+              </tr>
+              <tr>
+                <td class="col">scheduled_post_id</td>
+                <td class="type">uuid</td>
+                <td>FK → scheduled_posts.id, required</td>
+              </tr>
+              <tr>
+                <td class="col">captured_at</td>
+                <td class="type">timestamptz</td>
+                <td>required</td>
+              </tr>
+              <tr>
+                <td class="col">views</td>
+                <td class="type">bigint</td>
+                <td>default 0</td>
+              </tr>
+              <tr>
+                <td class="col">likes</td>
+                <td class="type">bigint</td>
+                <td>default 0</td>
+              </tr>
+              <tr>
+                <td class="col">comments</td>
+                <td class="type">bigint</td>
+                <td>default 0</td>
+              </tr>
+              <tr>
+                <td class="col">shares</td>
+                <td class="type">bigint</td>
+                <td>default 0</td>
+              </tr>
+              <tr>
+                <td class="col">watch_time_sec</td>
+                <td class="type">bigint</td>
+                <td>nullable (platform may not expose)</td>
+              </tr>
+              <tr>
+                <td class="col">engagement_rate</td>
+                <td class="type">numeric(6,4)</td>
+                <td>nullable, computed at write time</td>
+              </tr>
+              <tr>
+                <td class="col">created_at</td>
+                <td class="type">timestamptz</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="meta-row">
+            <div class="label">Relationships</div>
+            <div class="value">belongs to <code>scheduled_posts</code>.</div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Indexes</div>
+            <div class="value">
+              composite index on <code>(scheduled_post_id, captured_at)</code>; index on
+              <code>captured_at</code> for nightly rollups.
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Constraints</div>
+            <div class="value">
+              append-only — no in-place mutation; unique (scheduled_post_id, captured_at) prevents
+              duplicate polls.
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="tname">recommendation_summaries</div>
+          <p class="purpose">
+            The persisted output of the posting-time recommendation engine — one row per (workspace
+            × platform-or-combined × day × hour) cell, rebuilt by the recompute job. Equivalent to
+            "Recommendation" in the product spec.
+          </p>
+          <table class="cols">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Type</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col">id</td>
+                <td class="type">uuid</td>
+                <td>PK</td>
+              </tr>
+              <tr>
+                <td class="col">workspace_id</td>
+                <td class="type">uuid</td>
+                <td>FK → workspaces.id, required</td>
+              </tr>
+              <tr>
+                <td class="col">platform</td>
+                <td class="type">text (enum)</td>
+                <td>youtube | tiktok | combined, required</td>
+              </tr>
+              <tr>
+                <td class="col">day_of_week</td>
+                <td class="type">smallint</td>
+                <td>0–6, required</td>
+              </tr>
+              <tr>
+                <td class="col">hour</td>
+                <td class="type">smallint</td>
+                <td>0–23, required</td>
+              </tr>
+              <tr>
+                <td class="col">score</td>
+                <td class="type">numeric(6,4)</td>
+                <td>required, z-scored</td>
+              </tr>
+              <tr>
+                <td class="col">confidence</td>
+                <td class="type">numeric(4,3)</td>
+                <td>0–1, required</td>
+              </tr>
+              <tr>
+                <td class="col">sample_size</td>
+                <td class="type">int</td>
+                <td>default 0</td>
+              </tr>
+              <tr>
+                <td class="col">is_cold_start</td>
+                <td class="type">boolean</td>
+                <td>default false — seeded from benchmarks, not first-party data</td>
+              </tr>
+              <tr>
+                <td class="col">computed_at</td>
+                <td class="type">timestamptz</td>
+                <td>required</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="meta-row">
+            <div class="label">Relationships</div>
+            <div class="value">belongs to <code>workspaces</code>.</div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Indexes</div>
+            <div class="value">
+              unique composite on <code>(workspace_id, platform, day_of_week, hour)</code>; index on
+              <code>(workspace_id, platform, score desc)</code>.
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Constraints</div>
+            <div class="value">
+              unique (workspace_id, platform, day_of_week, hour); day_of_week CHECK 0–6; hour CHECK
+              0–23; confidence CHECK 0–1.
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="tname">audit_logs</div>
+          <p class="purpose">
+            Cross-cutting append-only record of significant actions (account connect/disconnect,
+            publish, schedule change, settings change, member role change) for support/debugging and
+            future compliance needs.
+          </p>
+          <table class="cols">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Type</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col">id</td>
+                <td class="type">uuid</td>
+                <td>PK</td>
+              </tr>
+              <tr>
+                <td class="col">workspace_id</td>
+                <td class="type">uuid</td>
+                <td>FK → workspaces.id, nullable</td>
+              </tr>
+              <tr>
+                <td class="col">actor_user_id</td>
+                <td class="type">uuid</td>
+                <td>FK → users.id, nullable (system/worker actions have no user)</td>
+              </tr>
+              <tr>
+                <td class="col">action</td>
+                <td class="type">text</td>
+                <td>e.g. 'post.published', 'account.disconnected', 'member.role_changed'</td>
+              </tr>
+              <tr>
+                <td class="col">resource_type</td>
+                <td class="type">text</td>
+                <td>e.g. 'scheduled_post', 'social_account'</td>
+              </tr>
+              <tr>
+                <td class="col">resource_id</td>
+                <td class="type">uuid</td>
+                <td>nullable</td>
+              </tr>
+              <tr>
+                <td class="col">metadata</td>
+                <td class="type">jsonb</td>
+                <td>freeform context (before/after values, error detail)</td>
+              </tr>
+              <tr>
+                <td class="col">created_at</td>
+                <td class="type">timestamptz</td>
+                <td>required</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="meta-row">
+            <div class="label">Relationships</div>
+            <div class="value">
+              belongs to <code>workspaces</code> (optional); belongs to
+              <code>users</code> (optional, actor).
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Indexes</div>
+            <div class="value">
+              index on <code>(workspace_id, created_at desc)</code>; index on
+              <code>(resource_type, resource_id)</code>.
+            </div>
+          </div>
+          <div class="meta-row">
+            <div class="label">Constraints</div>
+            <div class="value">
+              append-only, no updates; retention policy enforced by scheduled cleanup job, not a DB
+              constraint.
+            </div>
+          </div>
+        </div>
+
+        <h2 class="section-title">Entity Relationship Summary</h2>
+        <div class="erd-block">
+          users ──&lt; workspace_members &gt;── workspaces │ ├──&lt; social_accounts ──1:1──
+          account_tokens │ │ │ └──&lt; scheduled_posts (via social_account_id) │ ├──&lt;
+          content_drafts ──&lt; scheduled_posts ──1:1── post_platform_variants │ │ │ │ └──
+          media_asset ├──&lt; publishing_jobs │ └──&lt; analytics_snapshots │ ├──&lt;
+          recommendation_summaries │ └──&lt; audit_logs media_assets ──&lt; content_drafts
+          (media_asset_id) media_assets ──&lt; post_platform_variants (custom_thumbnail_media_id)
+          users ──&lt; audit_logs (actor)
+        </div>
+
+        <h2 class="section-title">Prisma Schema</h2>
+        <div class="prisma-block">
+          datasource db { provider = "postgresql" url = env("DATABASE_URL") } generator client {
+          provider = "prisma-client-js" } enum WorkspaceRole { owner admin editor reviewer } enum
+          WorkspacePlan { free pro agency } enum Provider { youtube tiktok } enum AccountStatus {
+          active needs_review disconnected } enum MediaStatus { uploading processing ready failed }
+          enum DraftStatus { draft scheduled publishing published failed needs_review } enum
+          PostStatus { draft scheduled publishing published failed cancelled needs_review } enum
+          Visibility { public unlisted private } enum TikTokPrivacy { public friends private } enum
+          JobStatus { queued running succeeded failed } enum RecommendationPlatform { youtube tiktok
+          combined } model User { id String @id @default(uuid()) email String @unique @db.Citext
+          passwordHash String? @map("password_hash") name String avatarUrl String?
+          @map("avatar_url") timezone String @default("UTC") createdAt DateTime @default(now())
+          @map("created_at") updatedAt DateTime @updatedAt @map("updated_at") memberships
+          WorkspaceMember[] mediaAssets MediaAsset[] contentDrafts ContentDraft[] auditLogs
+          AuditLog[] @@map("users") } model Workspace { id String @id @default(uuid()) name String
+          slug String @unique plan WorkspacePlan @default(free) defaultTimezone String
+          @default("UTC") @map("default_timezone") createdAt DateTime @default(now())
+          @map("created_at") updatedAt DateTime @updatedAt @map("updated_at") members
+          WorkspaceMember[] socialAccounts SocialAccount[] contentDrafts ContentDraft[] mediaAssets
+          MediaAsset[] recommendations RecommendationSummary[] auditLogs AuditLog[]
+          @@map("workspaces") } model WorkspaceMember { id String @id @default(uuid()) workspaceId
+          String @map("workspace_id") userId String @map("user_id") role WorkspaceRole invitedEmail
+          String? @map("invited_email") @db.Citext joinedAt DateTime? @map("joined_at") createdAt
+          DateTime @default(now()) @map("created_at") updatedAt DateTime @updatedAt
+          @map("updated_at") workspace Workspace @relation(fields: [workspaceId], references: [id],
+          onDelete: Cascade) user User @relation(fields: [userId], references: [id], onDelete:
+          Cascade) @@unique([workspaceId, userId]) @@index([userId]) @@map("workspace_members") }
+          model SocialAccount { id String @id @default(uuid()) workspaceId String
+          @map("workspace_id") provider Provider externalAccountId String
+          @map("external_account_id") handle String? avatarUrl String? @map("avatar_url") status
+          AccountStatus @default(active) capabilities Json @default("{}") scopes String[]
+          lastSyncedAt DateTime? @map("last_synced_at") createdAt DateTime @default(now())
+          @map("created_at") updatedAt DateTime @updatedAt @map("updated_at") workspace Workspace
+          @relation(fields: [workspaceId], references: [id], onDelete: Cascade) token AccountToken?
+          scheduledPosts ScheduledPost[] @@unique([workspaceId, provider, externalAccountId])
+          @@index([workspaceId, status]) @@map("social_accounts") } model AccountToken { id String
+          @id @default(uuid()) socialAccountId String @unique @map("social_account_id")
+          accessTokenEnc String @map("access_token_enc") refreshTokenEnc String?
+          @map("refresh_token_enc") tokenType String? @map("token_type") expiresAt DateTime
+          @map("expires_at") scope String? lastRefreshedAt DateTime? @map("last_refreshed_at")
+          refreshFailureCount Int @default(0) @map("refresh_failure_count") createdAt DateTime
+          @default(now()) @map("created_at") updatedAt DateTime @updatedAt @map("updated_at")
+          socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id],
+          onDelete: Cascade) @@index([expiresAt]) @@map("account_tokens") } model ContentDraft { id
+          String @id @default(uuid()) workspaceId String @map("workspace_id") authorId String
+          @map("author_id") internalTitle String @map("internal_title") baseCaption String?
+          @map("base_caption") tags String[] @default([]) campaign String? mediaAssetId String?
+          @map("media_asset_id") status DraftStatus @default(draft) createdAt DateTime
+          @default(now()) @map("created_at") updatedAt DateTime @updatedAt @map("updated_at")
+          workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+          author User @relation(fields: [authorId], references: [id]) mediaAsset MediaAsset?
+          @relation(fields: [mediaAssetId], references: [id]) scheduledPosts ScheduledPost[]
+          @@index([workspaceId, status]) @@index([workspaceId, campaign]) @@map("content_drafts") }
+          model MediaAsset { id String @id @default(uuid()) workspaceId String @map("workspace_id")
+          uploadedById String @map("uploaded_by_id") s3Key String @map("s3_key") mimeType String
+          @map("mime_type") sizeBytes BigInt @map("size_bytes") durationSec Decimal?
+          @map("duration_sec") @db.Decimal(10, 2) width Int? height Int? status MediaStatus
+          @default(uploading) thumbnailUrl String? @map("thumbnail_url") createdAt DateTime
+          @default(now()) @map("created_at") updatedAt DateTime @updatedAt @map("updated_at")
+          workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+          uploadedBy User @relation(fields: [uploadedById], references: [id]) drafts ContentDraft[]
+          thumbnailFor PostPlatformVariant[] @@index([workspaceId, status]) @@map("media_assets") }
+          model ScheduledPost { id String @id @default(uuid()) contentDraftId String
+          @map("content_draft_id") socialAccountId String @map("social_account_id") platform
+          Provider scheduledAt DateTime? @map("scheduled_at") timezone String? status PostStatus
+          @default(draft) externalPostId String? @map("external_post_id") publishedAt DateTime?
+          @map("published_at") failureReason String? @map("failure_reason") createdAt DateTime
+          @default(now()) @map("created_at") updatedAt DateTime @updatedAt @map("updated_at")
+          contentDraft ContentDraft @relation(fields: [contentDraftId], references: [id], onDelete:
+          Cascade) socialAccount SocialAccount @relation(fields: [socialAccountId], references:
+          [id]) variant PostPlatformVariant? jobs PublishingJob[] snapshots AnalyticsSnapshot[]
+          @@unique([contentDraftId, socialAccountId]) @@index([status, scheduledAt])
+          @@index([socialAccountId, status]) @@map("scheduled_posts") } model PostPlatformVariant {
+          id String @id @default(uuid()) scheduledPostId String @unique @map("scheduled_post_id")
+          title String? description String? caption String? visibility Visibility? privacyLevel
+          TikTokPrivacy? @map("privacy_level") madeForKids Boolean? @map("made_for_kids")
+          allowComments Boolean @default(true) @map("allow_comments") allowDuet Boolean
+          @default(true) @map("allow_duet") allowStitch Boolean @default(true) @map("allow_stitch")
+          customThumbnailMediaId String? @map("custom_thumbnail_media_id") tagsOverride String[]?
+          @map("tags_override") createdAt DateTime @default(now()) @map("created_at") updatedAt
+          DateTime @updatedAt @map("updated_at") scheduledPost ScheduledPost @relation(fields:
+          [scheduledPostId], references: [id], onDelete: Cascade) customThumbnail MediaAsset?
+          @relation(fields: [customThumbnailMediaId], references: [id])
+          @@map("post_platform_variants") } model PublishingJob { id String @id @default(uuid())
+          scheduledPostId String @map("scheduled_post_id") queueJobId String? @map("queue_job_id")
+          attempt Int @default(1) status JobStatus @default(queued) startedAt DateTime?
+          @map("started_at") finishedAt DateTime? @map("finished_at") errorMessage String?
+          @map("error_message") createdAt DateTime @default(now()) @map("created_at") scheduledPost
+          ScheduledPost @relation(fields: [scheduledPostId], references: [id], onDelete: Cascade)
+          @@index([scheduledPostId, createdAt]) @@index([status]) @@map("publishing_jobs") } model
+          AnalyticsSnapshot { id String @id @default(uuid()) scheduledPostId String
+          @map("scheduled_post_id") capturedAt DateTime @map("captured_at") views BigInt @default(0)
+          likes BigInt @default(0) comments BigInt @default(0) shares BigInt @default(0)
+          watchTimeSec BigInt? @map("watch_time_sec") engagementRate Decimal?
+          @map("engagement_rate") @db.Decimal(6, 4) createdAt DateTime @default(now())
+          @map("created_at") scheduledPost ScheduledPost @relation(fields: [scheduledPostId],
+          references: [id], onDelete: Cascade) @@unique([scheduledPostId, capturedAt])
+          @@index([capturedAt]) @@map("analytics_snapshots") } model RecommendationSummary { id
+          String @id @default(uuid()) workspaceId String @map("workspace_id") platform
+          RecommendationPlatform dayOfWeek Int @map("day_of_week") hour Int score Decimal
+          @db.Decimal(6, 4) confidence Decimal @db.Decimal(4, 3) sampleSize Int @default(0)
+          @map("sample_size") isColdStart Boolean @default(false) @map("is_cold_start") computedAt
+          DateTime @map("computed_at") workspace Workspace @relation(fields: [workspaceId],
+          references: [id], onDelete: Cascade) @@unique([workspaceId, platform, dayOfWeek, hour])
+          @@index([workspaceId, platform, score(sort: Desc)]) @@map("recommendation_summaries") }
+          model AuditLog { id String @id @default(uuid()) workspaceId String? @map("workspace_id")
+          actorUserId String? @map("actor_user_id") action String resourceType String
+          @map("resource_type") resourceId String? @map("resource_id") metadata Json? createdAt
+          DateTime @default(now()) @map("created_at") workspace Workspace? @relation(fields:
+          [workspaceId], references: [id], onDelete: SetNull) actor User? @relation(fields:
+          [actorUserId], references: [id], onDelete: SetNull) @@index([workspaceId, createdAt(sort:
+          Desc)]) @@index([resourceType, resourceId]) @@map("audit_logs") }
+        </div>
+
+        <h2 class="section-title">Notes on Cascade Behavior</h2>
+        <ul class="cascade-list">
+          <li>
+            <strong>Workspace deletion</strong> cascades to members, social accounts, content
+            drafts, media assets, recommendations (destructive — gate behind a confirmation + grace
+            period at the application layer, not shown in schema).
+          </li>
+          <li>
+            <strong>Social account disconnect</strong> does <strong>not</strong> cascade-delete
+            <code>scheduled_posts</code> — historical posts/analytics remain for reporting; only new
+            scheduling is blocked while <code>status = disconnected</code>.
+          </li>
+          <li>
+            <strong>Content draft deletion</strong> cascades to its
+            <code>scheduled_posts</code> (and transitively their variants/jobs/snapshots) — only
+            allowed at the application layer when no target is in a non-terminal state.
+          </li>
+          <li>
+            <strong>Audit logs</strong> use <code>onDelete: SetNull</code> on both FKs so history
+            survives workspace/user deletion.
+          </li>
+        </ul>
+
+        <div class="footer">
+          <p>
+            PostPilot MVP Database Schema &bull; Companion to Engineering Spec &amp; Implementation
+            Checklist &bull; For internal engineering use
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div id="markdown-view" class="view hidden">
+      <div class="container">
+        <textarea id="markdown-content" readonly></textarea>
+      </div>
+    </div>
+
+    <script id="md-source" type="text/plain">
+      # PostPilot — MVP Database Schema
+
+      **Companion to:** `PostPilot Engineering Spec` · `PostPilot Implementation Checklist`
+      **Database:** PostgreSQL 15+ · accessed via Prisma ORM
+      **Scope:** 13 tables covering auth/workspace, integrations, content, scheduling, publishing, analytics, and recommendations.
+
+      ---
+
+      ## Conventions
+
+      - All primary keys are `uuid` (`gen_random_uuid()`), except where noted.
+      - All tables have `created_at timestamptz` and `updated_at timestamptz` (auto-managed).
+      - Money/plan fields aside, all timestamps are stored in UTC; per-workspace/user timezone is applied at render time.
+      - Soft-delete is **not** used in MVP — hard delete with cascade rules noted per table (simplifies MVP; revisit if audit/compliance needs retention).
+      - Foreign keys are named `<referenced_table_singular>_id`.
+
+      ---
+
+      ## 1. `users`
+
+      **Purpose:** A person who can log in. Root identity for auth; may belong to multiple workspaces.
+
+      | Column | Type | Notes |
+      |---|---|---|
+      | `id` | `uuid` | PK |
+      | `email` | `citext` | unique, required |
+      | `password_hash` | `text` | nullable (OAuth-only users have none) |
+      | `name` | `text` | required |
+      | `avatar_url` | `text` | nullable |
+      | `timezone` | `text` | IANA string, default `'UTC'` |
+      | `created_at` | `timestamptz` | default `now()` |
+      | `updated_at` | `timestamptz` | auto |
+
+      **Relationships:** has many `workspace_members` (→ `workspaces` via join); has many `audit_logs` (as actor).
+
+      **Indexes:** unique index on `email`.
+
+      **Constraints:** `email` unique + valid-format check; at least one of `password_hash` / linked OAuth identity must exist (enforced at application layer for MVP).
+
+      ---
+
+      ## 2. `workspaces`
+
+      **Purpose:** The billing/ownership boundary. All content, accounts, and analytics are scoped to a workspace.
+
+      | Column | Type | Notes |
+      |---|---|---|
+      | `id` | `uuid` | PK |
+      | `name` | `text` | required |
+      | `slug` | `text` | unique, required (URL-safe) |
+      | `plan` | `text` (enum: `free`, `pro`, `agency`) | default `'free'` |
+      | `default_timezone` | `text` | IANA string, default `'UTC'` |
+      | `created_at` | `timestamptz` | |
+      | `updated_at` | `timestamptz` | |
+
+      **Relationships:** has many `workspace_members`, `social_accounts`, `content_drafts`, `recommendation_summaries`.
+
+      **Indexes:** unique index on `slug`.
+
+      **Constraints:** `slug` unique, lowercase/alphanumeric-dash check.
+
+      ---
+
+      ## 3. `workspace_members`
+
+      **Purpose:** Join table between `users` and `workspaces`; carries the role used by the `can()` policy layer.
+
+      | Column | Type | Notes |
+      |---|---|---|
+      | `id` | `uuid` | PK |
+      | `workspace_id` | `uuid` | FK → `workspaces.id`, required |
+      | `user_id` | `uuid` | FK → `users.id`, required |
+      | `role` | `text` (enum: `owner`, `admin`, `editor`, `reviewer`) | required |
+      | `invited_email` | `citext` | nullable — set when invite is pending and user hasn't signed up yet |
+      | `joined_at` | `timestamptz` | nullable until accepted |
+      | `created_at` | `timestamptz` | |
+      | `updated_at` | `timestamptz` | |
+
+      **Relationships:** belongs to `workspaces`; belongs to `users`.
+
+      **Indexes:** unique composite index on `(workspace_id, user_id)`; index on `user_id` (list "my workspaces").
+
+      **Constraints:** unique `(workspace_id, user_id)` — a user has exactly one role per workspace; exactly one `owner` per workspace enforced at application layer (cannot demote/remove the last owner).
+
+      ---
+
+      ## 4. `social_accounts`
+
+      **Purpose:** A connected external platform account (YouTube channel, TikTok account) owned by a workspace.
+
+      | Column | Type | Notes |
+      |---|---|---|
+      | `id` | `uuid` | PK |
+      | `workspace_id` | `uuid` | FK → `workspaces.id`, required |
+      | `provider` | `text` (enum: `youtube`, `tiktok`) | required |
+      | `external_account_id` | `text` | provider's own ID for the channel/account, required |
+      | `handle` | `text` | display handle/username |
+      | `avatar_url` | `text` | nullable |
+      | `status` | `text` (enum: `active`, `needs_review`, `disconnected`) | default `'active'` |
+      | `capabilities` | `jsonb` | e.g. `{"publish": true, "analytics": true}` |
+      | `scopes` | `text[]` | granted OAuth scopes |
+      | `last_synced_at` | `timestamptz` | nullable |
+      | `created_at` | `timestamptz` | |
+      | `updated_at` | `timestamptz` | |
+
+      **Relationships:** belongs to `workspaces`; has one `account_tokens`; has many `post_platform_variants`, `analytics_snapshots` (indirectly via variant), `publishing_jobs` (indirectly).
+
+      **Indexes:** unique composite index on `(workspace_id, provider, external_account_id)` (prevent connecting the same external account twice); index on `(workspace_id, status)` for health dashboards.
+
+      **Constraints:** unique `(workspace_id, provider, external_account_id)`.
+
+      ---
+
+      ## 5. `account_tokens`
+
+      **Purpose:** OAuth credentials and metadata for a `social_accounts` row. Isolated into its own table so encrypted secrets are never joined into general reads.
+
+      | Column | Type | Notes |
+      |---|---|---|
+      | `id` | `uuid` | PK |
+      | `social_account_id` | `uuid` | FK → `social_accounts.id`, unique, required |
+      | `access_token_enc` | `text` | encrypted at rest (KMS/libsodium), required |
+      | `refresh_token_enc` | `text` | encrypted at rest, nullable (some providers rotate differently) |
+      | `token_type` | `text` | e.g. `'bearer'` |
+      | `expires_at` | `timestamptz` | required |
+      | `scope` | `text` | raw scope string as returned by provider |
+      | `last_refreshed_at` | `timestamptz` | nullable |
+      | `refresh_failure_count` | `int` | default `0` |
+      | `created_at` | `timestamptz` | |
+      | `updated_at` | `timestamptz` | |
+
+      **Relationships:** belongs to `social_accounts` (1–1).
+
+      **Indexes:** unique index on `social_account_id`; index on `expires_at` (token-refresh queue polls this ahead of expiry).
+
+      **Constraints:** unique `social_account_id`; access/refresh tokens never exposed via API serialization (application-layer field omission).
+
+      ---
+
+      ## 6. `content_drafts`
+
+      **Purpose:** The base, platform-agnostic content object created in the composer — title/caption/tags/media before per-platform adaptation. This is the "Post" entity from the product spec.
+
+      | Column | Type | Notes |
+      |---|---|---|
+      | `id` | `uuid` | PK |
+      | `workspace_id` | `uuid` | FK → `workspaces.id`, required |
+      | `author_id` | `uuid` | FK → `users.id`, required |
+      | `internal_title` | `text` | required (not shown on any platform) |
+      | `base_caption` | `text` | nullable |
+      | `tags` | `text[]` | default `{}` |
+      | `campaign` | `text` | nullable, freeform grouping label |
+      | `media_asset_id` | `uuid` | FK → `media_assets.id`, nullable (draft may be created before upload completes) |
+      | `status` | `text` (enum: `draft`, `scheduled`, `publishing`, `published`, `failed`, `needs_review`) | default `'draft'` — **derived/rolled-up** from its `scheduled_posts`; see note below |
+      | `created_at` | `timestamptz` | |
+      | `updated_at` | `timestamptz` | |
+
+      **Relationships:** belongs to `workspaces`, `users` (author); belongs to `media_assets`; has many `scheduled_posts` (one per target platform).
+
+      **Indexes:** index on `(workspace_id, status)`; index on `(workspace_id, campaign)`; GIN index on `tags`; full-text index on `internal_title` for library search.
+
+      **Constraints:** none blocking at DB level beyond FKs; "≥1 platform selected" and per-platform validation are application/Zod-layer rules, not DB constraints, since a draft may legitimately have zero targets before the user picks platforms.
+
+      > **Note:** `content_drafts.status` is a convenience rollup (worst/most-advanced state across its `scheduled_posts`), recomputed on any child status change — avoids recalculating on every dashboard/library read.
+
+      ---
+
+      ## 7. `media_assets`
+
+      **Purpose:** An uploaded file (video, thumbnail image) stored in S3, independent of any specific draft so it can be probed/reused.
+
+      | Column | Type | Notes |
+      |---|---|---|
+      | `id` | `uuid` | PK |
+      | `workspace_id` | `uuid` | FK → `workspaces.id`, required |
+      | `uploaded_by_id` | `uuid` | FK → `users.id`, required |
+      | `s3_key` | `text` | required |
+      | `mime_type` | `text` | required |
+      | `size_bytes` | `bigint` | required |
+      | `duration_sec` | `numeric(10,2)` | nullable until ffprobe completes |
+      | `width` | `int` | nullable |
+      | `height` | `int` | nullable |
+      | `status` | `text` (enum: `uploading`, `processing`, `ready`, `failed`) | default `'uploading'` |
+      | `thumbnail_url` | `text` | nullable, generated preview |
+      | `created_at` | `timestamptz` | |
+      | `updated_at` | `timestamptz` | |
+
+      **Relationships:** belongs to `workspaces`, `users` (uploader); referenced by `content_drafts.media_asset_id`.
+
+      **Indexes:** index on `(workspace_id, status)`.
+
+      **Constraints:** `size_bytes > 0`; deletion of a `media_asset` referenced by a non-terminal `content_draft` (status not in `published`/`failed`) is blocked at application layer.
+
+      ---
+
+      ## 8. `scheduled_posts`
+
+      **Purpose:** The unit the scheduler and publisher act on — one row per (draft × target platform account). Equivalent to "PostTarget" in the product spec. Holds timing and lifecycle state independent of the parent draft.
+
+      | Column | Type | Notes |
+      |---|---|---|
+      | `id` | `uuid` | PK |
+      | `content_draft_id` | `uuid` | FK → `content_drafts.id`, required |
+      | `social_account_id` | `uuid` | FK → `social_accounts.id`, required |
+      | `platform` | `text` (enum: `youtube`, `tiktok`) | required, denormalized from `social_accounts.provider` for fast filtering |
+      | `scheduled_at` | `timestamptz` | nullable (null while still a draft target) |
+      | `timezone` | `text` | IANA string used when the user picked the time |
+      | `status` | `text` (enum: `draft`, `scheduled`, `publishing`, `published`, `failed`, `cancelled`, `needs_review`) | default `'draft'` |
+      | `external_post_id` | `text` | nullable, provider's ID once published |
+      | `published_at` | `timestamptz` | nullable |
+      | `failure_reason` | `text` | nullable |
+      | `created_at` | `timestamptz` | |
+      | `updated_at` | `timestamptz` | |
+
+      **Relationships:** belongs to `content_drafts`; belongs to `social_accounts`; has one `post_platform_variants`; has many `publishing_jobs`, `analytics_snapshots`.
+
+      **Indexes:** composite index on `(status, scheduled_at)` — the scheduler/sweeper's primary poll query; index on `(social_account_id, status)`; index on `content_draft_id`.
+
+      **Constraints:** `scheduled_at` required when `status = 'scheduled'` (app-layer + optional CHECK); unique `(content_draft_id, social_account_id)` — a draft targets a given account at most once.
+
+      ---
+
+      ## 9. `post_platform_variants`
+
+      **Purpose:** Platform-specific field overrides layered on top of the base draft (title/description/visibility for YouTube; caption/privacy/duet-stitch for TikTok). One-to-one with `scheduled_posts`.
+
+      | Column | Type | Notes |
+      |---|---|---|
+      | `id` | `uuid` | PK |
+      | `scheduled_post_id` | `uuid` | FK → `scheduled_posts.id`, unique, required |
+      | `title` | `text` | nullable (YouTube) |
+      | `description` | `text` | nullable (YouTube) |
+      | `caption` | `text` | nullable (TikTok) |
+      | `visibility` | `text` (enum: `public`, `unlisted`, `private`) | nullable (YouTube) |
+      | `privacy_level` | `text` (enum: `public`, `friends`, `private`) | nullable (TikTok) |
+      | `made_for_kids` | `boolean` | nullable (YouTube, required at publish time) |
+      | `allow_comments` | `boolean` | default `true` (TikTok) |
+      | `allow_duet` | `boolean` | default `true` (TikTok) |
+      | `allow_stitch` | `boolean` | default `true` (TikTok) |
+      | `custom_thumbnail_media_id` | `uuid` | FK → `media_assets.id`, nullable |
+      | `tags_override` | `text[]` | nullable, falls back to draft tags if null |
+      | `created_at` | `timestamptz` | |
+      | `updated_at` | `timestamptz` | |
+
+      **Relationships:** belongs to `scheduled_posts` (1–1); optionally belongs to `media_assets` (thumbnail).
+
+      **Indexes:** unique index on `scheduled_post_id`.
+
+      **Constraints:** unique `scheduled_post_id`; `made_for_kids` NOT NULL enforced at publish-time validation (not a DB-level NOT NULL, since it's irrelevant until publish).
+
+      ---
+
+      ## 10. `publishing_jobs`
+
+      **Purpose:** An execution record of the worker attempting to publish a `scheduled_post` — the audit trail behind the BullMQ `publish` queue, decoupled from the queue itself so history survives job completion/removal.
+
+      | Column | Type | Notes |
+      |---|---|---|
+      | `id` | `uuid` | PK |
+      | `scheduled_post_id` | `uuid` | FK → `scheduled_posts.id`, required |
+      | `queue_job_id` | `text` | BullMQ job id, nullable |
+      | `attempt` | `int` | default `1` |
+      | `status` | `text` (enum: `queued`, `running`, `succeeded`, `failed`) | default `'queued'` |
+      | `started_at` | `timestamptz` | nullable |
+      | `finished_at` | `timestamptz` | nullable |
+      | `error_message` | `text` | nullable |
+      | `created_at` | `timestamptz` | |
+
+      **Relationships:** belongs to `scheduled_posts`.
+
+      **Indexes:** index on `(scheduled_post_id, created_at)` — latest attempt lookup; index on `status` for ops dashboards.
+
+      **Constraints:** `attempt >= 1`.
+
+      ---
+
+      ## 11. `analytics_snapshots`
+
+      **Purpose:** An immutable point-in-time metrics read for a published `scheduled_post`, captured repeatedly on a decaying cadence to build a growth curve. Equivalent to "MetricSnapshot" in the product spec.
+
+      | Column | Type | Notes |
+      |---|---|---|
+      | `id` | `uuid` | PK |
+      | `scheduled_post_id` | `uuid` | FK → `scheduled_posts.id`, required |
+      | `captured_at` | `timestamptz` | required |
+      | `views` | `bigint` | default `0` |
+      | `likes` | `bigint` | default `0` |
+      | `comments` | `bigint` | default `0` |
+      | `shares` | `bigint` | default `0` |
+      | `watch_time_sec` | `bigint` | nullable (platform may not expose) |
+      | `engagement_rate` | `numeric(6,4)` | nullable, computed at write time |
+      | `created_at` | `timestamptz` | |
+
+      **Relationships:** belongs to `scheduled_posts`.
+
+      **Indexes:** composite index on `(scheduled_post_id, captured_at)`; index on `captured_at` for nightly rollup jobs.
+
+      **Constraints:** rows are append-only — no `updated_at`, no in-place mutation; unique `(scheduled_post_id, captured_at)` to prevent duplicate polls.
+
+      ---
+
+      ## 12. `recommendation_summaries`
+
+      **Purpose:** The persisted output of the posting-time recommendation engine — one row per (workspace × platform-or-combined × day × hour) cell, rebuilt by the recompute job. Equivalent to "Recommendation" in the product spec.
+
+      | Column | Type | Notes |
+      |---|---|---|
+      | `id` | `uuid` | PK |
+      | `workspace_id` | `uuid` | FK → `workspaces.id`, required |
+      | `platform` | `text` (enum: `youtube`, `tiktok`, `combined`) | required |
+      | `day_of_week` | `smallint` | `0`–`6`, required |
+      | `hour` | `smallint` | `0`–`23`, required |
+      | `score` | `numeric(6,4)` | required, z-scored |
+      | `confidence` | `numeric(4,3)` | `0`–`1`, required |
+      | `sample_size` | `int` | default `0` |
+      | `is_cold_start` | `boolean` | default `false` — true when seeded from benchmarks, not first-party data |
+      | `computed_at` | `timestamptz` | required |
+
+      **Relationships:** belongs to `workspaces`.
+
+      **Indexes:** unique composite index on `(workspace_id, platform, day_of_week, hour)`; index on `(workspace_id, platform, score desc)` for "best slot" queries.
+
+      **Constraints:** unique `(workspace_id, platform, day_of_week, hour)`; `day_of_week` CHECK `0`–`6`; `hour` CHECK `0`–`23`; `confidence` CHECK `0`–`1`.
+
+      ---
+
+      ## 13. `audit_logs`
+
+      **Purpose:** Cross-cutting append-only record of significant actions (account connect/disconnect, publish, schedule change, settings change, member role change) for support/debugging and future compliance needs.
+
+      | Column | Type | Notes |
+      |---|---|---|
+      | `id` | `uuid` | PK |
+      | `workspace_id` | `uuid` | FK → `workspaces.id`, nullable (some actions are account-level, pre-workspace) |
+      | `actor_user_id` | `uuid` | FK → `users.id`, nullable (system/worker-initiated actions have no user) |
+      | `action` | `text` | e.g. `'post.published'`, `'account.disconnected'`, `'member.role_changed'` |
+      | `resource_type` | `text` | e.g. `'scheduled_post'`, `'social_account'` |
+      | `resource_id` | `uuid` | nullable |
+      | `metadata` | `jsonb` | freeform context (before/after values, error detail) |
+      | `created_at` | `timestamptz` | required |
+
+      **Relationships:** belongs to `workspaces` (optional); belongs to `users` (optional, actor).
+
+      **Indexes:** index on `(workspace_id, created_at desc)`; index on `(resource_type, resource_id)`.
+
+      **Constraints:** append-only, no updates; retention policy (e.g. 1 year) enforced by a scheduled cleanup job, not a DB constraint.
+
+      ---
+
+      ## Entity Relationship Summary
+
+      ```
+      users ──< workspace_members >── workspaces
+                                          │
+                                          ├──< social_accounts ──1:1── account_tokens
+                                          │         │
+                                          │         └──< scheduled_posts (via social_account_id)
+                                          │
+                                          ├──< content_drafts ──< scheduled_posts ──1:1── post_platform_variants
+                                          │         │                    │
+                                          │         └── media_asset       ├──< publishing_jobs
+                                          │                                └──< analytics_snapshots
+                                          │
+                                          ├──< recommendation_summaries
+                                          │
+                                          └──< audit_logs
+
+      media_assets ──< content_drafts (media_asset_id)
+      media_assets ──< post_platform_variants (custom_thumbnail_media_id)
+      users ──< audit_logs (actor)
+      ```
+
+      ---
+
+      ## Prisma Schema
+
+      ```prisma
+      datasource db {
+        provider = "postgresql"
+        url      = env("DATABASE_URL")
+      }
+
+      generator client {
+        provider = "prisma-client-js"
+      }
+
+      enum WorkspaceRole {
+        owner
+        admin
+        editor
+        reviewer
+      }
+
+      enum WorkspacePlan {
+        free
+        pro
+        agency
+      }
+
+      enum Provider {
+        youtube
+        tiktok
+      }
+
+      enum AccountStatus {
+        active
+        needs_review
+        disconnected
+      }
+
+      enum MediaStatus {
+        uploading
+        processing
+        ready
+        failed
+      }
+
+      enum DraftStatus {
+        draft
+        scheduled
+        publishing
+        published
+        failed
+        needs_review
+      }
+
+      enum PostStatus {
+        draft
+        scheduled
+        publishing
+        published
+        failed
+        cancelled
+        needs_review
+      }
+
+      enum Visibility {
+        public
+        unlisted
+        private
+      }
+
+      enum TikTokPrivacy {
+        public
+        friends
+        private
+      }
+
+      enum JobStatus {
+        queued
+        running
+        succeeded
+        failed
+      }
+
+      enum RecommendationPlatform {
+        youtube
+        tiktok
+        combined
+      }
+
+      model User {
+        id           String   @id @default(uuid())
+        email        String   @unique @db.Citext
+        passwordHash String?  @map("password_hash")
+        name         String
+        avatarUrl    String?  @map("avatar_url")
+        timezone     String   @default("UTC")
+        createdAt    DateTime @default(now()) @map("created_at")
+        updatedAt    DateTime @updatedAt @map("updated_at")
+
+        memberships   WorkspaceMember[]
+        mediaAssets   MediaAsset[]
+        contentDrafts ContentDraft[]
+        auditLogs     AuditLog[]
+
+        @@map("users")
+      }
+
+      model Workspace {
+        id               String        @id @default(uuid())
+        name             String
+        slug             String        @unique
+        plan             WorkspacePlan @default(free)
+        defaultTimezone  String        @default("UTC") @map("default_timezone")
+        createdAt        DateTime      @default(now()) @map("created_at")
+        updatedAt        DateTime      @updatedAt @map("updated_at")
+
+        members         WorkspaceMember[]
+        socialAccounts  SocialAccount[]
+        contentDrafts   ContentDraft[]
+        mediaAssets     MediaAsset[]
+        recommendations RecommendationSummary[]
+        auditLogs       AuditLog[]
+
+        @@map("workspaces")
+      }
+
+      model WorkspaceMember {
+        id            String        @id @default(uuid())
+        workspaceId   String        @map("workspace_id")
+        userId        String        @map("user_id")
+        role          WorkspaceRole
+        invitedEmail  String?       @map("invited_email") @db.Citext
+        joinedAt      DateTime?     @map("joined_at")
+        createdAt     DateTime      @default(now()) @map("created_at")
+        updatedAt     DateTime      @updatedAt @map("updated_at")
+
+        workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+        user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+        @@unique([workspaceId, userId])
+        @@index([userId])
+        @@map("workspace_members")
+      }
+
+      model SocialAccount {
+        id                 String        @id @default(uuid())
+        workspaceId        String        @map("workspace_id")
+        provider           Provider
+        externalAccountId  String        @map("external_account_id")
+        handle             String?
+        avatarUrl          String?       @map("avatar_url")
+        status             AccountStatus @default(active)
+        capabilities       Json          @default("{}")
+        scopes             String[]
+        lastSyncedAt       DateTime?     @map("last_synced_at")
+        createdAt          DateTime      @default(now()) @map("created_at")
+        updatedAt          DateTime      @updatedAt @map("updated_at")
+
+        workspace       Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+        token           AccountToken?
+        scheduledPosts  ScheduledPost[]
+
+        @@unique([workspaceId, provider, externalAccountId])
+        @@index([workspaceId, status])
+        @@map("social_accounts")
+      }
+
+      model AccountToken {
+        id                    String    @id @default(uuid())
+        socialAccountId       String    @unique @map("social_account_id")
+        accessTokenEnc        String    @map("access_token_enc")
+        refreshTokenEnc       String?   @map("refresh_token_enc")
+        tokenType             String?   @map("token_type")
+        expiresAt             DateTime  @map("expires_at")
+        scope                 String?
+        lastRefreshedAt       DateTime? @map("last_refreshed_at")
+        refreshFailureCount   Int       @default(0) @map("refresh_failure_count")
+        createdAt             DateTime  @default(now()) @map("created_at")
+        updatedAt             DateTime  @updatedAt @map("updated_at")
+
+        socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+        @@index([expiresAt])
+        @@map("account_tokens")
+      }
+
+      model ContentDraft {
+        id             String      @id @default(uuid())
+        workspaceId    String      @map("workspace_id")
+        authorId       String      @map("author_id")
+        internalTitle  String      @map("internal_title")
+        baseCaption    String?     @map("base_caption")
+        tags           String[]    @default([])
+        campaign       String?
+        mediaAssetId   String?     @map("media_asset_id")
+        status         DraftStatus @default(draft)
+        createdAt      DateTime    @default(now()) @map("created_at")
+        updatedAt      DateTime    @updatedAt @map("updated_at")
+
+        workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+        author         User            @relation(fields: [authorId], references: [id])
+        mediaAsset     MediaAsset?     @relation(fields: [mediaAssetId], references: [id])
+        scheduledPosts ScheduledPost[]
+
+        @@index([workspaceId, status])
+        @@index([workspaceId, campaign])
+        @@map("content_drafts")
+      }
+
+      model MediaAsset {
+        id             String      @id @default(uuid())
+        workspaceId    String      @map("workspace_id")
+        uploadedById   String      @map("uploaded_by_id")
+        s3Key          String      @map("s3_key")
+        mimeType       String      @map("mime_type")
+        sizeBytes      BigInt      @map("size_bytes")
+        durationSec    Decimal?    @map("duration_sec") @db.Decimal(10, 2)
+        width          Int?
+        height         Int?
+        status         MediaStatus @default(uploading)
+        thumbnailUrl   String?     @map("thumbnail_url")
+        createdAt      DateTime    @default(now()) @map("created_at")
+        updatedAt      DateTime    @updatedAt @map("updated_at")
+
+        workspace     Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+        uploadedBy    User               @relation(fields: [uploadedById], references: [id])
+        drafts        ContentDraft[]
+        thumbnailFor  PostPlatformVariant[]
+
+        @@index([workspaceId, status])
+        @@map("media_assets")
+      }
+
+      model ScheduledPost {
+        id               String     @id @default(uuid())
+        contentDraftId   String     @map("content_draft_id")
+        socialAccountId  String     @map("social_account_id")
+        platform         Provider
+        scheduledAt      DateTime?  @map("scheduled_at")
+        timezone         String?
+        status           PostStatus @default(draft)
+        externalPostId   String?    @map("external_post_id")
+        publishedAt      DateTime?  @map("published_at")
+        failureReason    String?    @map("failure_reason")
+        createdAt        DateTime   @default(now()) @map("created_at")
+        updatedAt        DateTime   @updatedAt @map("updated_at")
+
+        contentDraft  ContentDraft         @relation(fields: [contentDraftId], references: [id], onDelete: Cascade)
+        socialAccount SocialAccount        @relation(fields: [socialAccountId], references: [id])
+        variant       PostPlatformVariant?
+        jobs          PublishingJob[]
+        snapshots     AnalyticsSnapshot[]
+
+        @@unique([contentDraftId, socialAccountId])
+        @@index([status, scheduledAt])
+        @@index([socialAccountId, status])
+        @@map("scheduled_posts")
+      }
+
+      model PostPlatformVariant {
+        id                      String         @id @default(uuid())
+        scheduledPostId         String         @unique @map("scheduled_post_id")
+        title                   String?
+        description             String?
+        caption                 String?
+        visibility              Visibility?
+        privacyLevel            TikTokPrivacy? @map("privacy_level")
+        madeForKids             Boolean?       @map("made_for_kids")
+        allowComments           Boolean        @default(true) @map("allow_comments")
+        allowDuet               Boolean        @default(true) @map("allow_duet")
+        allowStitch             Boolean        @default(true) @map("allow_stitch")
+        customThumbnailMediaId  String?        @map("custom_thumbnail_media_id")
+        tagsOverride            String[]?      @map("tags_override")
+        createdAt               DateTime       @default(now()) @map("created_at")
+        updatedAt               DateTime       @updatedAt @map("updated_at")
+
+        scheduledPost     ScheduledPost @relation(fields: [scheduledPostId], references: [id], onDelete: Cascade)
+        customThumbnail   MediaAsset?   @relation(fields: [customThumbnailMediaId], references: [id])
+
+        @@map("post_platform_variants")
+      }
+
+      model PublishingJob {
+        id              String    @id @default(uuid())
+        scheduledPostId String    @map("scheduled_post_id")
+        queueJobId      String?   @map("queue_job_id")
+        attempt         Int       @default(1)
+        status          JobStatus @default(queued)
+        startedAt       DateTime? @map("started_at")
+        finishedAt      DateTime? @map("finished_at")
+        errorMessage    String?   @map("error_message")
+        createdAt       DateTime  @default(now()) @map("created_at")
+
+        scheduledPost ScheduledPost @relation(fields: [scheduledPostId], references: [id], onDelete: Cascade)
+
+        @@index([scheduledPostId, createdAt])
+        @@index([status])
+        @@map("publishing_jobs")
+      }
+
+      model AnalyticsSnapshot {
+        id               String   @id @default(uuid())
+        scheduledPostId  String   @map("scheduled_post_id")
+        capturedAt       DateTime @map("captured_at")
+        views            BigInt   @default(0)
+        likes            BigInt   @default(0)
+        comments         BigInt   @default(0)
+        shares           BigInt   @default(0)
+        watchTimeSec     BigInt?  @map("watch_time_sec")
+        engagementRate   Decimal? @map("engagement_rate") @db.Decimal(6, 4)
+        createdAt        DateTime @default(now()) @map("created_at")
+
+        scheduledPost ScheduledPost @relation(fields: [scheduledPostId], references: [id], onDelete: Cascade)
+
+        @@unique([scheduledPostId, capturedAt])
+        @@index([capturedAt])
+        @@map("analytics_snapshots")
+      }
+
+      model RecommendationSummary {
+        id           String                 @id @default(uuid())
+        workspaceId  String                 @map("workspace_id")
+        platform     RecommendationPlatform
+        dayOfWeek    Int                    @map("day_of_week")
+        hour         Int
+        score        Decimal                @db.Decimal(6, 4)
+        confidence   Decimal                @db.Decimal(4, 3)
+        sampleSize   Int                    @default(0) @map("sample_size")
+        isColdStart  Boolean                @default(false) @map("is_cold_start")
+        computedAt   DateTime               @map("computed_at")
+
+        workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+        @@unique([workspaceId, platform, dayOfWeek, hour])
+        @@index([workspaceId, platform, score(sort: Desc)])
+        @@map("recommendation_summaries")
+      }
+
+      model AuditLog {
+        id            String   @id @default(uuid())
+        workspaceId   String?  @map("workspace_id")
+        actorUserId   String?  @map("actor_user_id")
+        action        String
+        resourceType  String   @map("resource_type")
+        resourceId    String?  @map("resource_id")
+        metadata      Json?
+        createdAt     DateTime @default(now()) @map("created_at")
+
+        workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+        actor     User?      @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+        @@index([workspaceId, createdAt(sort: Desc)])
+        @@index([resourceType, resourceId])
+        @@map("audit_logs")
+      }
+      ```
+
+      ---
+
+      ## Notes on Cascade Behavior
+
+      - **Workspace deletion** cascades to members, social accounts, content drafts, media assets, recommendations (destructive — gate behind a confirmation + grace period at the application layer, not shown in schema).
+      - **Social account disconnect** does **not** cascade-delete `scheduled_posts` — historical posts/analytics remain for reporting; only new scheduling is blocked while `status = disconnected`.
+      - **Content draft deletion** cascades to its `scheduled_posts` (and transitively their variants/jobs/snapshots) — only allowed at the application layer when no target is in a non-terminal state.
+      - **Audit logs** use `onDelete: SetNull` on both FKs so history survives workspace/user deletion.
+    </script>
+    <script>
+      document.getElementById("markdown-content").value =
+        document.getElementById("md-source").textContent;
+      function switchView(view) {
+        const htmlView = document.getElementById("html-view");
+        const markdownView = document.getElementById("markdown-view");
+        const buttons = document.querySelectorAll(".view-toggle button");
+        buttons.forEach((btn) => btn.classList.remove("active"));
+        if (view === "html") {
+          htmlView.classList.remove("hidden");
+          markdownView.classList.add("hidden");
+          buttons[0].classList.add("active");
+        } else {
+          htmlView.classList.add("hidden");
+          markdownView.classList.remove("hidden");
+          buttons[1].classList.add("active");
+        }
+      }
+    </script>
+  </body>
+</html>
