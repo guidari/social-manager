@@ -39,7 +39,7 @@ function Toggle({ checked, onChange, label, disabled, className, id }: TogglePro
       {label && (
         <label
           htmlFor={switchId}
-          className="text-sm font-medium text-foreground cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+          className="cursor-pointer text-sm font-medium text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
         >
           {label}
         </label>

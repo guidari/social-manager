@@ -21,9 +21,9 @@ const toastVariants = cva(
 );
 
 const iconMap = {
-  success: <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />,
-  error: <XCircle className="h-5 w-5 text-red-600 shrink-0" />,
-  info: <Info className="h-5 w-5 text-blue-600 shrink-0" />,
+  success: <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />,
+  error: <XCircle className="h-5 w-5 shrink-0 text-red-600" />,
+  info: <Info className="h-5 w-5 shrink-0 text-blue-600" />,
 };
 
 export interface ToastProps extends VariantProps<typeof toastVariants> {
@@ -42,7 +42,7 @@ function Toast({ message, variant = "info", duration = 4000, open, onOpenChange 
       className={cn(toastVariants({ variant }))}
     >
       {iconMap[variant ?? "info"]}
-      <ToastPrimitive.Description className="text-sm font-medium flex-1">
+      <ToastPrimitive.Description className="flex-1 text-sm font-medium">
         {message}
       </ToastPrimitive.Description>
       <ToastPrimitive.Close className="absolute right-2 top-2 rounded-md p-1 opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring">
@@ -84,9 +84,7 @@ function ToastManagerProvider({ children }: { children: React.ReactNode }) {
             message={t.message}
             variant={t.variant}
             open
-            onOpenChange={(o) =>
-              !o && setToasts((prev) => prev.filter((x) => x.id !== t.id))
-            }
+            onOpenChange={(o) => !o && setToasts((prev) => prev.filter((x) => x.id !== t.id))}
           />
         ))}
       </ToastProvider>

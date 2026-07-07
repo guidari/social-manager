@@ -18,7 +18,14 @@ export interface TabsProps {
   children?: React.ReactNode;
 }
 
-function Tabs({ items, value, onChange, orientation = "horizontal", className, children }: TabsProps) {
+function Tabs({
+  items,
+  value,
+  onChange,
+  orientation = "horizontal",
+  className,
+  children,
+}: TabsProps) {
   return (
     <TabsPrimitive.Root
       value={value}
@@ -29,7 +36,7 @@ function Tabs({ items, value, onChange, orientation = "horizontal", className, c
       <TabsPrimitive.List
         className={cn(
           "inline-flex items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground",
-          orientation === "vertical" && "flex-col h-fit",
+          orientation === "vertical" && "h-fit flex-col",
         )}
       >
         {items.map((item) => (

@@ -11,7 +11,14 @@ export interface EmptyStateProps {
   className?: string;
 }
 
-function EmptyState({ icon, title, description, actionLabel, onAction, className }: EmptyStateProps) {
+function EmptyState({
+  icon,
+  title,
+  description,
+  actionLabel,
+  onAction,
+  className,
+}: EmptyStateProps) {
   return (
     <div
       className={cn(
@@ -24,9 +31,7 @@ function EmptyState({ icon, title, description, actionLabel, onAction, className
       </div>
       <div className="space-y-1">
         <h3 className="text-base font-semibold text-foreground">{title}</h3>
-        {description && (
-          <p className="text-sm text-muted-foreground max-w-sm">{description}</p>
-        )}
+        {description && <p className="max-w-sm text-sm text-muted-foreground">{description}</p>}
       </div>
       {actionLabel && onAction && (
         <Button variant="primary" size="md" onClick={onAction}>

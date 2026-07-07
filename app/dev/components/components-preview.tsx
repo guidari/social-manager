@@ -13,7 +13,6 @@ import {
   TabsContent,
   Modal,
   Sheet,
-  Toast,
   ToastManagerProvider,
   useToast,
   Skeleton,
@@ -22,13 +21,13 @@ import {
   StatusBadge,
   EmptyState,
 } from "@/components/ui";
-import { Plus, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-semibold text-foreground border-b pb-2">{title}</h2>
-      <div className="flex flex-wrap gap-3 items-start">{children}</div>
+      <h2 className="border-b pb-2 text-lg font-semibold text-foreground">{title}</h2>
+      <div className="flex flex-wrap items-start gap-3">{children}</div>
     </section>
   );
 }
@@ -37,13 +36,25 @@ function ToastDemo() {
   const toast = useToast();
   return (
     <div className="flex flex-wrap gap-2">
-      <Button size="sm" variant="primary" onClick={() => toast.show("Post scheduled successfully!", "success")}>
+      <Button
+        size="sm"
+        variant="primary"
+        onClick={() => toast.show("Post scheduled successfully!", "success")}
+      >
         Success Toast
       </Button>
-      <Button size="sm" variant="destructive" onClick={() => toast.show("Failed to publish post.", "error")}>
+      <Button
+        size="sm"
+        variant="destructive"
+        onClick={() => toast.show("Failed to publish post.", "error")}
+      >
         Error Toast
       </Button>
-      <Button size="sm" variant="ghost" onClick={() => toast.show("Analytics sync in progress.", "info")}>
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={() => toast.show("Analytics sync in progress.", "info")}
+      >
         Info Toast
       </Button>
     </div>
@@ -63,10 +74,12 @@ export function ComponentsPreview() {
 
   return (
     <ToastManagerProvider>
-      <main className="max-w-4xl mx-auto px-6 py-10 space-y-10">
+      <main className="mx-auto max-w-4xl space-y-10 px-6 py-10">
         <div>
           <h1 className="text-3xl font-bold text-foreground">PostPilot — Component Library</h1>
-          <p className="text-muted-foreground mt-1">Shared UI primitives built on shadcn/ui + Tailwind with the PostPilot brand palette.</p>
+          <p className="mt-1 text-muted-foreground">
+            Shared UI primitives built on shadcn/ui + Tailwind with the PostPilot brand palette.
+          </p>
         </div>
 
         {/* Button */}
@@ -75,10 +88,18 @@ export function ComponentsPreview() {
           <Button variant="secondary">Secondary</Button>
           <Button variant="ghost">Ghost</Button>
           <Button variant="destructive">Destructive</Button>
-          <Button variant="primary" size="sm">Small</Button>
-          <Button variant="primary" size="lg">Large</Button>
-          <Button variant="primary" loading>Loading</Button>
-          <Button variant="primary" disabled>Disabled</Button>
+          <Button variant="primary" size="sm">
+            Small
+          </Button>
+          <Button variant="primary" size="lg">
+            Large
+          </Button>
+          <Button variant="primary" loading>
+            Loading
+          </Button>
+          <Button variant="primary" disabled>
+            Disabled
+          </Button>
         </Section>
 
         {/* TextInput / TextArea */}
@@ -142,11 +163,7 @@ export function ComponentsPreview() {
               onChange={setDateVal}
               minDate={new Date().toISOString().split("T")[0]}
             />
-            <TimePicker
-              label="Schedule time"
-              value={timeVal}
-              onChange={setTimeVal}
-            />
+            <TimePicker label="Schedule time" value={timeVal} onChange={setTimeVal} />
           </div>
         </Section>
 
@@ -169,36 +186,53 @@ export function ComponentsPreview() {
               value={tabVal}
               onChange={setTabVal}
             >
-              <TabsContent value="tab1" className="p-4 border rounded-lg">Overview content</TabsContent>
-              <TabsContent value="tab2" className="p-4 border rounded-lg">YouTube settings</TabsContent>
-              <TabsContent value="tab3" className="p-4 border rounded-lg">TikTok settings</TabsContent>
+              <TabsContent value="tab1" className="rounded-lg border p-4">
+                Overview content
+              </TabsContent>
+              <TabsContent value="tab2" className="rounded-lg border p-4">
+                YouTube settings
+              </TabsContent>
+              <TabsContent value="tab3" className="rounded-lg border p-4">
+                TikTok settings
+              </TabsContent>
             </Tabs>
           </div>
         </Section>
 
         {/* Modal */}
         <Section title="Modal / Dialog">
-          <Button variant="secondary" onClick={() => setModalOpen(true)}>Open Modal</Button>
+          <Button variant="secondary" onClick={() => setModalOpen(true)}>
+            Open Modal
+          </Button>
           <Modal
             open={modalOpen}
             onClose={() => setModalOpen(false)}
             title="Disconnect account?"
             footer={
               <>
-                <Button variant="ghost" onClick={() => setModalOpen(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={() => setModalOpen(false)}>Disconnect</Button>
+                <Button variant="ghost" onClick={() => setModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={() => setModalOpen(false)}>
+                  Disconnect
+                </Button>
               </>
             }
           >
-            <p>This will remove the connection to your YouTube account. You can reconnect at any time from the Accounts page.</p>
+            <p>
+              This will remove the connection to your YouTube account. You can reconnect at any time
+              from the Accounts page.
+            </p>
           </Modal>
         </Section>
 
         {/* Sheet */}
         <Section title="Sheet (Drawer)">
-          <Button variant="secondary" onClick={() => setSheetOpen(true)}>Open Sheet (right)</Button>
+          <Button variant="secondary" onClick={() => setSheetOpen(true)}>
+            Open Sheet (right)
+          </Button>
           <Sheet open={sheetOpen} onClose={() => setSheetOpen(false)} side="right">
-            <div className="pt-6 space-y-3">
+            <div className="space-y-3 pt-6">
               <h3 className="text-lg font-semibold">Post Details</h3>
               <p className="text-sm text-muted-foreground">Slide-in panel content goes here.</p>
             </div>

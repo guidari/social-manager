@@ -6,7 +6,6 @@ import { DayPicker } from "react-day-picker";
 import { format, parse, isValid } from "date-fns";
 import { Calendar, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
 export interface DatePickerProps {
   value: string | null;
@@ -53,9 +52,7 @@ function DatePicker({
             )}
           >
             <Calendar className="h-4 w-4 shrink-0" />
-            {value && selected && isValid(selected)
-              ? format(selected, "PPP")
-              : placeholder}
+            {value && selected && isValid(selected) ? format(selected, "PPP") : placeholder}
           </button>
         </PopoverPrimitive.Trigger>
         <PopoverPrimitive.Portal>
@@ -124,13 +121,7 @@ export interface TimePickerProps {
   timezone?: string;
 }
 
-function TimePicker({
-  value,
-  onChange,
-  disabled,
-  className,
-  label,
-}: TimePickerProps) {
+function TimePicker({ value, onChange, disabled, className, label }: TimePickerProps) {
   const [hour, minute] = value ? value.split(":") : ["", ""];
 
   function handleChange(h: string, m: string) {
@@ -142,7 +133,7 @@ function TimePicker({
     <div className={cn("flex flex-col gap-1.5", className)}>
       {label && <label className="text-sm font-medium text-foreground">{label}</label>}
       <div className="flex items-center gap-2">
-        <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+        <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
         <select
           aria-label="Hour"
           value={hour}

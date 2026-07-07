@@ -2,12 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 function SkeletonBase({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  return (
-    <div
-      className={cn("animate-pulse rounded-md bg-muted", className)}
-      style={style}
-    />
-  );
+  return <div className={cn("animate-pulse rounded-md bg-muted", className)} style={style} />;
 }
 
 export interface SkeletonProps {
@@ -23,7 +18,7 @@ function Skeleton({ variant = "text", count = 1, className }: SkeletonProps) {
     return (
       <>
         {items.map((_, i) => (
-          <div key={i} className={cn("rounded-xl border bg-card p-4 space-y-3", className)}>
+          <div key={i} className={cn("space-y-3 rounded-xl border bg-card p-4", className)}>
             <SkeletonBase className="h-4 w-1/3" />
             <SkeletonBase className="h-8 w-1/2" />
             <SkeletonBase className="h-3 w-1/4" />
@@ -38,7 +33,7 @@ function Skeleton({ variant = "text", count = 1, className }: SkeletonProps) {
       <>
         {items.map((_, i) => (
           <div key={i} className={cn("flex items-center gap-3 py-2", className)}>
-            <SkeletonBase className="h-10 w-10 rounded-full shrink-0" />
+            <SkeletonBase className="h-10 w-10 shrink-0 rounded-full" />
             <div className="flex-1 space-y-2">
               <SkeletonBase className="h-4 w-3/4" />
               <SkeletonBase className="h-3 w-1/2" />
