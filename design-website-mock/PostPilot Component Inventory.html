@@ -1,0 +1,3338 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PostPilot — MVP Component Inventory</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: linear-gradient(135deg, #f2f1ee 0%, #faf9f7 100%);
+        color: #2c2e36;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 1150px;
+        margin: 0 auto;
+        padding: 40px 20px 80px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 32px;
+        padding-bottom: 28px;
+        border-bottom: 1px solid #e6e4df;
+      }
+      .logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #3d5afe;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .logo svg {
+        width: 24px;
+        height: 24px;
+        fill: #fff;
+      }
+      header h1 {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #14151a;
+      }
+      .subtitle {
+        font-size: 13px;
+        color: #9a9aa0;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-top: 6px;
+      }
+      .view-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 8px;
+        background: #fff;
+        border: 1px solid #e6e4df;
+        border-radius: 9px;
+        padding: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        z-index: 1000;
+      }
+      .view-toggle button {
+        padding: 8px 14px;
+        border: none;
+        background: transparent;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.2s;
+        color: #5c5e68;
+      }
+      .view-toggle button.active {
+        background: #3d5afe;
+        color: #fff;
+      }
+      .doc-title {
+        display: none;
+      }
+      .field-row {
+        display: grid;
+        grid-template-columns: 170px 1fr;
+        gap: 4px 14px;
+        font-size: 13px;
+        margin-bottom: 8px;
+      }
+      .field-label {
+        font-weight: 700;
+        color: #9a9aa0;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-size: 10.5px;
+        padding-top: 3px;
+      }
+      .field-value {
+        color: #2c2e36;
+      }
+      .field-value code,
+      .para code {
+        font-family: "IBM Plex Mono", monospace;
+        background: #f5f5f7;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #3c3e46;
+      }
+      .md-list {
+        margin: 6px 0 16px 20px;
+        font-size: 13px;
+      }
+      .md-list li {
+        margin-bottom: 6px;
+      }
+      .md-list code {
+        font-family: "IBM Plex Mono", monospace;
+        background: #f5f5f7;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #3c3e46;
+      }
+      .para {
+        font-size: 13.5px;
+        margin-bottom: 10px;
+        color: #2c2e36;
+        max-width: 900px;
+      }
+      .domain-title {
+        font-size: 14px;
+        font-weight: 800;
+        color: #fff;
+        background: #3d5afe;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 9px 18px;
+        border-radius: 9px;
+        display: inline-block;
+        margin: 36px 0 18px;
+      }
+      .domain-body {
+        margin-bottom: 8px;
+      }
+      .domain-body > .field-row,
+      .domain-body > .md-list,
+      .domain-body > .para {
+        max-width: 900px;
+      }
+      .endpoint-card {
+        background: #fff;
+        border: 1px solid #e6e4df;
+        border-radius: 12px;
+        padding: 22px 26px;
+        margin-bottom: 18px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        break-inside: avoid;
+      }
+      .endpoint-title {
+        margin-bottom: 14px;
+      }
+      .comp-name {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 16px;
+        font-weight: 700;
+        color: #14151a;
+        background: #f0f0ff;
+        padding: 3px 10px;
+        border-radius: 6px;
+      }
+      .render-badge {
+        font-size: 12.5px;
+        padding: 2px 4px;
+        border-radius: 4px;
+      }
+      .badge-client {
+        color: #2a6fdb;
+      }
+      .badge-server {
+        color: #0a7a55;
+      }
+      .badge-mixed {
+        color: #9a6414;
+      }
+      .reuse-badge {
+        display: inline-block;
+        font-size: 10.5px;
+        font-weight: 800;
+        padding: 2px 9px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        margin-right: 6px;
+      }
+      .badge-true {
+        background: #e8f0e6;
+        color: #0e9f6e;
+      }
+      .badge-false {
+        background: #f0f0f2;
+        color: #9a9aa0;
+      }
+      .code-block {
+        background: #14151a;
+        color: #d7d9e0;
+        border-radius: 9px;
+        padding: 14px 16px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+        line-height: 1.6;
+        overflow-x: auto;
+        white-space: pre;
+        margin: 8px 0 14px;
+      }
+      .hidden {
+        display: none;
+      }
+      #markdown-content {
+        width: 100%;
+        min-height: 800px;
+        padding: 20px;
+        border: 1px solid #e6e4df;
+        border-radius: 12px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12.5px;
+        line-height: 1.6;
+        resize: vertical;
+        background: #fff;
+      }
+      .footer {
+        text-align: center;
+        padding: 40px 20px;
+        border-top: 1px solid #e6e4df;
+        color: #9a9aa0;
+        font-size: 12px;
+        margin-top: 20px;
+      }
+      .legend {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        font-size: 12px;
+        color: #5c5e68;
+        margin-bottom: 8px;
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .legend .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      @media (max-width: 768px) {
+        .container {
+          padding: 24px 16px;
+        }
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+        .endpoint-card {
+          padding: 16px;
+        }
+        .view-toggle {
+          top: 12px;
+          right: 12px;
+        }
+        .field-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="view-toggle">
+      <button class="active" onclick="switchView('html')">HTML View</button>
+      <button onclick="switchView('markdown')">Markdown View</button>
+    </div>
+    <div id="html-view" class="view">
+      <div class="container">
+        <header>
+          <div class="logo">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="6,6 18,12 6,18" />
+            </svg>
+          </div>
+          <div>
+            <h1>PostPilot</h1>
+            <p class="subtitle">MVP Frontend Component Inventory</p>
+          </div>
+        </header>
+        <div class="legend">
+          <span><span class="dot" style="background: #0a7a55"></span> Server-rendered</span>
+          <span><span class="dot" style="background: #2a6fdb"></span> Client component</span>
+          <span><span class="reuse-badge badge-true">Yes</span> reusable globally</span>
+          <span><span class="reuse-badge badge-false">No</span> app-specific</span>
+        </div>
+        <h1 class="doc-title">PostPilot — MVP Frontend Component Inventory</h1>
+        <div class="field-row">
+          <span class="field-label">Companion to</span
+          ><span class="field-value"
+            ><code>PostPilot Engineering Spec</code> ·
+            <code>PostPilot Implementation Checklist</code> ·
+            <code>PostPilot API Contract</code></span
+          >
+        </div>
+        <div class="field-row">
+          <span class="field-label">Stack</span
+          ><span class="field-value"
+            >Next.js 14+ App Router (React Server Components + Client Components), Tailwind +
+            shadcn/ui primitives, TanStack Query, react-hook-form + Zod.</span
+          >
+        </div>
+        <h2 class="domain-title">Conventions</h2>
+        <div class="domain-body">
+          <ul class="md-list">
+            <li>
+              <strong>Server-rendered (RSC):</strong> no <code>useState</code>/event handlers of its
+              own; renders from props/fetched data; ships zero client JS for that component.
+            </li>
+            <li>
+              <strong>Client:</strong> needs interactivity (<code>'use client'</code>) — forms,
+              drag/drop, hover, live updates, local UI state.
+            </li>
+            <li>
+              <strong>Reusable globally:</strong> true if this component has no PostPilot-domain
+              assumptions baked in and could be lifted into any product's shared UI layer as-is
+              (mostly the Shared Form Components group + a few structural pieces). Domain components
+              (know about "platform", "post", "recommendation") are marked false even if used on 2+
+              pages — they're app-specific, not general-purpose.
+            </li>
+          </ul>
+        </div>
+        <h2 class="domain-title">1. Layout Components</h2>
+        <div class="domain-body">
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">AppShell</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Root authenticated layout — positions Sidebar, TopBar, and page content; owns the
+                responsive breakpoint that collapses Sidebar to an icon rail.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"><code>children: ReactNode</code></span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value"
+                >sidebar collapsed/expanded (persisted to localStorage), mobile drawer
+                open/closed.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">none — mounted once at <code>/app/layout.tsx</code>.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server"
+                  >Server shell wrapping a Client boundary for the collapse/drawer state.</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"
+                ><span class="reuse-badge badge-false">No</span> (assumes Sidebar/TopBar composition
+                specific to this app).</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">Sidebar</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Primary left navigation — route links, workspace switcher, collapse toggle.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>activeRoute: string</code>, <code>collapsed: boolean</code>,
+                <code>onToggleCollapse: () =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">hover states on nav items (CSS-only where possible).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >current route (from Next.js <code>usePathname</code>), workspace list (from
+                <code>/me</code>).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client"
+                  >Client (interactive toggle, active-route highlighting).</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">TopBar</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Page title, contextual primary action (e.g. "Create Post" button), user avatar
+                menu.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>title: string</code>,
+                <code>primaryAction?: { label: string; onClick: () =&gt; void }</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">avatar dropdown open/closed.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >page title (set per-route), current user (avatar/name).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client"
+                  >Client (dropdown interactivity).</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value"
+                >false (composition is app-specific; the dropdown itself could be extracted — see
+                <code>Popover</code> in Shared).</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">PageContainer</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Consistent max-width, padding, and vertical rhythm wrapper for every route's
+                content.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>children: ReactNode</code>, <code>maxWidth?: 'md'|'lg'|'xl'</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server">Server.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"
+                ><span class="reuse-badge badge-true">Yes</span> — pure layout primitive, no domain
+                logic.</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">SectionCard</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >The generic white bordered-card wrapper used to group content within a page (KPI
+                rows, panels, tables all sit inside one of these).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>title?: string</code>, <code>subtitle?: string</code>,
+                <code>actions?: ReactNode</code>, <code>children: ReactNode</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server">Server.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-true">Yes</span>.</span>
+            </div>
+          </div>
+        </div>
+        <h2 class="domain-title">2. Navigation Components</h2>
+        <div class="domain-body">
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">SidebarNavItem</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >A single route link in the Sidebar — icon, label, active-state styling, optional
+                badge (e.g. "needs review" count).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>href: string</code>, <code>icon: ReactNode</code>,
+                <code>label: string</code>, <code>active: boolean</code>,
+                <code>badgeCount?: number</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value"
+                >none (active state is a prop, driven by the parent's route check).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                ><code>active</code> boolean, badge count (from workspace-level counts query).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server"
+                  >Server-renderable, but typically lives inside the Client Sidebar tree.</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"
+                ><span class="reuse-badge badge-true">Yes</span> (generic nav-item pattern).</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">WorkspaceSwitcher</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Dropdown to switch the active workspace (multi-workspace users) and jump to "Create
+                workspace."</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>workspaces: {id, name}[]</code>, <code>activeWorkspaceId: string</code>,
+                <code>onSwitch: (id: string) =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">open/closed dropdown state.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">workspace list + active id from <code>/me</code>.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"
+                ><span class="reuse-badge badge-false">No</span> (workspace concept is
+                app-specific), though the underlying dropdown shell is generic.</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">MobileNavDrawer</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Slide-in nav drawer replacing the Sidebar under the mobile breakpoint.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>open: boolean</code>, <code>onClose: () =&gt; void</code>,
+                <code>children: ReactNode</code> (reuses SidebarNavItem list)</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">open animation state.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">same nav data as Sidebar.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value"
+                >true as a drawer shell (pairs with the shared <code>Sheet</code> primitive), but
+                the nav content it wraps is app-specific.</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">Breadcrumbs</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Shows the path back to a list view from a detail screen (e.g. Library → Post
+                Detail).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>items: { label: string; href?: string }[]</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">breadcrumb trail computed per-route.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server">Server.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-true">Yes</span>.</span>
+            </div>
+          </div>
+        </div>
+        <h2 class="domain-title">3. Dashboard Components</h2>
+        <div class="domain-body">
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">StatCard</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >A single KPI tile (label, big number, optional delta vs. previous period). Used on
+                both Dashboard and Analytics.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>label: string</code>, <code>value: string | number</code>,
+                <code>delta?: number</code>, <code>format?: 'number'|'percent'|'compact'</code>,
+                <code>loading?: boolean</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >the raw KPI value + delta from <code>/analytics/overview</code> or
+                <code>/calendar</code>.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Server or client</span
+              ><span class="field-value"
+                >Server (pure display), with a client <code>Skeleton</code> swapped in while
+                <code>loading</code>.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"
+                ><span class="reuse-badge badge-true">Yes</span> — generic metric-tile pattern, no
+                PostPilot-specific assumptions.</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">BestTimeHero</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >The 3-slot "best time to post" callout (YouTube / TikTok / Combined) with
+                confidence + CTA, shown on Dashboard and mirrored (larger) on Recommendations.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code
+                  >slots: { platform: 'youtube'|'tiktok'|'combined'; dayOfWeek: number; hour:
+                  number; confidence: number; isColdStart: boolean }[]</code
+                >, <code>onApply: (slot) =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">hover/focus states on each slot card.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >resolved slots from <code>GET /recommendations</code>.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client"
+                  >Client (click handler triggers navigation/composer prefill).</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">UpcomingPostsList</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Compact list of the next scheduled posts with thumbnail, time, platform badges,
+                status.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>posts: PostSummary[]</code>,
+                <code>onSelect: (postId: string) =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                ><code>GET /posts?status=scheduled&amp;limit=5</code> result.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server"
+                  >Server list, client-wrapped only for the row click handler.</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">PerformanceSnapshot</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Small views-trend chart + "top post" + "top day" callouts summarizing recent
+                performance on the Dashboard (lighter version of the full Analytics page).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>series: {date: string; value: number}[]</code>,
+                <code>topPost: PostSummary | null</code>, <code>topDay: string | null</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value"
+                >chart hover tooltip state (delegated to Recharts internals).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                ><code>GET /analytics/timeseries</code> +
+                <code>GET /analytics/posts?sort=views&amp;limit=1</code>.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client"
+                  >Client (chart library requires it).</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value"
+                >false (composition specific), though it wraps the reusable
+                <code>TrendChartCard</code>.</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">QuickInsightsPanel</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >2–3 rule-derived insight strings ("Your TikTok engagement is up 12% this week")
+                with light iconography — not a chat interface.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>insights: { icon: ReactNode; text: string }[]</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >computed insight strings (derived server-side from analytics deltas).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server">Server.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+        </div>
+        <h2 class="domain-title">4. Composer Components</h2>
+        <div class="domain-body">
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">MediaDropzone</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Drag-and-drop / click-to-upload target for the post's video, with progress bar and
+                thumbnail preview once processed.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>mediaAsset: MediaAsset | null</code>,
+                <code>onUploadStart: (file: File) =&gt; void</code>,
+                <code>uploadProgress: number</code>,
+                <code>status: 'idle'|'uploading'|'processing'|'ready'|'failed'</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">drag-over highlight state.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >current media asset (if editing existing draft), upload progress from the uppy/tus
+                instance owned by the parent's logic hook.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client"
+                  >Client (drag/drop + file APIs).</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"
+                ><span class="reuse-badge badge-false">No</span> (tightly coupled to the
+                presign/complete upload flow), though the drag-over visual shell is a common
+                pattern.</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">BaseContentForm</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >The platform-agnostic fields — internal title, base caption, tags, campaign.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>defaultValues: {internalTitle, baseCaption, tags, campaign}</code>,
+                <code>onChange: (values) =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">react-hook-form field state + validation errors.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">draft defaults when editing.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client (form state).</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value"
+                >false (field set is domain-specific), but built from reusable
+                <code>TextInput</code>/<code>TextArea</code>/<code>TagInput</code>.</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">PlatformSelector</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Toggle cards for YouTube/TikTok — turning a platform on reveals its field panel and
+                preview tab.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>connectedAccounts: SocialAccount[]</code>, <code>selected: string[]</code>,
+                <code>onToggle: (accountId: string) =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none (fully controlled).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">connected accounts list, current selection.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">PlatformFieldPanel</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Per-platform override fields — YouTube
+                (title/description/visibility/made-for-kids/tags/thumbnail) or TikTok
+                (caption/privacy/duet/stitch/comments), rendered as a tab or accordion
+                section.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>platform: 'youtube'|'tiktok'</code>, <code>values: PlatformOverrides</code>,
+                <code>onChange: (values) =&gt; void</code>,
+                <code>characterLimits: {field: string; max: number}[]</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value"
+                >local field focus/touched state for inline validation display.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >current override values, platform char/field limits (static config).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">SmartAdaptationPanel</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Surfaces non-blocking warnings and one-click suggestions ("Shorten TikTok caption",
+                "Add hashtags", "YouTube title missing").</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code
+                  >warnings: { id: string; severity: 'warning'; message: string; fixLabel?: string;
+                  onFix?: () =&gt; void }[]</code
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">dismissed-warning ids (session-only).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >warnings computed from current form values by the parent's validation hook.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"
+                ><span class="reuse-badge badge-false">No</span>, though the visual "warning row
+                with a fix button" shell is a reusable pattern worth extracting later.</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">ScheduleControl</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Now / Draft / Schedule mode picker; date/time/timezone inputs; "use recommended
+                time" shortcut.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>mode: 'now'|'draft'|'schedule'</code>,
+                <code>scheduledAt: string | null</code>, <code>timezone: string</code>,
+                <code>recommendedSlot: {dayOfWeek, hour, confidence} | null</code>,
+                <code>onChange: (patch) =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">date-picker popover open/closed.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >recommended slot (from <code>/recommendations</code>), workspace default
+                timezone.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value"
+                >false (built on the reusable <code>DatePicker</code>/<code>TimePicker</code> shared
+                components).</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">PlatformPreview</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Renders a mocked YouTube or TikTok post preview so the user sees roughly what will
+                publish; switchable between connected platforms.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>platform: 'youtube'|'tiktok'</code>,
+                <code>content: { title, caption, thumbnailUrl, channelName }</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value"
+                >none (pure render of whichever platform tab is active, tab state owned by
+                parent).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">merged base + override content per platform.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server"
+                  >Server-renderable (static preview markup), likely rendered inside a client tab
+                  container.</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">ComposerFooterActions</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Sticky footer bar with Save Draft / Schedule / Publish Now buttons, showing
+                validation-blocked state.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>canPublish: boolean</code>, <code>isSaving: boolean</code>,
+                <code>onSaveDraft</code>, <code>onSchedule</code>, <code>onPublishNow</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >aggregate validation result from the composer's form state.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value">false, built from the shared <code>Button</code>.</span>
+            </div>
+          </div>
+        </div>
+        <h2 class="domain-title">5. Calendar Components</h2>
+        <div class="domain-body">
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">CalendarGrid</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Renders the month/week/agenda grid of days, each containing that day's
+                <code>PostChip</code>s; owns the drag-and-drop reordering logic.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>view: 'month'|'week'|'agenda'</code>,
+                <code>days: { date: string; posts: PostSummary[] }[]</code>,
+                <code>onDropPost: (postId, newDate) =&gt; void</code>,
+                <code>highlightedSlots?: {dayOfWeek, hour}[]</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value"
+                >drag source/target tracking, optimistic post position during drag.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                ><code>GET /calendar</code> result for the visible range, recommendation heatmap for
+                highlighting.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client (drag/drop).</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">CalendarViewSwitcher</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value">Month / Week / Agenda tab control.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>value: 'month'|'week'|'agenda'</code>,
+                <code>onChange: (view) =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >current view (often synced to URL search param by parent).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value"
+                >true (generic tri-state tab switcher), built on the shared
+                <code>Tabs</code> primitive.</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">CalendarFilterBar</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Platform/status/campaign filter controls above the grid.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>filters: {platform?, status?, campaign?}</code>,
+                <code>onChange: (filters) =&gt; void</code>,
+                <code>campaignOptions: string[]</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none (controlled; syncs to URL params in parent).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >available campaign values (from a lightweight facet query).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">PostChip</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >The small draggable pill representing one scheduled post inside a day cell —
+                thumbnail sliver, time, platform badge, status color.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>post: PostSummary</code>, <code>draggable: boolean</code>,
+                <code>onClick: () =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">drag-active visual state.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">post summary fields.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client (drag handle + click).</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">PostDetailDrawer</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Side drawer opened from a PostChip click — larger preview, scheduled time, target
+                platforms, Edit/Duplicate/Cancel actions.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>post: PostDetail | null</code>, <code>open: boolean</code>,
+                <code>onClose</code>, <code>onEdit</code>, <code>onDuplicate</code>,
+                <code>onCancel</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">confirm-cancel sub-dialog state.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">full post detail from <code>GET /posts/:id</code>.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client"
+                  >Client (drawer open state, action handlers).</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value"
+                >false, built on the shared <code>Sheet</code> primitive.</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title">
+              <span class="comp-name">RecommendedWindowOverlay</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Subtle background tint on calendar cells/hours that fall within a high-confidence
+                recommended posting window.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>slots: {dayOfWeek, hour, score}[]</code>,
+                <code>view: 'month'|'week'</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >recommendation heatmap subset relevant to the visible range.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server"
+                  >Server (pure conditional styling).</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+        </div>
+        <h2 class="domain-title">6. Analytics Components</h2>
+        <div class="domain-body">
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">AnalyticsFilterBar</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Platform tabs + date-range picker + compare-to-previous toggle above the Analytics
+                dashboard.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>platform: 'all'|'youtube'|'tiktok'</code>, <code>range: {from, to}</code>,
+                <code>compare: boolean</code>, <code>onChange: (patch) =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">date-range popover open state.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">current filter values (URL-synced).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value"
+                >false, built on shared <code>Tabs</code>/<code>DateRangePicker</code>.</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">TrendChartCard</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Titled card wrapping a line/bar chart for a single metric over time (used for both
+                views and engagement, on Dashboard and Analytics).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>title: string</code>, <code>series: {date, value}[]</code>,
+                <code>metricFormat: 'number'|'percent'</code>, <code>loading?: boolean</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">chart tooltip hover (Recharts-internal).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"><code>GET /analytics/timeseries</code> result.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client (charting library).</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"
+                ><span class="reuse-badge badge-true">Yes</span> — generic time-series chart card,
+                no PostPilot-specific logic beyond the data shape.</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">PlatformComparisonBar</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Horizontal bar comparing totals (e.g. views) between YouTube and TikTok for the
+                selected period.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>data: { platform: 'youtube'|'tiktok'; value: number }[]</code>,
+                <code>metricLabel: string</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                ><code>GET /analytics/overview</code> per-platform breakdown.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client"
+                  >Client (uses the same chart library as TrendChartCard for consistent
+                  rendering).</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"
+                ><span class="reuse-badge badge-false">No</span> (assumes exactly the two-platform
+                PostPilot shape today).</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">PostPerformanceTable</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Sortable, paginated table of individual posts with
+                views/likes/comments/shares/engagement/status.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>rows: PostPerformanceRow[]</code>, <code>sort: {field, order}</code>,
+                <code>onSortChange</code>, <code>onRowClick: (postId) =&gt; void</code>,
+                <code>nextCursor: string | null</code>, <code>onLoadMore</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value"
+                >none beyond hover-row styling (sort/pagination are controlled by parent,
+                URL-synced).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"><code>GET /analytics/posts</code> page.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Server or client</span
+              ><span class="field-value"
+                >Client (sort/click interactivity), built on the shared
+                <code>Table</code> primitive.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value"
+                >false, though it's a thin domain wrapper over the reusable
+                <code>Table</code>.</span
+              >
+            </div>
+          </div>
+        </div>
+        <h2 class="domain-title">7. Recommendation Components</h2>
+        <div class="domain-body">
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">BestTimeCard</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Single hero card showing one platform's (or Combined's) best slot, confidence, and
+                sample size, with an action button.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>platform: 'youtube'|'tiktok'|'combined'</code>,
+                <code>dayOfWeek: number</code>, <code>hour: number</code>,
+                <code>confidence: number</code>, <code>sampleSize: number</code>,
+                <code>isColdStart: boolean</code>, <code>onAction: () =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">one slot from <code>GET /recommendations</code>.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server"
+                  >Server (pure display) with a client button handler wrapper.</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">HeatmapGrid</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Day × hour grid where cell opacity/color encodes score; hover shows exact
+                score/confidence/sample size.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>cells: { dayOfWeek, hour, score, confidence, sampleSize }[]</code>,
+                <code>onHoverCell?: (cell) =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">hovered-cell id (for tooltip).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >heatmap array from <code>GET /recommendations</code>.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client (hover tooltip).</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"
+                ><span class="reuse-badge badge-false">No</span>, though the underlying "scored
+                grid" rendering approach could generalize.</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">PlatformTabs</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >YouTube / TikTok / Combined tab switcher above the heatmap.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>value: 'youtube'|'tiktok'|'combined'</code>, <code>onChange</code>,
+                <code>disabledTabs?: string[]</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >current tab, and which tabs are disabled (e.g. Combined when &lt;2 platforms
+                connected).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value"
+                >true as a tab shell (built on shared <code>Tabs</code>), domain values passed in as
+                props.</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">CalculationExplainer</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Plain-language "how this is calculated" panel — explains the scoring/confidence
+                methodology, builds trust in the heuristic.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>methodologyText: string</code>, <code>isColdStart: boolean</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">expand/collapse (if long).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">static copy + cold-start flag.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server"
+                  >Server, with a client collapse toggle if needed.</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">RecommendedActionsList</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >2–3 templated action rows ("Schedule your next post for Thu 7pm") with one-click
+                buttons (schedule / apply-to-draft / export).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>actions: { id: string; label: string; onClick: () =&gt; void }[]</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value"
+                >loading state per action while its click handler runs.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >templated action definitions built server-side from the current recommendation
+                set.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+        </div>
+        <h2 class="domain-title">8. Account / Integration Components</h2>
+        <div class="domain-body">
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">ConnectionCard</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >One connected platform's card — avatar/handle, status badge, capability chips,
+                last-synced time, connect/reconnect/disconnect/test actions.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>account: SocialAccount</code>, <code>onConnect</code>,
+                <code>onReconnect</code>, <code>onDisconnect</code>, <code>onTest</code>,
+                <code>testResult?: {ok: boolean; error?: string} | null</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value"
+                >test-in-progress spinner, disconnect-confirm sub-dialog.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">account object from <code>GET /accounts</code>.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client (action handlers).</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">ComingSoonPlatformCard</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Static, non-interactive card signaling a future integration (Instagram, LinkedIn,
+                X, Facebook).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>platformName: string</code>, <code>icon: ReactNode</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >static roadmap list (hardcoded config, not an API call).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server">Server.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"
+                ><span class="reuse-badge badge-true">Yes</span> (generic "coming soon" tile
+                pattern).</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">OAuthConnectButton</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Button that kicks off the OAuth redirect flow for a given provider.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>provider: 'youtube'|'tiktok'</code>, <code>label: string</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none (triggers a full-page navigation, not a fetch).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">provider identity.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Server or client</span
+              ><span class="field-value"
+                >Client (needs the click handler / <code>window.location</code> navigation).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value">false, built on the shared <code>Button</code>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">AccountHealthBadge</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Small colored badge summarizing account status (<code>active</code> /
+                <code>needs_review</code> / <code>disconnected</code>) used on ConnectionCard and in
+                Settings/Dashboard banners.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>status: 'active'|'needs_review'|'disconnected'</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">status string.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server">Server.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value"
+                >false (values are domain-specific), though it's a thin wrapper over the reusable
+                <code>Badge</code>.</span
+              >
+            </div>
+          </div>
+        </div>
+        <h2 class="domain-title">9. Settings Components</h2>
+        <div class="domain-body">
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">SettingsTabList</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Left-hand vertical tab list for Settings (Profile, Workspace, Team, Notifications,
+                Billing, Publishing Defaults, Timezone, AI Recommendations).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>tabs: {id, label}[]</code>, <code>activeTab: string</code>,
+                <code>onChange: (id) =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">tab config (static) + active tab (URL-synced).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value"
+                >true as a vertical-tabs shell (built on shared <code>Tabs</code>).</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">ProfileForm</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Name, avatar, email, timezone fields for the current user.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>defaultValues: {name, email, avatarUrl, timezone}</code>,
+                <code>onSubmit: (values) =&gt; Promise&lt;void&gt;</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">react-hook-form state, save-in-progress.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">current user from <code>/me</code>.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">WorkspaceForm</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value">Workspace name/slug editing (owner/admin only).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>defaultValues: {name, slug}</code>, <code>onSubmit</code>,
+                <code>readOnly: boolean</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">form state, slug-availability check debounce.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >workspace record, current user's role (drives <code>readOnly</code>).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">TeamMembersTable</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >List of workspace members with role, invite/remove/change-role actions.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>members: {id, name, email, role}[]</code>,
+                <code>currentUserRole: string</code>, <code>onInvite</code>, <code>onRemove</code>,
+                <code>onChangeRole</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">invite-modal open state.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >member list from <code>GET /workspace/members</code>.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Server or client</span
+              ><span class="field-value"
+                >Client (row actions), built on the shared <code>Table</code>.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">NotificationPreferences</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Toggle list for notification types (publish success/fail, review requests, weekly
+                summary).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>preferences: Record&lt;string, boolean&gt;</code>,
+                <code>onChange: (key, value) =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none (fully controlled).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">current preference values.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value">false, built on the shared <code>Switch</code>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">BillingPanel</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Current plan summary and upgrade/downgrade entry point.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>plan: 'free'|'pro'|'agency'</code>,
+                <code>usage: {accountsConnected, limit}</code>,
+                <code>onManageBilling: () =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"><code>GET /billing</code> result.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server"
+                  >Server (static summary) with a client button for the billing-portal
+                  handoff.</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">PublishingDefaultsForm</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Default publish mode (draft/schedule/now) and "auto-apply recommended time"
+                toggle.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>defaultValues: {defaultMode, autoApplyRecommended}</code>,
+                <code>onSubmit</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">form state.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"><code>GET /settings/publishing</code> result.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-false">No</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">AITuningPanel</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Weighting sliders for the recommendation engine (engagement vs. views vs. watch
+                time) and history-window selector.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>weights: {engagement, views, watchTime}</code>,
+                <code>historyWindowDays: number</code>, <code>onChange</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value"
+                >local slider drag state before committing on release.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"><code>GET /settings/ai</code> result.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value"
+                >false, built on the shared <code>Slider</code>/<code>Select</code>.</span
+              >
+            </div>
+          </div>
+        </div>
+        <h2 class="domain-title">10. Shared Form Components</h2>
+        <div class="domain-body">
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">Button</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Primary/secondary/ghost/destructive button variants with loading and disabled
+                states, used everywhere.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>variant: 'primary'|'secondary'|'ghost'|'destructive'</code>,
+                <code>size: 'sm'|'md'|'lg'</code>, <code>loading?: boolean</code>,
+                <code>disabled?: boolean</code>, <code>onClick</code>, <code>children</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none (visual states are prop-driven).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Server or client</span
+              ><span class="field-value"
+                >Server-renderable; only needs <code>'use client'</code> when
+                <code>onClick</code> is attached directly (Next.js requires the boundary at the
+                interactive leaf).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-true">Yes</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">TextInput / TextArea</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Styled text field wrapping a native <code>input</code>/<code>textarea</code> with
+                label, helper text, and error state.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>label?: string</code>, <code>value</code>, <code>onChange</code>,
+                <code>error?: string</code>, <code>maxLength?: number</code>,
+                <code>placeholder?: string</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">focus state (for styling only).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">controlled value + validation error string.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client (controlled input).</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-true">Yes</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">Select</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Dropdown select (native or Radix-based) with label and error state.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>label?: string</code>, <code>value</code>, <code>onChange</code>,
+                <code>options: {value, label}[]</code>, <code>error?: string</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">open/closed dropdown state.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">options list, controlled value.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-true">Yes</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">DatePicker / TimePicker</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Calendar and time-of-day pickers used by ScheduleControl and Analytics date-range
+                filters.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>value: string | null</code>, <code>onChange</code>,
+                <code>minDate?: string</code>, <code>timezone?: string</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">popover open state, currently-displayed month.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">controlled value, min/max bounds.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-true">Yes</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">Toggle / Switch</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Boolean on/off control used throughout Settings and platform field panels (e.g.
+                made-for-kids, allow-duet).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>checked: boolean</code>, <code>onChange</code>, <code>label?: string</code>,
+                <code>disabled?: boolean</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">controlled checked state.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-true">Yes</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">Tabs</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Generic tab-strip primitive underlying CalendarViewSwitcher, PlatformTabs,
+                AnalyticsFilterBar platform tabs, SettingsTabList.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>items: {id, label}[]</code>, <code>value: string</code>,
+                <code>onChange</code>, <code>orientation?: 'horizontal'|'vertical'</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none (fully controlled; hover/focus styling only).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">tab list, active value.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-true">Yes</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">Modal / Dialog</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Centered overlay dialog for confirmations (disconnect account, delete post) and
+                small forms (invite teammate).</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>open: boolean</code>, <code>onClose</code>, <code>title: string</code>,
+                <code>children: ReactNode</code>, <code>footer?: ReactNode</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">focus-trap/escape-key handling (via Radix Dialog).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">open state, content.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-true">Yes</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">Sheet (Drawer)</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Slide-in side panel underlying PostDetailDrawer and MobileNavDrawer.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>open: boolean</code>, <code>onClose</code>,
+                <code>side: 'left'|'right'</code>, <code>children: ReactNode</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">slide animation state.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">open state, content.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-true">Yes</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">Toast</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Transient notification for mutation success/failure (e.g. "Post scheduled", "Failed
+                to disconnect account").</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>message: string</code>, <code>variant: 'success'|'error'|'info'</code>,
+                <code>duration?: number</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">auto-dismiss timer.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value"
+                >triggered imperatively from a global toast manager/hook, not passed as a prop
+                tree.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-client">Client.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-true">Yes</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">Skeleton</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Loading placeholder shape (card/row/chart outline) shown while data is in
+                flight.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>variant: 'card'|'row'|'chart'|'text'</code>,
+                <code>count?: number</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">shimmer animation (CSS-only).</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server"
+                  >Server-renderable (pure CSS animation, no JS needed).</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-true">Yes</span>.</span>
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title">
+              <span class="comp-name">PlatformBadge / StatusBadge</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Small colored pill labeling a platform (YouTube/TikTok) or a post/account
+                status.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>type: 'platform'|'status'</code>, <code>value: string</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">the platform or status value.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server">Server.</span></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable globally</span
+              ><span class="field-value"
+                >true as the underlying <code>Badge</code> primitive; the platform/status
+                color-mapping layer on top is domain-specific.</span
+              >
+            </div>
+          </div>
+          <div class="endpoint-card">
+            <div class="endpoint-title"><span class="comp-name">EmptyState</span></div>
+            <div class="field-row">
+              <span class="field-label">Purpose</span
+              ><span class="field-value"
+                >Standard "nothing here yet" block — icon, message, primary CTA — used across
+                Dashboard, Library, Calendar, Analytics, Accounts.</span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Props</span
+              ><span class="field-value"
+                ><code>icon: ReactNode</code>, <code>title: string</code>,
+                <code>description?: string</code>, <code>actionLabel?: string</code>,
+                <code>onAction?: () =&gt; void</code></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">State handled internally</span
+              ><span class="field-value">none.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Data passed from parent</span
+              ><span class="field-value">copy + action handler, varies per page.</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Rendering</span
+              ><span class="field-value"
+                ><span class="render-badge badge-server"
+                  >Server, with a client wrapper only around the action button.</span
+                ></span
+              >
+            </div>
+            <div class="field-row">
+              <span class="field-label">Reusable</span
+              ><span class="field-value"><span class="reuse-badge badge-true">Yes</span>.</span>
+            </div>
+          </div>
+        </div>
+        <h2 class="domain-title">Reuse Map (Cross-References)</h2>
+        <div class="domain-body">
+          <ul class="md-list">
+            <li><strong>StatCard</strong> → Dashboard + Analytics.</li>
+            <li><strong>TrendChartCard</strong> → Dashboard (PerformanceSnapshot) + Analytics.</li>
+            <li>
+              <strong>PlatformBadge / StatusBadge</strong> → PostChip, UpcomingPostsList,
+              PostPerformanceTable, ConnectionCard, TeamMembersTable (role badge reuses the same
+              shell with different colors).
+            </li>
+            <li>
+              <strong>Tabs</strong> → CalendarViewSwitcher, PlatformTabs, AnalyticsFilterBar,
+              SettingsTabList.
+            </li>
+            <li><strong>EmptyState</strong> → every list/grid page's zero-data condition.</li>
+            <li><strong>Sheet</strong> → PostDetailDrawer, MobileNavDrawer.</li>
+            <li>
+              <strong>Button / TextInput / Select / Toggle</strong> → every form in Composer and
+              Settings.
+            </li>
+          </ul>
+          <p class="para">
+            Building the 12 Shared Form Components first (Phase 1 of the roadmap) means every
+            subsequent domain component in groups 3–9 composes from an already-solid, consistent
+            base — this is the practical reason "Foundations" in the build roadmap includes the
+            component-library primitives before any domain page work starts.
+          </p>
+        </div>
+        <div class="footer">
+          <p>
+            PostPilot MVP Component Inventory &bull; Companion to Engineering Spec, Checklist &amp;
+            API Contract &bull; For internal engineering use
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div id="markdown-view" class="view hidden">
+      <div class="container">
+        <textarea id="markdown-content" readonly></textarea>
+      </div>
+    </div>
+
+    <script id="md-source" type="text/plain">
+      # PostPilot — MVP Frontend Component Inventory
+
+      **Companion to:** `PostPilot Engineering Spec` · `PostPilot Implementation Checklist` · `PostPilot API Contract`
+      **Stack:** Next.js 14+ App Router (React Server Components + Client Components), Tailwind + shadcn/ui primitives, TanStack Query, react-hook-form + Zod.
+
+      ---
+
+      ## Conventions
+
+      - **Server-rendered (RSC):** no `useState`/event handlers of its own; renders from props/fetched data; ships zero client JS for that component.
+      - **Client:** needs interactivity (`'use client'`) — forms, drag/drop, hover, live updates, local UI state.
+      - **Reusable globally:** true if this component has no PostPilot-domain assumptions baked in and could be lifted into any product's shared UI layer as-is (mostly the Shared Form Components group + a few structural pieces). Domain components (know about "platform", "post", "recommendation") are marked false even if used on 2+ pages — they're app-specific, not general-purpose.
+
+      ---
+
+      ## 1. Layout Components
+
+      ### AppShell
+      **Purpose:** Root authenticated layout — positions Sidebar, TopBar, and page content; owns the responsive breakpoint that collapses Sidebar to an icon rail.
+      **Props:** `children: ReactNode`
+      **State handled internally:** sidebar collapsed/expanded (persisted to localStorage), mobile drawer open/closed.
+      **Data passed from parent:** none — mounted once at `/app/layout.tsx`.
+      **Server or client:** Server shell wrapping a Client boundary for the collapse/drawer state.
+      **Reusable globally:** false (assumes Sidebar/TopBar composition specific to this app).
+
+      ### Sidebar
+      **Purpose:** Primary left navigation — route links, workspace switcher, collapse toggle.
+      **Props:** `activeRoute: string`, `collapsed: boolean`, `onToggleCollapse: () => void`
+      **State handled internally:** hover states on nav items (CSS-only where possible).
+      **Data passed from parent:** current route (from Next.js `usePathname`), workspace list (from `/me`).
+      **Server or client:** Client (interactive toggle, active-route highlighting).
+      **Reusable globally:** false.
+
+      ### TopBar
+      **Purpose:** Page title, contextual primary action (e.g. "Create Post" button), user avatar menu.
+      **Props:** `title: string`, `primaryAction?: { label: string; onClick: () => void }`
+      **State handled internally:** avatar dropdown open/closed.
+      **Data passed from parent:** page title (set per-route), current user (avatar/name).
+      **Server or client:** Client (dropdown interactivity).
+      **Reusable globally:** false (composition is app-specific; the dropdown itself could be extracted — see `Popover` in Shared).
+
+      ### PageContainer
+      **Purpose:** Consistent max-width, padding, and vertical rhythm wrapper for every route's content.
+      **Props:** `children: ReactNode`, `maxWidth?: 'md'|'lg'|'xl'`
+      **State handled internally:** none.
+      **Data passed from parent:** none.
+      **Server or client:** Server.
+      **Reusable globally:** true — pure layout primitive, no domain logic.
+
+      ### SectionCard
+      **Purpose:** The generic white bordered-card wrapper used to group content within a page (KPI rows, panels, tables all sit inside one of these).
+      **Props:** `title?: string`, `subtitle?: string`, `actions?: ReactNode`, `children: ReactNode`
+      **State handled internally:** none.
+      **Data passed from parent:** none.
+      **Server or client:** Server.
+      **Reusable globally:** true.
+
+      ---
+
+      ## 2. Navigation Components
+
+      ### SidebarNavItem
+      **Purpose:** A single route link in the Sidebar — icon, label, active-state styling, optional badge (e.g. "needs review" count).
+      **Props:** `href: string`, `icon: ReactNode`, `label: string`, `active: boolean`, `badgeCount?: number`
+      **State handled internally:** none (active state is a prop, driven by the parent's route check).
+      **Data passed from parent:** `active` boolean, badge count (from workspace-level counts query).
+      **Server or client:** Server-renderable, but typically lives inside the Client Sidebar tree.
+      **Reusable globally:** true (generic nav-item pattern).
+
+      ### WorkspaceSwitcher
+      **Purpose:** Dropdown to switch the active workspace (multi-workspace users) and jump to "Create workspace."
+      **Props:** `workspaces: {id, name}[]`, `activeWorkspaceId: string`, `onSwitch: (id: string) => void`
+      **State handled internally:** open/closed dropdown state.
+      **Data passed from parent:** workspace list + active id from `/me`.
+      **Server or client:** Client.
+      **Reusable globally:** false (workspace concept is app-specific), though the underlying dropdown shell is generic.
+
+      ### MobileNavDrawer
+      **Purpose:** Slide-in nav drawer replacing the Sidebar under the mobile breakpoint.
+      **Props:** `open: boolean`, `onClose: () => void`, `children: ReactNode` (reuses SidebarNavItem list)
+      **State handled internally:** open animation state.
+      **Data passed from parent:** same nav data as Sidebar.
+      **Server or client:** Client.
+      **Reusable globally:** true as a drawer shell (pairs with the shared `Sheet` primitive), but the nav content it wraps is app-specific.
+
+      ### Breadcrumbs
+      **Purpose:** Shows the path back to a list view from a detail screen (e.g. Library → Post Detail).
+      **Props:** `items: { label: string; href?: string }[]`
+      **State handled internally:** none.
+      **Data passed from parent:** breadcrumb trail computed per-route.
+      **Server or client:** Server.
+      **Reusable globally:** true.
+
+      ---
+
+      ## 3. Dashboard Components
+
+      ### StatCard
+      **Purpose:** A single KPI tile (label, big number, optional delta vs. previous period). Used on both Dashboard and Analytics.
+      **Props:** `label: string`, `value: string | number`, `delta?: number`, `format?: 'number'|'percent'|'compact'`, `loading?: boolean`
+      **State handled internally:** none.
+      **Data passed from parent:** the raw KPI value + delta from `/analytics/overview` or `/calendar`.
+      **Server or client:** Server (pure display), with a client `Skeleton` swapped in while `loading`.
+      **Reusable globally:** true — generic metric-tile pattern, no PostPilot-specific assumptions.
+
+      ### BestTimeHero
+      **Purpose:** The 3-slot "best time to post" callout (YouTube / TikTok / Combined) with confidence + CTA, shown on Dashboard and mirrored (larger) on Recommendations.
+      **Props:** `slots: { platform: 'youtube'|'tiktok'|'combined'; dayOfWeek: number; hour: number; confidence: number; isColdStart: boolean }[]`, `onApply: (slot) => void`
+      **State handled internally:** hover/focus states on each slot card.
+      **Data passed from parent:** resolved slots from `GET /recommendations`.
+      **Server or client:** Client (click handler triggers navigation/composer prefill).
+      **Reusable globally:** false.
+
+      ### UpcomingPostsList
+      **Purpose:** Compact list of the next scheduled posts with thumbnail, time, platform badges, status.
+      **Props:** `posts: PostSummary[]`, `onSelect: (postId: string) => void`
+      **State handled internally:** none.
+      **Data passed from parent:** `GET /posts?status=scheduled&limit=5` result.
+      **Server or client:** Server list, client-wrapped only for the row click handler.
+      **Reusable globally:** false.
+
+      ### PerformanceSnapshot
+      **Purpose:** Small views-trend chart + "top post" + "top day" callouts summarizing recent performance on the Dashboard (lighter version of the full Analytics page).
+      **Props:** `series: {date: string; value: number}[]`, `topPost: PostSummary | null`, `topDay: string | null`
+      **State handled internally:** chart hover tooltip state (delegated to Recharts internals).
+      **Data passed from parent:** `GET /analytics/timeseries` + `GET /analytics/posts?sort=views&limit=1`.
+      **Server or client:** Client (chart library requires it).
+      **Reusable globally:** false (composition specific), though it wraps the reusable `TrendChartCard`.
+
+      ### QuickInsightsPanel
+      **Purpose:** 2–3 rule-derived insight strings ("Your TikTok engagement is up 12% this week") with light iconography — not a chat interface.
+      **Props:** `insights: { icon: ReactNode; text: string }[]`
+      **State handled internally:** none.
+      **Data passed from parent:** computed insight strings (derived server-side from analytics deltas).
+      **Server or client:** Server.
+      **Reusable globally:** false.
+
+      ---
+
+      ## 4. Composer Components
+
+      ### MediaDropzone
+      **Purpose:** Drag-and-drop / click-to-upload target for the post's video, with progress bar and thumbnail preview once processed.
+      **Props:** `mediaAsset: MediaAsset | null`, `onUploadStart: (file: File) => void`, `uploadProgress: number`, `status: 'idle'|'uploading'|'processing'|'ready'|'failed'`
+      **State handled internally:** drag-over highlight state.
+      **Data passed from parent:** current media asset (if editing existing draft), upload progress from the uppy/tus instance owned by the parent's logic hook.
+      **Server or client:** Client (drag/drop + file APIs).
+      **Reusable globally:** false (tightly coupled to the presign/complete upload flow), though the drag-over visual shell is a common pattern.
+
+      ### BaseContentForm
+      **Purpose:** The platform-agnostic fields — internal title, base caption, tags, campaign.
+      **Props:** `defaultValues: {internalTitle, baseCaption, tags, campaign}`, `onChange: (values) => void`
+      **State handled internally:** react-hook-form field state + validation errors.
+      **Data passed from parent:** draft defaults when editing.
+      **Server or client:** Client (form state).
+      **Reusable globally:** false (field set is domain-specific), but built from reusable `TextInput`/`TextArea`/`TagInput`.
+
+      ### PlatformSelector
+      **Purpose:** Toggle cards for YouTube/TikTok — turning a platform on reveals its field panel and preview tab.
+      **Props:** `connectedAccounts: SocialAccount[]`, `selected: string[]`, `onToggle: (accountId: string) => void`
+      **State handled internally:** none (fully controlled).
+      **Data passed from parent:** connected accounts list, current selection.
+      **Server or client:** Client.
+      **Reusable globally:** false.
+
+      ### PlatformFieldPanel
+      **Purpose:** Per-platform override fields — YouTube (title/description/visibility/made-for-kids/tags/thumbnail) or TikTok (caption/privacy/duet/stitch/comments), rendered as a tab or accordion section.
+      **Props:** `platform: 'youtube'|'tiktok'`, `values: PlatformOverrides`, `onChange: (values) => void`, `characterLimits: {field: string; max: number}[]`
+      **State handled internally:** local field focus/touched state for inline validation display.
+      **Data passed from parent:** current override values, platform char/field limits (static config).
+      **Server or client:** Client.
+      **Reusable globally:** false.
+
+      ### SmartAdaptationPanel
+      **Purpose:** Surfaces non-blocking warnings and one-click suggestions ("Shorten TikTok caption", "Add hashtags", "YouTube title missing").
+      **Props:** `warnings: { id: string; severity: 'warning'; message: string; fixLabel?: string; onFix?: () => void }[]`
+      **State handled internally:** dismissed-warning ids (session-only).
+      **Data passed from parent:** warnings computed from current form values by the parent's validation hook.
+      **Server or client:** Client.
+      **Reusable globally:** false, though the visual "warning row with a fix button" shell is a reusable pattern worth extracting later.
+
+      ### ScheduleControl
+      **Purpose:** Now / Draft / Schedule mode picker; date/time/timezone inputs; "use recommended time" shortcut.
+      **Props:** `mode: 'now'|'draft'|'schedule'`, `scheduledAt: string | null`, `timezone: string`, `recommendedSlot: {dayOfWeek, hour, confidence} | null`, `onChange: (patch) => void`
+      **State handled internally:** date-picker popover open/closed.
+      **Data passed from parent:** recommended slot (from `/recommendations`), workspace default timezone.
+      **Server or client:** Client.
+      **Reusable globally:** false (built on the reusable `DatePicker`/`TimePicker` shared components).
+
+      ### PlatformPreview
+      **Purpose:** Renders a mocked YouTube or TikTok post preview so the user sees roughly what will publish; switchable between connected platforms.
+      **Props:** `platform: 'youtube'|'tiktok'`, `content: { title, caption, thumbnailUrl, channelName }`
+      **State handled internally:** none (pure render of whichever platform tab is active, tab state owned by parent).
+      **Data passed from parent:** merged base + override content per platform.
+      **Server or client:** Server-renderable (static preview markup), likely rendered inside a client tab container.
+      **Reusable globally:** false.
+
+      ### ComposerFooterActions
+      **Purpose:** Sticky footer bar with Save Draft / Schedule / Publish Now buttons, showing validation-blocked state.
+      **Props:** `canPublish: boolean`, `isSaving: boolean`, `onSaveDraft`, `onSchedule`, `onPublishNow`
+      **State handled internally:** none.
+      **Data passed from parent:** aggregate validation result from the composer's form state.
+      **Server or client:** Client.
+      **Reusable globally:** false, built from the shared `Button`.
+
+      ---
+
+      ## 5. Calendar Components
+
+      ### CalendarGrid
+      **Purpose:** Renders the month/week/agenda grid of days, each containing that day's `PostChip`s; owns the drag-and-drop reordering logic.
+      **Props:** `view: 'month'|'week'|'agenda'`, `days: { date: string; posts: PostSummary[] }[]`, `onDropPost: (postId, newDate) => void`, `highlightedSlots?: {dayOfWeek, hour}[]`
+      **State handled internally:** drag source/target tracking, optimistic post position during drag.
+      **Data passed from parent:** `GET /calendar` result for the visible range, recommendation heatmap for highlighting.
+      **Server or client:** Client (drag/drop).
+      **Reusable globally:** false.
+
+      ### CalendarViewSwitcher
+      **Purpose:** Month / Week / Agenda tab control.
+      **Props:** `value: 'month'|'week'|'agenda'`, `onChange: (view) => void`
+      **State handled internally:** none.
+      **Data passed from parent:** current view (often synced to URL search param by parent).
+      **Server or client:** Client.
+      **Reusable globally:** true (generic tri-state tab switcher), built on the shared `Tabs` primitive.
+
+      ### CalendarFilterBar
+      **Purpose:** Platform/status/campaign filter controls above the grid.
+      **Props:** `filters: {platform?, status?, campaign?}`, `onChange: (filters) => void`, `campaignOptions: string[]`
+      **State handled internally:** none (controlled; syncs to URL params in parent).
+      **Data passed from parent:** available campaign values (from a lightweight facet query).
+      **Server or client:** Client.
+      **Reusable globally:** false.
+
+      ### PostChip
+      **Purpose:** The small draggable pill representing one scheduled post inside a day cell — thumbnail sliver, time, platform badge, status color.
+      **Props:** `post: PostSummary`, `draggable: boolean`, `onClick: () => void`
+      **State handled internally:** drag-active visual state.
+      **Data passed from parent:** post summary fields.
+      **Server or client:** Client (drag handle + click).
+      **Reusable globally:** false.
+
+      ### PostDetailDrawer
+      **Purpose:** Side drawer opened from a PostChip click — larger preview, scheduled time, target platforms, Edit/Duplicate/Cancel actions.
+      **Props:** `post: PostDetail | null`, `open: boolean`, `onClose`, `onEdit`, `onDuplicate`, `onCancel`
+      **State handled internally:** confirm-cancel sub-dialog state.
+      **Data passed from parent:** full post detail from `GET /posts/:id`.
+      **Server or client:** Client (drawer open state, action handlers).
+      **Reusable globally:** false, built on the shared `Sheet` primitive.
+
+      ### RecommendedWindowOverlay
+      **Purpose:** Subtle background tint on calendar cells/hours that fall within a high-confidence recommended posting window.
+      **Props:** `slots: {dayOfWeek, hour, score}[]`, `view: 'month'|'week'`
+      **State handled internally:** none.
+      **Data passed from parent:** recommendation heatmap subset relevant to the visible range.
+      **Server or client:** Server (pure conditional styling).
+      **Reusable globally:** false.
+
+      ---
+
+      ## 6. Analytics Components
+
+      ### AnalyticsFilterBar
+      **Purpose:** Platform tabs + date-range picker + compare-to-previous toggle above the Analytics dashboard.
+      **Props:** `platform: 'all'|'youtube'|'tiktok'`, `range: {from, to}`, `compare: boolean`, `onChange: (patch) => void`
+      **State handled internally:** date-range popover open state.
+      **Data passed from parent:** current filter values (URL-synced).
+      **Server or client:** Client.
+      **Reusable globally:** false, built on shared `Tabs`/`DateRangePicker`.
+
+      ### TrendChartCard
+      **Purpose:** Titled card wrapping a line/bar chart for a single metric over time (used for both views and engagement, on Dashboard and Analytics).
+      **Props:** `title: string`, `series: {date, value}[]`, `metricFormat: 'number'|'percent'`, `loading?: boolean`
+      **State handled internally:** chart tooltip hover (Recharts-internal).
+      **Data passed from parent:** `GET /analytics/timeseries` result.
+      **Server or client:** Client (charting library).
+      **Reusable globally:** true — generic time-series chart card, no PostPilot-specific logic beyond the data shape.
+
+      ### PlatformComparisonBar
+      **Purpose:** Horizontal bar comparing totals (e.g. views) between YouTube and TikTok for the selected period.
+      **Props:** `data: { platform: 'youtube'|'tiktok'; value: number }[]`, `metricLabel: string`
+      **State handled internally:** none.
+      **Data passed from parent:** `GET /analytics/overview` per-platform breakdown.
+      **Server or client:** Client (uses the same chart library as TrendChartCard for consistent rendering).
+      **Reusable globally:** false (assumes exactly the two-platform PostPilot shape today).
+
+      ### PostPerformanceTable
+      **Purpose:** Sortable, paginated table of individual posts with views/likes/comments/shares/engagement/status.
+      **Props:** `rows: PostPerformanceRow[]`, `sort: {field, order}`, `onSortChange`, `onRowClick: (postId) => void`, `nextCursor: string | null`, `onLoadMore`
+      **State handled internally:** none beyond hover-row styling (sort/pagination are controlled by parent, URL-synced).
+      **Data passed from parent:** `GET /analytics/posts` page.
+      **Server or client:** Client (sort/click interactivity), built on the shared `Table` primitive.
+      **Reusable globally:** false, though it's a thin domain wrapper over the reusable `Table`.
+
+      ---
+
+      ## 7. Recommendation Components
+
+      ### BestTimeCard
+      **Purpose:** Single hero card showing one platform's (or Combined's) best slot, confidence, and sample size, with an action button.
+      **Props:** `platform: 'youtube'|'tiktok'|'combined'`, `dayOfWeek: number`, `hour: number`, `confidence: number`, `sampleSize: number`, `isColdStart: boolean`, `onAction: () => void`
+      **State handled internally:** none.
+      **Data passed from parent:** one slot from `GET /recommendations`.
+      **Server or client:** Server (pure display) with a client button handler wrapper.
+      **Reusable globally:** false.
+
+      ### HeatmapGrid
+      **Purpose:** Day × hour grid where cell opacity/color encodes score; hover shows exact score/confidence/sample size.
+      **Props:** `cells: { dayOfWeek, hour, score, confidence, sampleSize }[]`, `onHoverCell?: (cell) => void`
+      **State handled internally:** hovered-cell id (for tooltip).
+      **Data passed from parent:** heatmap array from `GET /recommendations`.
+      **Server or client:** Client (hover tooltip).
+      **Reusable globally:** false, though the underlying "scored grid" rendering approach could generalize.
+
+      ### PlatformTabs
+      **Purpose:** YouTube / TikTok / Combined tab switcher above the heatmap.
+      **Props:** `value: 'youtube'|'tiktok'|'combined'`, `onChange`, `disabledTabs?: string[]`
+      **State handled internally:** none.
+      **Data passed from parent:** current tab, and which tabs are disabled (e.g. Combined when <2 platforms connected).
+      **Server or client:** Client.
+      **Reusable globally:** true as a tab shell (built on shared `Tabs`), domain values passed in as props.
+
+      ### CalculationExplainer
+      **Purpose:** Plain-language "how this is calculated" panel — explains the scoring/confidence methodology, builds trust in the heuristic.
+      **Props:** `methodologyText: string`, `isColdStart: boolean`
+      **State handled internally:** expand/collapse (if long).
+      **Data passed from parent:** static copy + cold-start flag.
+      **Server or client:** Server, with a client collapse toggle if needed.
+      **Reusable globally:** false.
+
+      ### RecommendedActionsList
+      **Purpose:** 2–3 templated action rows ("Schedule your next post for Thu 7pm") with one-click buttons (schedule / apply-to-draft / export).
+      **Props:** `actions: { id: string; label: string; onClick: () => void }[]`
+      **State handled internally:** loading state per action while its click handler runs.
+      **Data passed from parent:** templated action definitions built server-side from the current recommendation set.
+      **Server or client:** Client.
+      **Reusable globally:** false.
+
+      ---
+
+      ## 8. Account / Integration Components
+
+      ### ConnectionCard
+      **Purpose:** One connected platform's card — avatar/handle, status badge, capability chips, last-synced time, connect/reconnect/disconnect/test actions.
+      **Props:** `account: SocialAccount`, `onConnect`, `onReconnect`, `onDisconnect`, `onTest`, `testResult?: {ok: boolean; error?: string} | null`
+      **State handled internally:** test-in-progress spinner, disconnect-confirm sub-dialog.
+      **Data passed from parent:** account object from `GET /accounts`.
+      **Server or client:** Client (action handlers).
+      **Reusable globally:** false.
+
+      ### ComingSoonPlatformCard
+      **Purpose:** Static, non-interactive card signaling a future integration (Instagram, LinkedIn, X, Facebook).
+      **Props:** `platformName: string`, `icon: ReactNode`
+      **State handled internally:** none.
+      **Data passed from parent:** static roadmap list (hardcoded config, not an API call).
+      **Server or client:** Server.
+      **Reusable globally:** true (generic "coming soon" tile pattern).
+
+      ### OAuthConnectButton
+      **Purpose:** Button that kicks off the OAuth redirect flow for a given provider.
+      **Props:** `provider: 'youtube'|'tiktok'`, `label: string`
+      **State handled internally:** none (triggers a full-page navigation, not a fetch).
+      **Data passed from parent:** provider identity.
+      **Server or client:** Client (needs the click handler / `window.location` navigation).
+      **Reusable globally:** false, built on the shared `Button`.
+
+      ### AccountHealthBadge
+      **Purpose:** Small colored badge summarizing account status (`active` / `needs_review` / `disconnected`) used on ConnectionCard and in Settings/Dashboard banners.
+      **Props:** `status: 'active'|'needs_review'|'disconnected'`
+      **State handled internally:** none.
+      **Data passed from parent:** status string.
+      **Server or client:** Server.
+      **Reusable globally:** false (values are domain-specific), though it's a thin wrapper over the reusable `Badge`.
+
+      ---
+
+      ## 9. Settings Components
+
+      ### SettingsTabList
+      **Purpose:** Left-hand vertical tab list for Settings (Profile, Workspace, Team, Notifications, Billing, Publishing Defaults, Timezone, AI Recommendations).
+      **Props:** `tabs: {id, label}[]`, `activeTab: string`, `onChange: (id) => void`
+      **State handled internally:** none.
+      **Data passed from parent:** tab config (static) + active tab (URL-synced).
+      **Server or client:** Client.
+      **Reusable globally:** true as a vertical-tabs shell (built on shared `Tabs`).
+
+      ### ProfileForm
+      **Purpose:** Name, avatar, email, timezone fields for the current user.
+      **Props:** `defaultValues: {name, email, avatarUrl, timezone}`, `onSubmit: (values) => Promise<void>`
+      **State handled internally:** react-hook-form state, save-in-progress.
+      **Data passed from parent:** current user from `/me`.
+      **Server or client:** Client.
+      **Reusable globally:** false.
+
+      ### WorkspaceForm
+      **Purpose:** Workspace name/slug editing (owner/admin only).
+      **Props:** `defaultValues: {name, slug}`, `onSubmit`, `readOnly: boolean`
+      **State handled internally:** form state, slug-availability check debounce.
+      **Data passed from parent:** workspace record, current user's role (drives `readOnly`).
+      **Server or client:** Client.
+      **Reusable globally:** false.
+
+      ### TeamMembersTable
+      **Purpose:** List of workspace members with role, invite/remove/change-role actions.
+      **Props:** `members: {id, name, email, role}[]`, `currentUserRole: string`, `onInvite`, `onRemove`, `onChangeRole`
+      **State handled internally:** invite-modal open state.
+      **Data passed from parent:** member list from `GET /workspace/members`.
+      **Server or client:** Client (row actions), built on the shared `Table`.
+      **Reusable globally:** false.
+
+      ### NotificationPreferences
+      **Purpose:** Toggle list for notification types (publish success/fail, review requests, weekly summary).
+      **Props:** `preferences: Record<string, boolean>`, `onChange: (key, value) => void`
+      **State handled internally:** none (fully controlled).
+      **Data passed from parent:** current preference values.
+      **Server or client:** Client.
+      **Reusable globally:** false, built on the shared `Switch`.
+
+      ### BillingPanel
+      **Purpose:** Current plan summary and upgrade/downgrade entry point.
+      **Props:** `plan: 'free'|'pro'|'agency'`, `usage: {accountsConnected, limit}`, `onManageBilling: () => void`
+      **State handled internally:** none.
+      **Data passed from parent:** `GET /billing` result.
+      **Server or client:** Server (static summary) with a client button for the billing-portal handoff.
+      **Reusable globally:** false.
+
+      ### PublishingDefaultsForm
+      **Purpose:** Default publish mode (draft/schedule/now) and "auto-apply recommended time" toggle.
+      **Props:** `defaultValues: {defaultMode, autoApplyRecommended}`, `onSubmit`
+      **State handled internally:** form state.
+      **Data passed from parent:** `GET /settings/publishing` result.
+      **Server or client:** Client.
+      **Reusable globally:** false.
+
+      ### AITuningPanel
+      **Purpose:** Weighting sliders for the recommendation engine (engagement vs. views vs. watch time) and history-window selector.
+      **Props:** `weights: {engagement, views, watchTime}`, `historyWindowDays: number`, `onChange`
+      **State handled internally:** local slider drag state before committing on release.
+      **Data passed from parent:** `GET /settings/ai` result.
+      **Server or client:** Client.
+      **Reusable globally:** false, built on the shared `Slider`/`Select`.
+
+      ---
+
+      ## 10. Shared Form Components
+
+      ### Button
+      **Purpose:** Primary/secondary/ghost/destructive button variants with loading and disabled states, used everywhere.
+      **Props:** `variant: 'primary'|'secondary'|'ghost'|'destructive'`, `size: 'sm'|'md'|'lg'`, `loading?: boolean`, `disabled?: boolean`, `onClick`, `children`
+      **State handled internally:** none (visual states are prop-driven).
+      **Data passed from parent:** none.
+      **Server or client:** Server-renderable; only needs `'use client'` when `onClick` is attached directly (Next.js requires the boundary at the interactive leaf).
+      **Reusable globally:** true.
+
+      ### TextInput / TextArea
+      **Purpose:** Styled text field wrapping a native `input`/`textarea` with label, helper text, and error state.
+      **Props:** `label?: string`, `value`, `onChange`, `error?: string`, `maxLength?: number`, `placeholder?: string`
+      **State handled internally:** focus state (for styling only).
+      **Data passed from parent:** controlled value + validation error string.
+      **Server or client:** Client (controlled input).
+      **Reusable globally:** true.
+
+      ### Select
+      **Purpose:** Dropdown select (native or Radix-based) with label and error state.
+      **Props:** `label?: string`, `value`, `onChange`, `options: {value, label}[]`, `error?: string`
+      **State handled internally:** open/closed dropdown state.
+      **Data passed from parent:** options list, controlled value.
+      **Server or client:** Client.
+      **Reusable globally:** true.
+
+      ### DatePicker / TimePicker
+      **Purpose:** Calendar and time-of-day pickers used by ScheduleControl and Analytics date-range filters.
+      **Props:** `value: string | null`, `onChange`, `minDate?: string`, `timezone?: string`
+      **State handled internally:** popover open state, currently-displayed month.
+      **Data passed from parent:** controlled value, min/max bounds.
+      **Server or client:** Client.
+      **Reusable globally:** true.
+
+      ### Toggle / Switch
+      **Purpose:** Boolean on/off control used throughout Settings and platform field panels (e.g. made-for-kids, allow-duet).
+      **Props:** `checked: boolean`, `onChange`, `label?: string`, `disabled?: boolean`
+      **State handled internally:** none.
+      **Data passed from parent:** controlled checked state.
+      **Server or client:** Client.
+      **Reusable globally:** true.
+
+      ### Tabs
+      **Purpose:** Generic tab-strip primitive underlying CalendarViewSwitcher, PlatformTabs, AnalyticsFilterBar platform tabs, SettingsTabList.
+      **Props:** `items: {id, label}[]`, `value: string`, `onChange`, `orientation?: 'horizontal'|'vertical'`
+      **State handled internally:** none (fully controlled; hover/focus styling only).
+      **Data passed from parent:** tab list, active value.
+      **Server or client:** Client.
+      **Reusable globally:** true.
+
+      ### Modal / Dialog
+      **Purpose:** Centered overlay dialog for confirmations (disconnect account, delete post) and small forms (invite teammate).
+      **Props:** `open: boolean`, `onClose`, `title: string`, `children: ReactNode`, `footer?: ReactNode`
+      **State handled internally:** focus-trap/escape-key handling (via Radix Dialog).
+      **Data passed from parent:** open state, content.
+      **Server or client:** Client.
+      **Reusable globally:** true.
+
+      ### Sheet (Drawer)
+      **Purpose:** Slide-in side panel underlying PostDetailDrawer and MobileNavDrawer.
+      **Props:** `open: boolean`, `onClose`, `side: 'left'|'right'`, `children: ReactNode`
+      **State handled internally:** slide animation state.
+      **Data passed from parent:** open state, content.
+      **Server or client:** Client.
+      **Reusable globally:** true.
+
+      ### Toast
+      **Purpose:** Transient notification for mutation success/failure (e.g. "Post scheduled", "Failed to disconnect account").
+      **Props:** `message: string`, `variant: 'success'|'error'|'info'`, `duration?: number`
+      **State handled internally:** auto-dismiss timer.
+      **Data passed from parent:** triggered imperatively from a global toast manager/hook, not passed as a prop tree.
+      **Server or client:** Client.
+      **Reusable globally:** true.
+
+      ### Skeleton
+      **Purpose:** Loading placeholder shape (card/row/chart outline) shown while data is in flight.
+      **Props:** `variant: 'card'|'row'|'chart'|'text'`, `count?: number`
+      **State handled internally:** shimmer animation (CSS-only).
+      **Data passed from parent:** none.
+      **Server or client:** Server-renderable (pure CSS animation, no JS needed).
+      **Reusable globally:** true.
+
+      ### PlatformBadge / StatusBadge
+      **Purpose:** Small colored pill labeling a platform (YouTube/TikTok) or a post/account status.
+      **Props:** `type: 'platform'|'status'`, `value: string`
+      **State handled internally:** none.
+      **Data passed from parent:** the platform or status value.
+      **Server or client:** Server.
+      **Reusable globally:** true as the underlying `Badge` primitive; the platform/status color-mapping layer on top is domain-specific.
+
+      ### EmptyState
+      **Purpose:** Standard "nothing here yet" block — icon, message, primary CTA — used across Dashboard, Library, Calendar, Analytics, Accounts.
+      **Props:** `icon: ReactNode`, `title: string`, `description?: string`, `actionLabel?: string`, `onAction?: () => void`
+      **State handled internally:** none.
+      **Data passed from parent:** copy + action handler, varies per page.
+      **Server or client:** Server, with a client wrapper only around the action button.
+      **Reusable globally:** true.
+
+      ---
+
+      ## Reuse Map (Cross-References)
+
+      - **StatCard** → Dashboard + Analytics.
+      - **TrendChartCard** → Dashboard (PerformanceSnapshot) + Analytics.
+      - **PlatformBadge / StatusBadge** → PostChip, UpcomingPostsList, PostPerformanceTable, ConnectionCard, TeamMembersTable (role badge reuses the same shell with different colors).
+      - **Tabs** → CalendarViewSwitcher, PlatformTabs, AnalyticsFilterBar, SettingsTabList.
+      - **EmptyState** → every list/grid page's zero-data condition.
+      - **Sheet** → PostDetailDrawer, MobileNavDrawer.
+      - **Button / TextInput / Select / Toggle** → every form in Composer and Settings.
+
+      Building the 12 Shared Form Components first (Phase 1 of the roadmap) means every subsequent domain component in groups 3–9 composes from an already-solid, consistent base — this is the practical reason "Foundations" in the build roadmap includes the component-library primitives before any domain page work starts.
+    </script>
+    <script>
+      document.getElementById("markdown-content").value =
+        document.getElementById("md-source").textContent;
+      function switchView(view) {
+        const htmlView = document.getElementById("html-view");
+        const markdownView = document.getElementById("markdown-view");
+        const buttons = document.querySelectorAll(".view-toggle button");
+        buttons.forEach((btn) => btn.classList.remove("active"));
+        if (view === "html") {
+          htmlView.classList.remove("hidden");
+          markdownView.classList.add("hidden");
+          buttons[0].classList.add("active");
+        } else {
+          htmlView.classList.add("hidden");
+          markdownView.classList.remove("hidden");
+          buttons[1].classList.add("active");
+        }
+      }
+    </script>
+  </body>
+</html>

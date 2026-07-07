@@ -1,0 +1,3489 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet data-dc-atomics>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
+        <style>
+          * {
+            box-sizing: border-box;
+          }
+          body {
+            margin: 0;
+            background: #faf9f7;
+          }
+          ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+          }
+          ::-webkit-scrollbar-thumb {
+            background: rgba(23, 24, 28, 0.14);
+            border-radius: 8px;
+          }
+          ::-webkit-scrollbar-track {
+            background: transparent;
+          }
+        </style>
+      </helmet>
+
+      <div
+        style="
+          display: flex;
+          width: 100%;
+          min-height: 100vh;
+          background: #faf9f7;
+          font-family: &quot;Inter&quot;, sans-serif;
+          color: #17181c;
+        "
+      >
+        <!-- ============ SIDEBAR ============ -->
+        <div
+          style="width:{{ sidebarWidth }}; flex-shrink:0; background:#fff; border-right:1px solid rgba(23,24,28,0.08); display:flex; flex-direction:column; position:sticky; top:0; height:100vh; transition:width 0.15s ease;"
+        >
+          <div
+            style="display:flex; align-items:center; gap:9px; padding:22px {{ sidebarPad }} 18px;"
+          >
+            <div
+              style="
+                width: 30px;
+                height: 30px;
+                border-radius: 9px;
+                background: #3d5afe;
+                position: relative;
+                flex-shrink: 0;
+              "
+            >
+              <div
+                style="
+                  position: absolute;
+                  left: 8px;
+                  top: 6px;
+                  width: 0;
+                  height: 0;
+                  border-top: 9px solid transparent;
+                  border-bottom: 9px solid transparent;
+                  border-left: 13px solid #fff;
+                "
+              ></div>
+            </div>
+            <sc-if value="{{ sidebarExpanded }}" hint-placeholder-val="{{ true }}">
+              <div
+                style="
+                  font-size: 16.5px;
+                  font-weight: 700;
+                  letter-spacing: -0.01em;
+                  white-space: nowrap;
+                "
+              >
+                PostPilot
+              </div>
+            </sc-if>
+          </div>
+
+          <div style="flex:1; overflow-y:auto; padding:8px {{ sidebarPad }};">
+            <sc-if value="{{ sidebarExpanded }}" hint-placeholder-val="{{ true }}">
+              <div
+                style="
+                  font-size: 11px;
+                  font-weight: 600;
+                  color: rgba(23, 24, 28, 0.38);
+                  letter-spacing: 0.06em;
+                  padding: 12px 10px 6px;
+                "
+              >
+                MAIN
+              </div>
+            </sc-if>
+
+            <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="8">
+              <div
+                onClick="{{ item.onClick }}"
+                style="{{ item.rowStyle }}"
+                style-hover="{{ item.rowHoverStyle }}"
+                title="{{ item.label }}"
+              >
+                <div style="{{ item.iconWrapStyle }}">
+                  <sc-if value="{{ item.iconType }}" hint-placeholder-val="dashboard">
+                    <div style="{{ item.iconInnerStyle }}"></div>
+                  </sc-if>
+                </div>
+                <sc-if value="{{ sidebarExpanded }}" hint-placeholder-val="{{ true }}">
+                  <div style="{{ item.labelStyle }}">{{ item.label }}</div>
+                  <sc-if value="{{ item.badge }}">
+                    <div
+                      style="
+                        margin-left: auto;
+                        font-size: 10.5px;
+                        font-weight: 700;
+                        background: #3d5afe;
+                        color: #fff;
+                        border-radius: 999px;
+                        padding: 1px 6px;
+                      "
+                    >
+                      {{ item.badge }}
+                    </div>
+                  </sc-if>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+
+          <div
+            style="padding:14px {{ sidebarPad }} 18px; border-top:1px solid rgba(23,24,28,0.07);"
+          >
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 8px;
+                border-radius: 10px;
+              "
+              style-hover="background:rgba(23,24,28,0.04);"
+            >
+              <div
+                style="
+                  width: 32px;
+                  height: 32px;
+                  border-radius: 9px;
+                  background: linear-gradient(135deg, #3d5afe, #7c5cff);
+                  flex-shrink: 0;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: #fff;
+                  font-size: 13px;
+                  font-weight: 700;
+                "
+              >
+                JM
+              </div>
+              <sc-if value="{{ sidebarExpanded }}" hint-placeholder-val="{{ true }}">
+                <div style="min-width: 0">
+                  <div
+                    style="
+                      font-size: 13px;
+                      font-weight: 600;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
+                    Jordan Marsh
+                  </div>
+                  <div
+                    style="
+                      font-size: 11.5px;
+                      color: rgba(23, 24, 28, 0.5);
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
+                    Solo Creator Plan
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ MAIN AREA ============ -->
+        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+          <!-- Top utility bar -->
+          <div
+            style="
+              height: 68px;
+              flex-shrink: 0;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 0 32px;
+              border-bottom: 1px solid rgba(23, 24, 28, 0.08);
+              background: #fff;
+              position: sticky;
+              top: 0;
+              z-index: 5;
+            "
+          >
+            <div style="font-size: 19px; font-weight: 700; letter-spacing: -0.01em">
+              {{ screenTitle }}
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 7px;
+                  padding: 8px 12px;
+                  border-radius: 9px;
+                  border: 1px solid rgba(23, 24, 28, 0.12);
+                  font-size: 13px;
+                  font-weight: 500;
+                  color: rgba(23, 24, 28, 0.7);
+                  cursor: pointer;
+                "
+              >
+                <span
+                  style="
+                    width: 7px;
+                    height: 7px;
+                    border-radius: 2px;
+                    border: 1.5px solid rgba(23, 24, 28, 0.5);
+                  "
+                ></span>
+                Last 30 days
+              </div>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 7px;
+                  padding: 8px 12px;
+                  border-radius: 9px;
+                  border: 1px solid rgba(23, 24, 28, 0.12);
+                  font-size: 13px;
+                  font-weight: 500;
+                  color: rgba(23, 24, 28, 0.7);
+                  cursor: pointer;
+                "
+              >
+                <div
+                  style="
+                    width: 16px;
+                    height: 16px;
+                    border-radius: 5px;
+                    background: linear-gradient(135deg, #3d5afe, #7c5cff);
+                  "
+                ></div>
+                Jordan's Workspace
+              </div>
+              <div
+                onClick="{{ goToCreate }}"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 7px;
+                  padding: 9px 16px;
+                  border-radius: 9px;
+                  background: #17181c;
+                  color: #fff;
+                  font-size: 13.5px;
+                  font-weight: 600;
+                  cursor: pointer;
+                "
+                style-hover="background:#000;"
+              >
+                <span style="font-size: 15px; line-height: 1">+</span> Create Post
+              </div>
+            </div>
+          </div>
+
+          <!-- Screen content -->
+          <div style="flex: 1; padding: 28px 32px 60px; overflow-y: auto">
+            <sc-if value="{{ isDashboard }}">
+              <div
+                data-screen-label="Dashboard"
+                style="display: flex; flex-direction: column; gap: 22px; max-width: 1360px"
+              >
+                <!-- KPI row -->
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px">
+                  <dc-import
+                    name="StatCard"
+                    label="Scheduled This Week"
+                    value="9"
+                    trend="+2"
+                    sublabel="across YouTube + TikTok"
+                    hint-size="100%,110px"
+                  ></dc-import>
+                  <dc-import
+                    name="StatCard"
+                    label="Published This Month"
+                    value="26"
+                    trend="+6"
+                    sublabel="vs 20 last month"
+                    hint-size="100%,110px"
+                  ></dc-import>
+                  <dc-import
+                    name="StatCard"
+                    label="Total Views"
+                    value="184.2K"
+                    trend="+14.8%"
+                    sublabel="last 30 days"
+                    hint-size="100%,110px"
+                  ></dc-import>
+                  <dc-import
+                    name="StatCard"
+                    label="Avg. Engagement Rate"
+                    value="7.9%"
+                    trend="+0.6pt"
+                    sublabel="last 30 days"
+                    hint-size="100%,110px"
+                  ></dc-import>
+                  <dc-import
+                    name="StatCard"
+                    label="Top Platform"
+                    value="TikTok"
+                    sublabel="61% of total views"
+                    hint-size="100%,110px"
+                  ></dc-import>
+                </div>
+
+                <!-- Best Time hero + Upcoming -->
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1.3fr 1fr;
+                    gap: 16px;
+                    align-items: stretch;
+                  "
+                >
+                  <div
+                    style="
+                      background: linear-gradient(135deg, #3d5afe 0%, #6c4cff 100%);
+                      border-radius: 16px;
+                      padding: 24px 26px;
+                      color: #fff;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 18px;
+                    "
+                  >
+                    <div style="display: flex; align-items: center; justify-content: space-between">
+                      <div style="display: flex; align-items: center; gap: 8px">
+                        <div
+                          style="width: 8px; height: 8px; border-radius: 50%; background: #fff"
+                        ></div>
+                        <div style="font-size: 13.5px; font-weight: 650; letter-spacing: 0.01em">
+                          Best Posting Time · based on last 90 days
+                        </div>
+                      </div>
+                      <div
+                        style="
+                          font-size: 11.5px;
+                          font-weight: 600;
+                          background: rgba(255, 255, 255, 0.18);
+                          padding: 4px 9px;
+                          border-radius: 999px;
+                        "
+                      >
+                        92% confidence
+                      </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px">
+                      <div
+                        style="
+                          background: rgba(255, 255, 255, 0.12);
+                          border-radius: 12px;
+                          padding: 14px 16px;
+                        "
+                      >
+                        <div
+                          style="
+                            font-size: 11.5px;
+                            font-weight: 600;
+                            opacity: 0.8;
+                            margin-bottom: 6px;
+                          "
+                        >
+                          YouTube
+                        </div>
+                        <div style="font-size: 19px; font-weight: 700">Tue · 6:00 PM</div>
+                      </div>
+                      <div
+                        style="
+                          background: rgba(255, 255, 255, 0.12);
+                          border-radius: 12px;
+                          padding: 14px 16px;
+                        "
+                      >
+                        <div
+                          style="
+                            font-size: 11.5px;
+                            font-weight: 600;
+                            opacity: 0.8;
+                            margin-bottom: 6px;
+                          "
+                        >
+                          TikTok
+                        </div>
+                        <div style="font-size: 19px; font-weight: 700">Thu · 8:15 PM</div>
+                      </div>
+                      <div
+                        style="
+                          background: rgba(255, 255, 255, 0.2);
+                          border-radius: 12px;
+                          padding: 14px 16px;
+                          border: 1px solid rgba(255, 255, 255, 0.35);
+                        "
+                      >
+                        <div
+                          style="
+                            font-size: 11.5px;
+                            font-weight: 600;
+                            opacity: 0.9;
+                            margin-bottom: 6px;
+                          "
+                        >
+                          Cross-Platform
+                        </div>
+                        <div style="font-size: 19px; font-weight: 700">Thu · 7:30 PM</div>
+                      </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: auto">
+                      <div
+                        onClick="{{ goToCreate }}"
+                        style="
+                          padding: 10px 16px;
+                          border-radius: 9px;
+                          background: #fff;
+                          color: #2a3ec4;
+                          font-size: 13.5px;
+                          font-weight: 650;
+                          cursor: pointer;
+                        "
+                        style-hover="background:rgba(255,255,255,0.9);"
+                      >
+                        Schedule for this time
+                      </div>
+                      <div
+                        onClick="{{ goToRecommendations }}"
+                        style="
+                          padding: 10px 16px;
+                          border-radius: 9px;
+                          background: rgba(255, 255, 255, 0.14);
+                          color: #fff;
+                          font-size: 13.5px;
+                          font-weight: 600;
+                          cursor: pointer;
+                          border: 1px solid rgba(255, 255, 255, 0.3);
+                        "
+                        style-hover="background:rgba(255,255,255,0.22);"
+                      >
+                        View all recommendations
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 20px 22px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 12px;
+                    "
+                  >
+                    <div style="display: flex; align-items: center; justify-content: space-between">
+                      <div style="font-size: 14.5px; font-weight: 650">Upcoming Posts</div>
+                      <div
+                        onClick="{{ goToCalendar }}"
+                        style="font-size: 12.5px; font-weight: 600; color: #3d5afe; cursor: pointer"
+                      >
+                        View calendar →
+                      </div>
+                    </div>
+                    <sc-for list="{{ upcomingPosts }}" as="post" hint-placeholder-count="3">
+                      <dc-import
+                        name="PostCard"
+                        title="{{ post.title }}"
+                        platforms="{{ post.platforms }}"
+                        scheduled-label="{{ post.scheduledLabel }}"
+                        status="{{ post.status }}"
+                        thumb-seed="{{ post.seed }}"
+                        thumb-label="{{ post.thumbLabel }}"
+                        hint-size="100%,80px"
+                      ></dc-import>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <!-- Performance snapshot + insights -->
+                <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px">
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 20px 22px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 16px;
+                    "
+                  >
+                    <div style="display: flex; align-items: center; justify-content: space-between">
+                      <div style="font-size: 14.5px; font-weight: 650">Performance Snapshot</div>
+                      <div
+                        onClick="{{ goToAnalytics }}"
+                        style="font-size: 12.5px; font-weight: 600; color: #3d5afe; cursor: pointer"
+                      >
+                        Full analytics →
+                      </div>
+                    </div>
+                    <div style="display: flex; align-items: flex-end; gap: 8px; height: 120px">
+                      <sc-for list="{{ viewBars }}" as="bar" hint-placeholder-count="12">
+                        <div
+                          style="
+                            flex: 1;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            gap: 6px;
+                            height: 100%;
+                            justify-content: flex-end;
+                          "
+                        >
+                          <div
+                            style="width:100%; max-width:22px; border-radius:5px 5px 2px 2px; background:{{ bar.color }}; height:{{ bar.height }};"
+                          ></div>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        border-top: 1px solid rgba(23, 24, 28, 0.07);
+                        padding-top: 14px;
+                      "
+                    >
+                      <div>
+                        <div
+                          style="
+                            font-size: 11.5px;
+                            color: rgba(23, 24, 28, 0.5);
+                            margin-bottom: 4px;
+                          "
+                        >
+                          Top post this month
+                        </div>
+                        <div style="font-size: 13px; font-weight: 600">
+                          "3 hooks that increased my watch time"
+                        </div>
+                      </div>
+                      <div>
+                        <div
+                          style="
+                            font-size: 11.5px;
+                            color: rgba(23, 24, 28, 0.5);
+                            margin-bottom: 4px;
+                          "
+                        >
+                          Top posting day
+                        </div>
+                        <div style="font-size: 13px; font-weight: 600">Thursday</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 20px 22px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 14px;
+                    "
+                  >
+                    <div style="display: flex; align-items: center; gap: 8px">
+                      <div
+                        style="
+                          width: 20px;
+                          height: 20px;
+                          border-radius: 6px;
+                          background: rgba(61, 90, 254, 0.1);
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                        "
+                      >
+                        <div
+                          style="width: 6px; height: 6px; border-radius: 50%; background: #3d5afe"
+                        ></div>
+                      </div>
+                      <div style="font-size: 14.5px; font-weight: 650">Quick Insights</div>
+                    </div>
+                    <sc-for list="{{ insights }}" as="note" hint-placeholder-count="3">
+                      <div
+                        style="
+                          padding: 12px 13px;
+                          background: #faf9f7;
+                          border-radius: 10px;
+                          font-size: 13px;
+                          line-height: 1.5;
+                          color: rgba(23, 24, 28, 0.8);
+                        "
+                      >
+                        {{ note }}
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isCreate }}">
+              <div
+                data-screen-label="Create Post"
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 380px;
+                  gap: 20px;
+                  max-width: 1360px;
+                  align-items: start;
+                "
+              >
+                <!-- LEFT: main composer -->
+                <div style="display: flex; flex-direction: column; gap: 18px; min-width: 0">
+                  <!-- Media upload -->
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 22px;
+                    "
+                  >
+                    <div style="font-size: 14.5px; font-weight: 650; margin-bottom: 14px">
+                      Media
+                    </div>
+                    <sc-if value="{{ hasMedia }}" hint-placeholder-val="{{ false }}">
+                      <div style="display: flex; gap: 14px; align-items: center">
+                        <div
+                          style="
+                            width: 96px;
+                            height: 96px;
+                            border-radius: 11px;
+                            flex-shrink: 0;
+                            background: #3d5afe;
+                            background-image: repeating-linear-gradient(
+                              135deg,
+                              rgba(255, 255, 255, 0.5) 0px,
+                              rgba(255, 255, 255, 0.5) 2px,
+                              transparent 2px,
+                              transparent 10px
+                            );
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                          "
+                        >
+                          <span
+                            style="
+                              font-family: &quot;IBM Plex Mono&quot;, monospace;
+                              font-size: 8px;
+                              color: rgba(255, 255, 255, 0.9);
+                              text-align: center;
+                              line-height: 1.4;
+                            "
+                            >VIDEO<br />THUMBNAIL</span
+                          >
+                        </div>
+                        <div style="flex: 1; min-width: 0">
+                          <div style="font-size: 13.5px; font-weight: 600; margin-bottom: 4px">
+                            edit-3x-faster-final.mp4
+                          </div>
+                          <div
+                            style="
+                              font-size: 12px;
+                              color: rgba(23, 24, 28, 0.5);
+                              margin-bottom: 10px;
+                            "
+                          >
+                            42.8 MB · 00:58 · 1080×1920
+                          </div>
+                          <div
+                            style="
+                              height: 6px;
+                              border-radius: 4px;
+                              background: rgba(23, 24, 28, 0.08);
+                              overflow: hidden;
+                            "
+                          >
+                            <div
+                              style="
+                                width: 100%;
+                                height: 100%;
+                                background: #0e9f6e;
+                                border-radius: 4px;
+                              "
+                            ></div>
+                          </div>
+                        </div>
+                        <div
+                          onClick="{{ clearMedia }}"
+                          style="
+                            font-size: 12.5px;
+                            font-weight: 600;
+                            color: rgba(23, 24, 28, 0.5);
+                            cursor: pointer;
+                            flex-shrink: 0;
+                          "
+                        >
+                          Remove
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ noMedia }}" hint-placeholder-val="{{ true }}">
+                      <div
+                        onClick="{{ setMedia }}"
+                        style="
+                          border: 1.5px dashed rgba(23, 24, 28, 0.18);
+                          border-radius: 12px;
+                          padding: 38px 20px;
+                          text-align: center;
+                          cursor: pointer;
+                          background: #faf9f7;
+                        "
+                        style-hover="border-color:#3D5AFE; background:rgba(61,90,254,0.03);"
+                      >
+                        <div
+                          style="
+                            width: 38px;
+                            height: 38px;
+                            border-radius: 10px;
+                            background: rgba(61, 90, 254, 0.09);
+                            margin: 0 auto 12px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                          "
+                        >
+                          <div
+                            style="
+                              width: 12px;
+                              height: 12px;
+                              border-radius: 50%;
+                              background:
+                                linear-gradient(#3d5afe, #3d5afe) center/8px 1.6px no-repeat,
+                                linear-gradient(#3d5afe, #3d5afe) center/1.6px 8px no-repeat;
+                            "
+                          ></div>
+                        </div>
+                        <div style="font-size: 13.5px; font-weight: 600; margin-bottom: 4px">
+                          Drag & drop your video, or click to upload
+                        </div>
+                        <div style="font-size: 12px; color: rgba(23, 24, 28, 0.45)">
+                          MP4, MOV up to 512MB · image/carousel support coming soon
+                        </div>
+                      </div>
+                    </sc-if>
+                  </div>
+
+                  <!-- Base content form -->
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 22px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 16px;
+                    "
+                  >
+                    <div style="font-size: 14.5px; font-weight: 650">Content Details</div>
+                    <div style="display: flex; flex-direction: column; gap: 6px">
+                      <div
+                        style="font-size: 12.5px; font-weight: 600; color: rgba(23, 24, 28, 0.6)"
+                      >
+                        Internal title
+                      </div>
+                      <div
+                        style="
+                          padding: 10px 12px;
+                          border: 1px solid rgba(23, 24, 28, 0.14);
+                          border-radius: 9px;
+                          font-size: 13.5px;
+                        "
+                      >
+                        3x Faster Editing Workflow — July drop
+                      </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px">
+                      <div
+                        style="font-size: 12.5px; font-weight: 600; color: rgba(23, 24, 28, 0.6)"
+                      >
+                        Caption / description
+                      </div>
+                      <div
+                        style="
+                          padding: 10px 12px;
+                          border: 1px solid rgba(23, 24, 28, 0.14);
+                          border-radius: 9px;
+                          font-size: 13.5px;
+                          line-height: 1.5;
+                          min-height: 70px;
+                          color: rgba(23, 24, 28, 0.85);
+                        "
+                      >
+                        Here's the exact editing workflow I use to cut my turnaround time by 3x —
+                        timestamps below 👇
+                      </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px">
+                      <div style="display: flex; flex-direction: column; gap: 6px">
+                        <div
+                          style="font-size: 12.5px; font-weight: 600; color: rgba(23, 24, 28, 0.6)"
+                        >
+                          Tags / labels
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px">
+                          <div
+                            style="
+                              padding: 5px 10px;
+                              background: #faf9f7;
+                              border-radius: 999px;
+                              font-size: 12px;
+                              font-weight: 600;
+                              color: rgba(23, 24, 28, 0.7);
+                            "
+                          >
+                            editing-tips
+                          </div>
+                          <div
+                            style="
+                              padding: 5px 10px;
+                              background: #faf9f7;
+                              border-radius: 999px;
+                              font-size: 12px;
+                              font-weight: 600;
+                              color: rgba(23, 24, 28, 0.7);
+                            "
+                          >
+                            workflow
+                          </div>
+                        </div>
+                      </div>
+                      <div style="display: flex; flex-direction: column; gap: 6px">
+                        <div
+                          style="font-size: 12.5px; font-weight: 600; color: rgba(23, 24, 28, 0.6)"
+                        >
+                          Campaign
+                        </div>
+                        <div
+                          style="
+                            padding: 10px 12px;
+                            border: 1px solid rgba(23, 24, 28, 0.14);
+                            border-radius: 9px;
+                            font-size: 13.5px;
+                            color: rgba(23, 24, 28, 0.85);
+                          "
+                        >
+                          Weekly Workflow Series
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Platform selection -->
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 22px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 14px;
+                    "
+                  >
+                    <div style="font-size: 14.5px; font-weight: 650">Publish To</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+                      <div onClick="{{ toggleYoutube }}" style="{{ youtubeCardStyle }}">
+                        <div
+                          style="
+                            width: 36px;
+                            height: 36px;
+                            border-radius: 10px;
+                            background: rgba(255, 59, 48, 0.1);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-shrink: 0;
+                          "
+                        >
+                          <div
+                            style="
+                              width: 0;
+                              height: 0;
+                              border-top: 6px solid transparent;
+                              border-bottom: 6px solid transparent;
+                              border-left: 9px solid #ff3b30;
+                            "
+                          ></div>
+                        </div>
+                        <div style="flex: 1; min-width: 0">
+                          <div style="font-size: 13.5px; font-weight: 650">YouTube</div>
+                          <div style="font-size: 12px; color: rgba(23, 24, 28, 0.5)">
+                            @jordanmarsh · connected
+                          </div>
+                        </div>
+                        <div style="{{ youtubeCheckStyle }}"></div>
+                      </div>
+                      <div onClick="{{ toggleTiktok }}" style="{{ tiktokCardStyle }}">
+                        <div
+                          style="
+                            width: 36px;
+                            height: 36px;
+                            border-radius: 10px;
+                            background: rgba(20, 21, 26, 0.08);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-shrink: 0;
+                          "
+                        >
+                          <div
+                            style="
+                              width: 12px;
+                              height: 12px;
+                              border-radius: 4px;
+                              background: #14151a;
+                            "
+                          ></div>
+                        </div>
+                        <div style="flex: 1; min-width: 0">
+                          <div style="font-size: 13.5px; font-weight: 650">TikTok</div>
+                          <div style="font-size: 12px; color: rgba(23, 24, 28, 0.5)">
+                            @jordan.marsh · connected
+                          </div>
+                        </div>
+                        <div style="{{ tiktokCheckStyle }}"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Platform customization tabs -->
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 0;
+                      overflow: hidden;
+                    "
+                  >
+                    <div style="display: flex; border-bottom: 1px solid rgba(23, 24, 28, 0.08)">
+                      <div onClick="{{ setTabYoutube }}" style="{{ ytTabStyle }}">
+                        YouTube settings
+                      </div>
+                      <div onClick="{{ setTabTiktok }}" style="{{ ttTabStyle }}">
+                        TikTok settings
+                      </div>
+                    </div>
+
+                    <sc-if value="{{ tabIsYoutube }}">
+                      <div style="padding: 22px; display: flex; flex-direction: column; gap: 16px">
+                        <div style="display: flex; flex-direction: column; gap: 6px">
+                          <div
+                            style="
+                              font-size: 12.5px;
+                              font-weight: 600;
+                              color: rgba(23, 24, 28, 0.6);
+                            "
+                          >
+                            Video title
+                          </div>
+                          <div
+                            style="
+                              padding: 10px 12px;
+                              border: 1px solid rgba(23, 24, 28, 0.14);
+                              border-radius: 9px;
+                              font-size: 13.5px;
+                            "
+                          >
+                            I Cut My Editing Time by 3x — Here's My Exact Workflow
+                          </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 6px">
+                          <div
+                            style="
+                              font-size: 12.5px;
+                              font-weight: 600;
+                              color: rgba(23, 24, 28, 0.6);
+                            "
+                          >
+                            Description
+                          </div>
+                          <div
+                            style="
+                              padding: 10px 12px;
+                              border: 1px solid rgba(23, 24, 28, 0.14);
+                              border-radius: 9px;
+                              font-size: 13.5px;
+                              line-height: 1.5;
+                              min-height: 60px;
+                              color: rgba(23, 24, 28, 0.85);
+                            "
+                          >
+                            In this video I break down the exact editing workflow, shortcuts, and
+                            plugins I use every week. Timestamps in the comments.
+                          </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px">
+                          <div style="display: flex; flex-direction: column; gap: 6px">
+                            <div
+                              style="
+                                font-size: 12.5px;
+                                font-weight: 600;
+                                color: rgba(23, 24, 28, 0.6);
+                              "
+                            >
+                              Visibility
+                            </div>
+                            <div
+                              style="
+                                padding: 10px 12px;
+                                border: 1px solid rgba(23, 24, 28, 0.14);
+                                border-radius: 9px;
+                                font-size: 13.5px;
+                              "
+                            >
+                              Public
+                            </div>
+                          </div>
+                          <div style="display: flex; flex-direction: column; gap: 6px">
+                            <div
+                              style="
+                                font-size: 12.5px;
+                                font-weight: 600;
+                                color: rgba(23, 24, 28, 0.6);
+                              "
+                            >
+                              Thumbnail
+                            </div>
+                            <div
+                              style="
+                                padding: 9px 12px;
+                                border: 1px dashed rgba(23, 24, 28, 0.2);
+                                border-radius: 9px;
+                                font-size: 12.5px;
+                                color: rgba(23, 24, 28, 0.5);
+                              "
+                            >
+                              Upload custom thumbnail
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            padding: 12px 14px;
+                            background: #faf9f7;
+                            border-radius: 10px;
+                          "
+                        >
+                          <div>
+                            <div style="font-size: 13px; font-weight: 600">Made for kids</div>
+                            <div style="font-size: 11.5px; color: rgba(23, 24, 28, 0.5)">
+                              Required by YouTube for all uploads
+                            </div>
+                          </div>
+                          <div
+                            style="
+                              width: 38px;
+                              height: 22px;
+                              border-radius: 999px;
+                              background: rgba(23, 24, 28, 0.15);
+                              position: relative;
+                            "
+                          >
+                            <div
+                              style="
+                                width: 16px;
+                                height: 16px;
+                                border-radius: 50%;
+                                background: #fff;
+                                position: absolute;
+                                top: 3px;
+                                left: 3px;
+                              "
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    </sc-if>
+
+                    <sc-if value="{{ tabIsTiktok }}">
+                      <div style="padding: 22px; display: flex; flex-direction: column; gap: 16px">
+                        <div style="display: flex; flex-direction: column; gap: 6px">
+                          <div
+                            style="
+                              display: flex;
+                              align-items: center;
+                              justify-content: space-between;
+                            "
+                          >
+                            <div
+                              style="
+                                font-size: 12.5px;
+                                font-weight: 600;
+                                color: rgba(23, 24, 28, 0.6);
+                              "
+                            >
+                              Caption
+                            </div>
+                            <div style="font-size: 11.5px; font-weight: 600; color: #c22f2f">
+                              128 / 150 chars
+                            </div>
+                          </div>
+                          <div
+                            style="
+                              padding: 10px 12px;
+                              border: 1px solid rgba(23, 24, 28, 0.14);
+                              border-radius: 9px;
+                              font-size: 13.5px;
+                              line-height: 1.5;
+                            "
+                          >
+                            Here's the exact editing workflow I use to cut my turnaround time by 3x
+                            — timestamps below 👇 #editingtips #contentcreator #workflow
+                          </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px">
+                          <div style="display: flex; flex-direction: column; gap: 6px">
+                            <div
+                              style="
+                                font-size: 12.5px;
+                                font-weight: 600;
+                                color: rgba(23, 24, 28, 0.6);
+                              "
+                            >
+                              Who can view this video
+                            </div>
+                            <div
+                              style="
+                                padding: 10px 12px;
+                                border: 1px solid rgba(23, 24, 28, 0.14);
+                                border-radius: 9px;
+                                font-size: 13.5px;
+                              "
+                            >
+                              Everyone
+                            </div>
+                          </div>
+                          <div style="display: flex; flex-direction: column; gap: 6px">
+                            <div
+                              style="
+                                font-size: 12.5px;
+                                font-weight: 600;
+                                color: rgba(23, 24, 28, 0.6);
+                              "
+                            >
+                              Allow
+                            </div>
+                            <div style="display: flex; gap: 8px">
+                              <div
+                                style="
+                                  padding: 6px 10px;
+                                  background: rgba(61, 90, 254, 0.08);
+                                  color: #2a3ec4;
+                                  border-radius: 999px;
+                                  font-size: 12px;
+                                  font-weight: 600;
+                                "
+                              >
+                                Comments
+                              </div>
+                              <div
+                                style="
+                                  padding: 6px 10px;
+                                  background: rgba(61, 90, 254, 0.08);
+                                  color: #2a3ec4;
+                                  border-radius: 999px;
+                                  font-size: 12px;
+                                  font-weight: 600;
+                                "
+                              >
+                                Duet
+                              </div>
+                              <div
+                                style="
+                                  padding: 6px 10px;
+                                  background: rgba(23, 24, 28, 0.06);
+                                  color: rgba(23, 24, 28, 0.5);
+                                  border-radius: 999px;
+                                  font-size: 12px;
+                                  font-weight: 600;
+                                "
+                              >
+                                Stitch
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </sc-if>
+                  </div>
+
+                  <!-- AI adaptation -->
+                  <div
+                    style="
+                      background: linear-gradient(
+                        135deg,
+                        rgba(61, 90, 254, 0.05),
+                        rgba(124, 92, 255, 0.05)
+                      );
+                      border: 1px solid rgba(61, 90, 254, 0.15);
+                      border-radius: 16px;
+                      padding: 20px 22px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 12px;
+                    "
+                  >
+                    <div style="display: flex; align-items: center; gap: 8px">
+                      <div
+                        style="
+                          width: 20px;
+                          height: 20px;
+                          border-radius: 6px;
+                          background: rgba(61, 90, 254, 0.14);
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                        "
+                      >
+                        <div
+                          style="width: 6px; height: 6px; border-radius: 50%; background: #3d5afe"
+                        ></div>
+                      </div>
+                      <div style="font-size: 14px; font-weight: 650">Smart Adaptation</div>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 11px 13px;
+                        background: #fff;
+                        border-radius: 10px;
+                        border: 1px solid rgba(23, 24, 28, 0.06);
+                      "
+                    >
+                      <div style="font-size: 13px; color: rgba(23, 24, 28, 0.8)">
+                        Shorten caption for TikTok's 150-char limit
+                      </div>
+                      <div
+                        style="font-size: 12px; font-weight: 650; color: #3d5afe; cursor: pointer"
+                      >
+                        Apply
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 11px 13px;
+                        background: #fff;
+                        border-radius: 10px;
+                        border: 1px solid rgba(23, 24, 28, 0.06);
+                      "
+                    >
+                      <div style="font-size: 13px; color: rgba(23, 24, 28, 0.8)">
+                        Add 3 trending hashtags for editing-tips niche
+                      </div>
+                      <div
+                        style="font-size: 12px; font-weight: 650; color: #3d5afe; cursor: pointer"
+                      >
+                        Apply
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        padding: 11px 13px;
+                        background: rgba(232, 162, 61, 0.1);
+                        border-radius: 10px;
+                      "
+                    >
+                      <div
+                        style="
+                          width: 6px;
+                          height: 6px;
+                          border-radius: 50%;
+                          background: #e8a23d;
+                          flex-shrink: 0;
+                        "
+                      ></div>
+                      <div style="font-size: 12.5px; color: #8a5a10">
+                        Same caption used on both platforms — TikTok engagement tends to drop 11%
+                        with YouTube-style long-form copy.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- RIGHT: schedule + preview -->
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                    position: sticky;
+                    top: 88px;
+                  "
+                >
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 20px 22px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 14px;
+                    "
+                  >
+                    <div style="font-size: 14.5px; font-weight: 650">Publish</div>
+                    <div
+                      style="display: flex; background: #faf9f7; border-radius: 10px; padding: 3px"
+                    >
+                      <div onClick="{{ setModeNow }}" style="{{ modeNowStyle }}">Now</div>
+                      <div onClick="{{ setModeDraft }}" style="{{ modeDraftStyle }}">Draft</div>
+                      <div onClick="{{ setModeSchedule }}" style="{{ modeScheduleStyle }}">
+                        Schedule
+                      </div>
+                    </div>
+
+                    <sc-if value="{{ modeIsSchedule }}">
+                      <div style="display: flex; flex-direction: column; gap: 10px">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+                          <div
+                            style="
+                              padding: 9px 11px;
+                              border: 1px solid rgba(23, 24, 28, 0.14);
+                              border-radius: 9px;
+                              font-size: 13px;
+                            "
+                          >
+                            Jul 9, 2026
+                          </div>
+                          <div
+                            style="
+                              padding: 9px 11px;
+                              border: 1px solid rgba(23, 24, 28, 0.14);
+                              border-radius: 9px;
+                              font-size: 13px;
+                            "
+                          >
+                            8:15 PM
+                          </div>
+                        </div>
+                        <div
+                          style="
+                            padding: 9px 11px;
+                            border: 1px solid rgba(23, 24, 28, 0.14);
+                            border-radius: 9px;
+                            font-size: 13px;
+                            color: rgba(23, 24, 28, 0.7);
+                          "
+                        >
+                          Eastern Time (ET)
+                        </div>
+                        <div
+                          onClick="{{ useRecommended }}"
+                          style="
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            padding: 11px 13px;
+                            background: rgba(61, 90, 254, 0.07);
+                            border-radius: 10px;
+                            cursor: pointer;
+                          "
+                        >
+                          <div
+                            style="
+                              width: 7px;
+                              height: 7px;
+                              border-radius: 50%;
+                              background: #3d5afe;
+                              flex-shrink: 0;
+                            "
+                          ></div>
+                          <div style="font-size: 12.5px; font-weight: 600; color: #2a3ec4">
+                            Use recommended best time — Thu 7:30 PM
+                          </div>
+                        </div>
+                      </div>
+                    </sc-if>
+
+                    <div
+                      style="
+                        border-top: 1px solid rgba(23, 24, 28, 0.07);
+                        padding-top: 14px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                      "
+                    >
+                      <div
+                        onClick="{{ publishAction }}"
+                        style="
+                          padding: 11px;
+                          border-radius: 10px;
+                          background: #17181c;
+                          color: #fff;
+                          text-align: center;
+                          font-size: 13.5px;
+                          font-weight: 650;
+                          cursor: pointer;
+                        "
+                        style-hover="background:#000;"
+                      >
+                        {{ publishLabel }}
+                      </div>
+                      <div
+                        style="
+                          padding: 11px;
+                          border-radius: 10px;
+                          border: 1px solid rgba(23, 24, 28, 0.14);
+                          color: rgba(23, 24, 28, 0.75);
+                          text-align: center;
+                          font-size: 13.5px;
+                          font-weight: 600;
+                          cursor: pointer;
+                        "
+                      >
+                        Save Draft
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 20px 22px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 14px;
+                    "
+                  >
+                    <div style="display: flex; align-items: center; justify-content: space-between">
+                      <div style="font-size: 14.5px; font-weight: 650">Preview</div>
+                      <div
+                        style="display: flex; background: #faf9f7; border-radius: 8px; padding: 3px"
+                      >
+                        <div onClick="{{ setPreviewYoutube }}" style="{{ previewYtStyle }}">YT</div>
+                        <div onClick="{{ setPreviewTiktok }}" style="{{ previewTtStyle }}">TT</div>
+                      </div>
+                    </div>
+
+                    <sc-if value="{{ previewIsYoutube }}">
+                      <div
+                        style="
+                          border-radius: 12px;
+                          overflow: hidden;
+                          border: 1px solid rgba(23, 24, 28, 0.08);
+                        "
+                      >
+                        <div
+                          style="
+                            width: 100%;
+                            aspect-ratio: 16/9;
+                            background: #3d5afe;
+                            background-image: repeating-linear-gradient(
+                              135deg,
+                              rgba(255, 255, 255, 0.5) 0px,
+                              rgba(255, 255, 255, 0.5) 2px,
+                              transparent 2px,
+                              transparent 10px
+                            );
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                          "
+                        >
+                          <span
+                            style="
+                              font-family: &quot;IBM Plex Mono&quot;, monospace;
+                              font-size: 9px;
+                              color: rgba(255, 255, 255, 0.9);
+                            "
+                            >VIDEO THUMBNAIL 16:9</span
+                          >
+                        </div>
+                        <div style="padding: 12px; display: flex; gap: 10px">
+                          <div
+                            style="
+                              width: 30px;
+                              height: 30px;
+                              border-radius: 50%;
+                              background: linear-gradient(135deg, #3d5afe, #7c5cff);
+                              flex-shrink: 0;
+                            "
+                          ></div>
+                          <div style="min-width: 0">
+                            <div
+                              style="
+                                font-size: 12.5px;
+                                font-weight: 650;
+                                line-height: 1.35;
+                                overflow: hidden;
+                                display: -webkit-box;
+                                -webkit-line-clamp: 2;
+                                -webkit-box-orient: vertical;
+                              "
+                            >
+                              I Cut My Editing Time by 3x — Here's My Exact Workflow
+                            </div>
+                            <div
+                              style="
+                                font-size: 11.5px;
+                                color: rgba(23, 24, 28, 0.5);
+                                margin-top: 4px;
+                              "
+                            >
+                              Jordan Marsh · 2.1K views · 2 min ago
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ previewIsTiktok }}">
+                      <div
+                        style="
+                          border-radius: 12px;
+                          overflow: hidden;
+                          border: 1px solid rgba(23, 24, 28, 0.08);
+                          position: relative;
+                          background: #14151a;
+                        "
+                      >
+                        <div
+                          style="
+                            width: 100%;
+                            aspect-ratio: 9/16;
+                            max-height: 340px;
+                            background: #14151a;
+                            background-image: repeating-linear-gradient(
+                              135deg,
+                              rgba(255, 255, 255, 0.08) 0px,
+                              rgba(255, 255, 255, 0.08) 2px,
+                              transparent 2px,
+                              transparent 10px
+                            );
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                          "
+                        >
+                          <span
+                            style="
+                              font-family: &quot;IBM Plex Mono&quot;, monospace;
+                              font-size: 9px;
+                              color: rgba(255, 255, 255, 0.6);
+                            "
+                            >VERTICAL VIDEO 9:16</span
+                          >
+                        </div>
+                        <div
+                          style="
+                            position: absolute;
+                            bottom: 12px;
+                            left: 12px;
+                            right: 50px;
+                            color: #fff;
+                          "
+                        >
+                          <div style="font-size: 12px; font-weight: 650; margin-bottom: 4px">
+                            @jordan.marsh
+                          </div>
+                          <div
+                            style="
+                              font-size: 11.5px;
+                              line-height: 1.4;
+                              opacity: 0.9;
+                              overflow: hidden;
+                              display: -webkit-box;
+                              -webkit-line-clamp: 2;
+                              -webkit-box-orient: vertical;
+                            "
+                          >
+                            Here's the exact editing workflow I use to cut my turnaround time by 3x
+                            👇 #editingtips
+                          </div>
+                        </div>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isRecommendations }}">
+              <div
+                data-screen-label="Recommendations"
+                style="display: flex; flex-direction: column; gap: 20px; max-width: 1360px"
+              >
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px">
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 20px 22px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 8px;
+                    "
+                  >
+                    <div style="display: flex; align-items: center; gap: 8px">
+                      <div
+                        style="width: 8px; height: 8px; border-radius: 2px; background: #ff3b30"
+                      ></div>
+                      <div
+                        style="font-size: 12.5px; font-weight: 600; color: rgba(23, 24, 28, 0.6)"
+                      >
+                        Best YouTube Time
+                      </div>
+                    </div>
+                    <div style="font-size: 24px; font-weight: 700; letter-spacing: -0.01em">
+                      Tuesday · 6:00 PM
+                    </div>
+                    <div style="font-size: 12px; color: rgba(23, 24, 28, 0.45)">
+                      92% confidence · 41 uploads analyzed
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 20px 22px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 8px;
+                    "
+                  >
+                    <div style="display: flex; align-items: center; gap: 8px">
+                      <div
+                        style="width: 8px; height: 8px; border-radius: 2px; background: #14151a"
+                      ></div>
+                      <div
+                        style="font-size: 12.5px; font-weight: 600; color: rgba(23, 24, 28, 0.6)"
+                      >
+                        Best TikTok Time
+                      </div>
+                    </div>
+                    <div style="font-size: 24px; font-weight: 700; letter-spacing: -0.01em">
+                      Thursday · 8:15 PM
+                    </div>
+                    <div style="font-size: 12px; color: rgba(23, 24, 28, 0.45)">
+                      88% confidence · 64 posts analyzed
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      background: linear-gradient(135deg, #3d5afe, #6c4cff);
+                      border-radius: 16px;
+                      padding: 20px 22px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 8px;
+                      color: #fff;
+                    "
+                  >
+                    <div style="display: flex; align-items: center; gap: 8px">
+                      <div
+                        style="width: 8px; height: 8px; border-radius: 2px; background: #fff"
+                      ></div>
+                      <div style="font-size: 12.5px; font-weight: 600; opacity: 0.85">
+                        Best Cross-Platform Time
+                      </div>
+                    </div>
+                    <div style="font-size: 24px; font-weight: 700; letter-spacing: -0.01em">
+                      Thursday · 7:30 PM
+                    </div>
+                    <div style="font-size: 12px; opacity: 0.8">
+                      Based on combined last-90-day performance
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  style="
+                    background: #fff;
+                    border: 1px solid rgba(23, 24, 28, 0.08);
+                    border-radius: 16px;
+                    padding: 22px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                  "
+                >
+                  <div style="display: flex; align-items: center; justify-content: space-between">
+                    <div style="font-size: 14.5px; font-weight: 650">Performance Heatmap</div>
+                    <div
+                      style="display: flex; background: #faf9f7; border-radius: 8px; padding: 3px"
+                    >
+                      <div onClick="{{ setHeatYoutube }}" style="{{ heatYtStyle }}">YouTube</div>
+                      <div onClick="{{ setHeatTiktok }}" style="{{ heatTtStyle }}">TikTok</div>
+                      <div onClick="{{ setHeatCombined }}" style="{{ heatCombinedStyle }}">
+                        Combined
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 44px repeat(7, 1fr); gap: 5px">
+                    <sc-for list="{{ heatCells }}" as="cell" hint-placeholder-count="56">
+                      <sc-if value="{{ cell.isLabel }}" hint-placeholder-val="{{ false }}">
+                        <div
+                          style="
+                            font-size: 11px;
+                            font-weight: 600;
+                            color: rgba(23, 24, 28, 0.45);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                          "
+                        >
+                          {{ cell.text }}
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ cell.isNotLabel }}" hint-placeholder-val="{{ true }}">
+                        <div
+                          style="aspect-ratio:1.6; border-radius:5px; background:{{ cell.color }};"
+                        ></div>
+                      </sc-if>
+                    </sc-for>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                      font-size: 11.5px;
+                      color: rgba(23, 24, 28, 0.45);
+                    "
+                  >
+                    <span>Lower performance</span>
+                    <div
+                      style="
+                        width: 80px;
+                        height: 8px;
+                        border-radius: 4px;
+                        background: linear-gradient(90deg, rgba(61, 90, 254, 0.08), #3d5afe);
+                      "
+                    ></div>
+                    <span>Higher performance</span>
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 22px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 12px;
+                    "
+                  >
+                    <div style="font-size: 14.5px; font-weight: 650">How this is calculated</div>
+                    <div style="display: flex; flex-direction: column; gap: 10px">
+                      <div
+                        style="
+                          display: flex;
+                          gap: 10px;
+                          font-size: 13px;
+                          line-height: 1.5;
+                          color: rgba(23, 24, 28, 0.75);
+                        "
+                      >
+                        <span style="color: #3d5afe; font-weight: 700">1.</span>Analyzes performance
+                        from your last 90 days of published posts.
+                      </div>
+                      <div
+                        style="
+                          display: flex;
+                          gap: 10px;
+                          font-size: 13px;
+                          line-height: 1.5;
+                          color: rgba(23, 24, 28, 0.75);
+                        "
+                      >
+                        <span style="color: #3d5afe; font-weight: 700">2.</span>Weighs views,
+                        engagement rate, and watch time per time slot.
+                      </div>
+                      <div
+                        style="
+                          display: flex;
+                          gap: 10px;
+                          font-size: 13px;
+                          line-height: 1.5;
+                          color: rgba(23, 24, 28, 0.75);
+                        "
+                      >
+                        <span style="color: #3d5afe; font-weight: 700">3.</span>Adjusts by platform
+                        and content type (tutorial, BTS, hook-style).
+                      </div>
+                      <div
+                        style="
+                          display: flex;
+                          gap: 10px;
+                          font-size: 13px;
+                          line-height: 1.5;
+                          color: rgba(23, 24, 28, 0.75);
+                        "
+                      >
+                        <span style="color: #3d5afe; font-weight: 700">4.</span>Recalculates weekly
+                        as new posts publish and mature.
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 22px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 12px;
+                    "
+                  >
+                    <div style="font-size: 14.5px; font-weight: 650">Recommended Actions</div>
+                    <div
+                      style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                        padding: 11px 13px;
+                        background: #faf9f7;
+                        border-radius: 10px;
+                      "
+                    >
+                      <div style="font-size: 13px; color: rgba(23, 24, 28, 0.8)">
+                        Schedule your next YouTube tutorial for Tuesday at 6 PM.
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                        padding: 11px 13px;
+                        background: #faf9f7;
+                        border-radius: 10px;
+                      "
+                    >
+                      <div style="font-size: 13px; color: rgba(23, 24, 28, 0.8)">
+                        Avoid posting TikTok content before noon based on recent performance.
+                      </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 4px">
+                      <div
+                        onClick="{{ goToCreate }}"
+                        style="
+                          padding: 9px 14px;
+                          border-radius: 9px;
+                          background: #17181c;
+                          color: #fff;
+                          font-size: 12.5px;
+                          font-weight: 650;
+                          cursor: pointer;
+                        "
+                      >
+                        Schedule next post at best time
+                      </div>
+                      <div
+                        style="
+                          padding: 9px 14px;
+                          border-radius: 9px;
+                          border: 1px solid rgba(23, 24, 28, 0.14);
+                          font-size: 12.5px;
+                          font-weight: 600;
+                          cursor: pointer;
+                          color: rgba(23, 24, 28, 0.75);
+                        "
+                      >
+                        Export report
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isAnalytics }}">
+              <div
+                data-screen-label="Analytics"
+                style="display: flex; flex-direction: column; gap: 20px; max-width: 1360px"
+              >
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    style="
+                      display: flex;
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.1);
+                      border-radius: 9px;
+                      padding: 3px;
+                    "
+                  >
+                    <div onClick="{{ setPlatformAll }}" style="{{ platAllStyle }}">All</div>
+                    <div onClick="{{ setPlatformYt }}" style="{{ platYtStyle }}">YouTube</div>
+                    <div onClick="{{ setPlatformTt }}" style="{{ platTtStyle }}">TikTok</div>
+                  </div>
+                  <div style="font-size: 12.5px; color: rgba(23, 24, 28, 0.45); margin-left: auto">
+                    Comparing to previous 30-day period
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px">
+                  <dc-import
+                    name="StatCard"
+                    label="Views"
+                    value="184.2K"
+                    trend="+14.8%"
+                    sublabel="last 30 days"
+                    hint-size="100%,110px"
+                  ></dc-import>
+                  <dc-import
+                    name="StatCard"
+                    label="Watch Time"
+                    value="612 hrs"
+                    trend="+9.2%"
+                    sublabel="last 30 days"
+                    hint-size="100%,110px"
+                  ></dc-import>
+                  <dc-import
+                    name="StatCard"
+                    label="Engagement Rate"
+                    value="7.9%"
+                    trend="+0.6pt"
+                    sublabel="last 30 days"
+                    hint-size="100%,110px"
+                  ></dc-import>
+                  <dc-import
+                    name="StatCard"
+                    label="Avg. Reach / Post"
+                    value="6.4K"
+                    trend="-2.1%"
+                    sublabel="last 30 days"
+                    hint-size="100%,110px"
+                  ></dc-import>
+                  <dc-import
+                    name="StatCard"
+                    label="Follower Growth"
+                    value="+2,180"
+                    trend="+18%"
+                    sublabel="last 30 days"
+                    hint-size="100%,110px"
+                  ></dc-import>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 20px 22px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 14px;
+                    "
+                  >
+                    <div style="font-size: 14.5px; font-weight: 650">Views Over Time</div>
+                    <div style="display: flex; align-items: flex-end; gap: 6px; height: 130px">
+                      <sc-for list="{{ viewsChart }}" as="bar" hint-placeholder-count="14">
+                        <div
+                          style="flex:1; border-radius:4px 4px 1px 1px; background:#3D5AFE; opacity:0.85; height:{{ bar.height }};"
+                        ></div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 20px 22px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 14px;
+                    "
+                  >
+                    <div style="font-size: 14.5px; font-weight: 650">Engagement Rate Over Time</div>
+                    <div style="display: flex; align-items: flex-end; gap: 6px; height: 130px">
+                      <sc-for list="{{ engagementChart }}" as="bar" hint-placeholder-count="14">
+                        <div
+                          style="flex:1; border-radius:4px 4px 1px 1px; background:#0E9F6E; opacity:0.85; height:{{ bar.height }};"
+                        ></div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  style="
+                    background: #fff;
+                    border: 1px solid rgba(23, 24, 28, 0.08);
+                    border-radius: 16px;
+                    padding: 20px 22px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
+                  "
+                >
+                  <div style="font-size: 14.5px; font-weight: 650">Performance by Platform</div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+                    <div style="display: flex; flex-direction: column; gap: 10px">
+                      <div
+                        style="display: flex; align-items: center; justify-content: space-between"
+                      >
+                        <dc-import
+                          name="PlatformBadge"
+                          platform="youtube"
+                          hint-size="80,26"
+                        ></dc-import>
+                        <div style="font-size: 13px; font-weight: 650">112.8K views</div>
+                      </div>
+                      <div
+                        style="
+                          height: 8px;
+                          border-radius: 5px;
+                          background: rgba(23, 24, 28, 0.06);
+                          overflow: hidden;
+                        "
+                      >
+                        <div style="width: 61%; height: 100%; background: #ff3b30"></div>
+                      </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 10px">
+                      <div
+                        style="display: flex; align-items: center; justify-content: space-between"
+                      >
+                        <dc-import
+                          name="PlatformBadge"
+                          platform="tiktok"
+                          hint-size="80,26"
+                        ></dc-import>
+                        <div style="font-size: 13px; font-weight: 650">71.4K views</div>
+                      </div>
+                      <div
+                        style="
+                          height: 8px;
+                          border-radius: 5px;
+                          background: rgba(23, 24, 28, 0.06);
+                          overflow: hidden;
+                        "
+                      >
+                        <div style="width: 39%; height: 100%; background: #14151a"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  style="
+                    background: #fff;
+                    border: 1px solid rgba(23, 24, 28, 0.08);
+                    border-radius: 16px;
+                    padding: 20px 22px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
+                  "
+                >
+                  <div style="font-size: 14.5px; font-weight: 650">Recent Post Performance</div>
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: 2.4fr 0.9fr 1fr 0.8fr 0.8fr 0.8fr 1fr 0.9fr;
+                      gap: 8px;
+                      padding: 0 4px 10px;
+                      border-bottom: 1px solid rgba(23, 24, 28, 0.08);
+                      font-size: 11.5px;
+                      font-weight: 650;
+                      color: rgba(23, 24, 28, 0.45);
+                      letter-spacing: 0.01em;
+                    "
+                  >
+                    <div>Post</div>
+                    <div>Platform</div>
+                    <div>Published</div>
+                    <div>Views</div>
+                    <div>Likes</div>
+                    <div>Comments</div>
+                    <div>Engagement</div>
+                    <div>Status</div>
+                  </div>
+                  <sc-for list="{{ postRows }}" as="p" hint-placeholder-count="6">
+                    <div
+                      style="
+                        display: grid;
+                        grid-template-columns: 2.4fr 0.9fr 1fr 0.8fr 0.8fr 0.8fr 1fr 0.9fr;
+                        gap: 8px;
+                        align-items: center;
+                        padding: 9px 4px;
+                        border-bottom: 1px solid rgba(23, 24, 28, 0.05);
+                      "
+                    >
+                      <div style="display: flex; align-items: center; gap: 10px; min-width: 0">
+                        <div
+                          style="width:34px; height:34px; border-radius:7px; flex-shrink:0; background:{{ p.color }};"
+                        ></div>
+                        <div
+                          style="
+                            font-size: 12.5px;
+                            font-weight: 600;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                          "
+                        >
+                          {{ p.title }}
+                        </div>
+                      </div>
+                      <dc-import
+                        name="PlatformBadge"
+                        platform="{{ p.platform }}"
+                        hint-size="76,24"
+                      ></dc-import>
+                      <div style="font-size: 12.5px; color: rgba(23, 24, 28, 0.6)">
+                        {{ p.date }}
+                      </div>
+                      <div style="font-size: 12.5px; font-weight: 600">{{ p.views }}</div>
+                      <div style="font-size: 12.5px; color: rgba(23, 24, 28, 0.7)">
+                        {{ p.likes }}
+                      </div>
+                      <div style="font-size: 12.5px; color: rgba(23, 24, 28, 0.7)">
+                        {{ p.comments }}
+                      </div>
+                      <div style="font-size: 12.5px; font-weight: 600; color: #0a7a55">
+                        {{ p.engagement }}
+                      </div>
+                      <dc-import
+                        name="StatusBadge"
+                        status="published"
+                        hint-size="90,24"
+                      ></dc-import>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isCalendar }}">
+              <div
+                data-screen-label="Calendar"
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 320px;
+                  gap: 20px;
+                  max-width: 1360px;
+                  align-items: start;
+                "
+              >
+                <div
+                  style="
+                    background: #fff;
+                    border: 1px solid rgba(23, 24, 28, 0.08);
+                    border-radius: 16px;
+                    padding: 20px 22px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                  "
+                >
+                  <div style="display: flex; align-items: center; justify-content: space-between">
+                    <div style="display: flex; align-items: center; gap: 14px">
+                      <div style="font-size: 15px; font-weight: 700">July 2026</div>
+                      <div style="display: flex; gap: 4px">
+                        <div
+                          style="
+                            width: 26px;
+                            height: 26px;
+                            border-radius: 7px;
+                            border: 1px solid rgba(23, 24, 28, 0.12);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            cursor: pointer;
+                            font-size: 13px;
+                            color: rgba(23, 24, 28, 0.6);
+                          "
+                        >
+                          ‹
+                        </div>
+                        <div
+                          style="
+                            width: 26px;
+                            height: 26px;
+                            border-radius: 7px;
+                            border: 1px solid rgba(23, 24, 28, 0.12);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            cursor: pointer;
+                            font-size: 13px;
+                            color: rgba(23, 24, 28, 0.6);
+                          "
+                        >
+                          ›
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      style="display: flex; background: #faf9f7; border-radius: 8px; padding: 3px"
+                    >
+                      <div style="{{ viewMonthStyle }}" onClick="{{ setViewMonth }}">Month</div>
+                      <div style="{{ viewWeekStyle }}" onClick="{{ setViewWeek }}">Week</div>
+                      <div style="{{ viewAgendaStyle }}" onClick="{{ setViewAgenda }}">Agenda</div>
+                    </div>
+                  </div>
+
+                  <sc-if value="{{ viewIsMonth }}">
+                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px">
+                      <sc-for list="{{ weekdayLabels }}" as="w" hint-placeholder-count="7">
+                        <div
+                          style="
+                            text-align: center;
+                            font-size: 11px;
+                            font-weight: 650;
+                            color: rgba(23, 24, 28, 0.4);
+                            padding-bottom: 4px;
+                          "
+                        >
+                          {{ w }}
+                        </div>
+                      </sc-for>
+                      <sc-for list="{{ monthCells }}" as="day" hint-placeholder-count="35">
+                        <div
+                          onClick="{{ day.onClick }}"
+                          style="min-height:84px; border-radius:9px; padding:6px; background:{{ day.bg }}; border:1px solid {{ day.border }}; cursor:pointer; display:flex; flex-direction:column; gap:4px;"
+                        >
+                          <div style="font-size:11.5px; font-weight:600; color:{{ day.numColor }};">
+                            {{ day.num }}
+                          </div>
+                          <sc-for list="{{ day.posts }}" as="pt" hint-placeholder-count="0">
+                            <div
+                              style="font-size:10px; font-weight:600; padding:2px 5px; border-radius:4px; background:{{ pt.bg }}; color:{{ pt.color }}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
+                            >
+                              {{ pt.label }}
+                            </div>
+                          </sc-for>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ viewIsAgenda }}">
+                    <div style="display: flex; flex-direction: column; gap: 10px">
+                      <sc-for list="{{ agendaPosts }}" as="post" hint-placeholder-count="5">
+                        <div onClick="{{ post.onClick }}" style="cursor: pointer">
+                          <dc-import
+                            name="PostCard"
+                            title="{{ post.title }}"
+                            platforms="{{ post.platforms }}"
+                            scheduled-label="{{ post.scheduledLabel }}"
+                            status="{{ post.status }}"
+                            thumb-seed="{{ post.seed }}"
+                            thumb-label="{{ post.thumbLabel }}"
+                            hint-size="100%,80px"
+                          ></dc-import>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ viewIsWeek }}">
+                    <div
+                      style="
+                        padding: 40px 20px;
+                        text-align: center;
+                        color: rgba(23, 24, 28, 0.4);
+                        font-size: 13px;
+                      "
+                    >
+                      Week view — same posts, laid out across 7 day columns with hourly rows.
+                    </div>
+                  </sc-if>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 16px">
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 16px;
+                      padding: 18px 20px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 12px;
+                    "
+                  >
+                    <div style="font-size: 13.5px; font-weight: 650">Filters</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px">
+                      <div
+                        style="font-size: 11.5px; font-weight: 600; color: rgba(23, 24, 28, 0.5)"
+                      >
+                        Platform
+                      </div>
+                      <div style="display: flex; gap: 6px; flex-wrap: wrap">
+                        <dc-import
+                          name="PlatformBadge"
+                          platform="youtube"
+                          hint-size="80,26"
+                        ></dc-import>
+                        <dc-import
+                          name="PlatformBadge"
+                          platform="tiktok"
+                          hint-size="80,26"
+                        ></dc-import>
+                      </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px">
+                      <div
+                        style="font-size: 11.5px; font-weight: 600; color: rgba(23, 24, 28, 0.5)"
+                      >
+                        Status
+                      </div>
+                      <div style="display: flex; gap: 6px; flex-wrap: wrap">
+                        <dc-import
+                          name="StatusBadge"
+                          status="scheduled"
+                          hint-size="90,26"
+                        ></dc-import>
+                        <dc-import name="StatusBadge" status="draft" hint-size="80,26"></dc-import>
+                        <dc-import
+                          name="StatusBadge"
+                          status="needsreview"
+                          hint-size="110,26"
+                        ></dc-import>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    style="
+                      background: linear-gradient(
+                        135deg,
+                        rgba(61, 90, 254, 0.06),
+                        rgba(124, 92, 255, 0.06)
+                      );
+                      border: 1px solid rgba(61, 90, 254, 0.15);
+                      border-radius: 16px;
+                      padding: 18px 20px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 8px;
+                    "
+                  >
+                    <div style="font-size: 13px; font-weight: 650; color: #2a3ec4">
+                      Recommended windows
+                    </div>
+                    <div style="font-size: 12.5px; line-height: 1.5; color: rgba(23, 24, 28, 0.75)">
+                      Days highlighted in deeper blue on the calendar are your strongest historical
+                      posting windows.
+                    </div>
+                  </div>
+
+                  <sc-if value="{{ hasSelectedPost }}" hint-placeholder-val="{{ false }}">
+                    <div
+                      style="
+                        background: #fff;
+                        border: 1px solid rgba(23, 24, 28, 0.08);
+                        border-radius: 16px;
+                        padding: 18px 20px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 12px;
+                      "
+                    >
+                      <div
+                        style="display: flex; align-items: center; justify-content: space-between"
+                      >
+                        <div style="font-size: 13.5px; font-weight: 650">Post Details</div>
+                        <div
+                          onClick="{{ closePost }}"
+                          style="font-size: 12px; color: rgba(23, 24, 28, 0.4); cursor: pointer"
+                        >
+                          Close
+                        </div>
+                      </div>
+                      <div
+                        style="width:100%; aspect-ratio:16/9; border-radius:10px; background:{{ selectedPost.color }}; background-image:repeating-linear-gradient(135deg, rgba(255,255,255,0.5) 0px, rgba(255,255,255,0.5) 2px, transparent 2px, transparent 10px);"
+                      ></div>
+                      <div style="font-size: 13.5px; font-weight: 650">
+                        {{ selectedPost.title }}
+                      </div>
+                      <div style="font-size: 12.5px; color: rgba(23, 24, 28, 0.5)">
+                        {{ selectedPost.scheduledLabel }}
+                      </div>
+                      <div style="display: flex; gap: 6px">
+                        <sc-for
+                          list="{{ selectedPost.platforms }}"
+                          as="p"
+                          hint-placeholder-count="2"
+                        >
+                          <dc-import
+                            name="PlatformBadge"
+                            platform="{{ p }}"
+                            hint-size="80,26"
+                          ></dc-import>
+                        </sc-for>
+                      </div>
+                      <dc-import
+                        name="StatusBadge"
+                        status="{{ selectedPost.status }}"
+                        hint-size="100,26"
+                      ></dc-import>
+                      <div style="display: flex; gap: 8px; margin-top: 4px">
+                        <div
+                          onClick="{{ goToCreate }}"
+                          style="
+                            flex: 1;
+                            text-align: center;
+                            padding: 9px;
+                            border-radius: 9px;
+                            background: #17181c;
+                            color: #fff;
+                            font-size: 12.5px;
+                            font-weight: 650;
+                            cursor: pointer;
+                          "
+                        >
+                          Edit
+                        </div>
+                        <div
+                          style="
+                            flex: 1;
+                            text-align: center;
+                            padding: 9px;
+                            border-radius: 9px;
+                            border: 1px solid rgba(23, 24, 28, 0.14);
+                            font-size: 12.5px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            color: rgba(23, 24, 28, 0.7);
+                          "
+                        >
+                          Duplicate
+                        </div>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isLibrary }}">
+              <div
+                data-screen-label="Content Library"
+                style="display: flex; flex-direction: column; gap: 18px; max-width: 1360px"
+              >
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div
+                    style="
+                      flex: 1;
+                      max-width: 340px;
+                      padding: 9px 13px;
+                      border: 1px solid rgba(23, 24, 28, 0.14);
+                      border-radius: 9px;
+                      font-size: 13px;
+                      color: rgba(23, 24, 28, 0.4);
+                      background: #fff;
+                    "
+                  >
+                    Search content…
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.1);
+                      border-radius: 9px;
+                      padding: 3px;
+                    "
+                  >
+                    <div style="{{ libAllStyle }}" onClick="{{ setLibAll }}">All</div>
+                    <div style="{{ libDraftStyle }}" onClick="{{ setLibDraft }}">Drafts</div>
+                    <div style="{{ libScheduledStyle }}" onClick="{{ setLibScheduled }}">
+                      Scheduled
+                    </div>
+                    <div style="{{ libPublishedStyle }}" onClick="{{ setLibPublished }}">
+                      Published
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px">
+                  <sc-for list="{{ libraryItems }}" as="item" hint-placeholder-count="8">
+                    <div
+                      style="
+                        background: #fff;
+                        border: 1px solid rgba(23, 24, 28, 0.08);
+                        border-radius: 14px;
+                        overflow: hidden;
+                        display: flex;
+                        flex-direction: column;
+                      "
+                    >
+                      <div
+                        style="width:100%; aspect-ratio:4/3; background:{{ item.color }}; background-image:repeating-linear-gradient(135deg, rgba(255,255,255,0.5) 0px, rgba(255,255,255,0.5) 2px, transparent 2px, transparent 10px); display:flex; align-items:center; justify-content:center; position:relative;"
+                      >
+                        <span
+                          style="
+                            font-family: &quot;IBM Plex Mono&quot;, monospace;
+                            font-size: 9px;
+                            color: rgba(255, 255, 255, 0.9);
+                          "
+                          >{{ item.thumbLabel }}</span
+                        >
+                        <sc-if value="{{ item.isTop }}" hint-placeholder-val="{{ false }}">
+                          <div
+                            style="
+                              position: absolute;
+                              top: 8px;
+                              left: 8px;
+                              font-size: 10px;
+                              font-weight: 700;
+                              background: #fff;
+                              color: #17181c;
+                              padding: 3px 8px;
+                              border-radius: 999px;
+                            "
+                          >
+                            Top performer
+                          </div>
+                        </sc-if>
+                      </div>
+                      <div style="padding: 14px; display: flex; flex-direction: column; gap: 8px">
+                        <div
+                          style="
+                            font-size: 13.5px;
+                            font-weight: 650;
+                            line-height: 1.3;
+                            overflow: hidden;
+                            display: -webkit-box;
+                            -webkit-line-clamp: 2;
+                            -webkit-box-orient: vertical;
+                            min-height: 35px;
+                          "
+                        >
+                          {{ item.title }}
+                        </div>
+                        <div style="display: flex; gap: 5px; flex-wrap: wrap">
+                          <sc-for list="{{ item.platforms }}" as="p" hint-placeholder-count="2">
+                            <dc-import
+                              name="PlatformBadge"
+                              platform="{{ p }}"
+                              hint-size="70,22"
+                            ></dc-import>
+                          </sc-for>
+                        </div>
+                        <div
+                          style="display: flex; align-items: center; justify-content: space-between"
+                        >
+                          <div style="font-size: 11.5px; color: rgba(23, 24, 28, 0.45)">
+                            {{ item.dateLabel }}
+                          </div>
+                          <dc-import
+                            name="StatusBadge"
+                            status="{{ item.status }}"
+                            hint-size="90,22"
+                          ></dc-import>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isAccounts }}">
+              <div
+                data-screen-label="Accounts"
+                style="display: flex; flex-direction: column; gap: 20px; max-width: 1000px"
+              >
+                <div style="display: flex; flex-direction: column; gap: 14px">
+                  <div style="font-size: 13.5px; font-weight: 650; color: rgba(23, 24, 28, 0.55)">
+                    Connected
+                  </div>
+
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 14px;
+                      padding: 20px 22px;
+                      display: flex;
+                      align-items: center;
+                      gap: 16px;
+                    "
+                  >
+                    <div
+                      style="
+                        width: 48px;
+                        height: 48px;
+                        border-radius: 12px;
+                        background: rgba(255, 59, 48, 0.1);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-shrink: 0;
+                      "
+                    >
+                      <div
+                        style="
+                          width: 0;
+                          height: 0;
+                          border-top: 8px solid transparent;
+                          border-bottom: 8px solid transparent;
+                          border-left: 12px solid #ff3b30;
+                        "
+                      ></div>
+                    </div>
+                    <div style="flex: 1; min-width: 0">
+                      <div style="display: flex; align-items: center; gap: 8px">
+                        <div style="font-size: 14.5px; font-weight: 650">YouTube</div>
+                        <dc-import
+                          name="StatusBadge"
+                          status="published"
+                          hint-size="90,24"
+                        ></dc-import>
+                      </div>
+                      <div style="font-size: 12.5px; color: rgba(23, 24, 28, 0.5); margin-top: 3px">
+                        @jordanmarsh · last synced 12 minutes ago
+                      </div>
+                      <div style="display: flex; gap: 8px; margin-top: 8px">
+                        <div
+                          style="
+                            font-size: 11.5px;
+                            font-weight: 600;
+                            padding: 4px 9px;
+                            background: #faf9f7;
+                            border-radius: 999px;
+                            color: rgba(23, 24, 28, 0.6);
+                          "
+                        >
+                          Publishing ✓
+                        </div>
+                        <div
+                          style="
+                            font-size: 11.5px;
+                            font-weight: 600;
+                            padding: 4px 9px;
+                            background: #faf9f7;
+                            border-radius: 999px;
+                            color: rgba(23, 24, 28, 0.6);
+                          "
+                        >
+                          Analytics sync ✓
+                        </div>
+                        <div
+                          style="
+                            font-size: 11.5px;
+                            font-weight: 600;
+                            padding: 4px 9px;
+                            background: #faf9f7;
+                            border-radius: 999px;
+                            color: rgba(23, 24, 28, 0.6);
+                          "
+                        >
+                          Recommendations ✓
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        font-size: 12.5px;
+                        font-weight: 600;
+                        color: rgba(23, 24, 28, 0.5);
+                        cursor: pointer;
+                        flex-shrink: 0;
+                      "
+                    >
+                      Disconnect
+                    </div>
+                  </div>
+
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid rgba(23, 24, 28, 0.08);
+                      border-radius: 14px;
+                      padding: 20px 22px;
+                      display: flex;
+                      align-items: center;
+                      gap: 16px;
+                    "
+                  >
+                    <div
+                      style="
+                        width: 48px;
+                        height: 48px;
+                        border-radius: 12px;
+                        background: rgba(20, 21, 26, 0.08);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-shrink: 0;
+                      "
+                    >
+                      <div
+                        style="width: 16px; height: 16px; border-radius: 5px; background: #14151a"
+                      ></div>
+                    </div>
+                    <div style="flex: 1; min-width: 0">
+                      <div style="display: flex; align-items: center; gap: 8px">
+                        <div style="font-size: 14.5px; font-weight: 650">TikTok</div>
+                        <dc-import
+                          name="StatusBadge"
+                          status="needsreview"
+                          hint-size="130,24"
+                        ></dc-import>
+                      </div>
+                      <div style="font-size: 12.5px; color: rgba(23, 24, 28, 0.5); margin-top: 3px">
+                        @jordan.marsh · permissions need review
+                      </div>
+                      <div style="display: flex; gap: 8px; margin-top: 8px">
+                        <div
+                          style="
+                            font-size: 11.5px;
+                            font-weight: 600;
+                            padding: 4px 9px;
+                            background: #faf9f7;
+                            border-radius: 999px;
+                            color: rgba(23, 24, 28, 0.6);
+                          "
+                        >
+                          Publishing ✓
+                        </div>
+                        <div
+                          style="
+                            font-size: 11.5px;
+                            font-weight: 600;
+                            padding: 4px 9px;
+                            background: rgba(232, 162, 61, 0.12);
+                            border-radius: 999px;
+                            color: #9a6414;
+                          "
+                        >
+                          Analytics sync ⚠
+                        </div>
+                        <div
+                          style="
+                            font-size: 11.5px;
+                            font-weight: 600;
+                            padding: 4px 9px;
+                            background: #faf9f7;
+                            border-radius: 999px;
+                            color: rgba(23, 24, 28, 0.6);
+                          "
+                        >
+                          Recommendations ✓
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        font-size: 12.5px;
+                        font-weight: 650;
+                        color: #3d5afe;
+                        cursor: pointer;
+                        flex-shrink: 0;
+                      "
+                    >
+                      Reconnect
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 14px">
+                  <div style="font-size: 13.5px; font-weight: 650; color: rgba(23, 24, 28, 0.55)">
+                    Coming soon
+                  </div>
+                  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px">
+                    <sc-for list="{{ comingSoonPlatforms }}" as="cs" hint-placeholder-count="4">
+                      <div
+                        style="
+                          background: #fff;
+                          border: 1px dashed rgba(23, 24, 28, 0.15);
+                          border-radius: 12px;
+                          padding: 16px;
+                          display: flex;
+                          flex-direction: column;
+                          align-items: center;
+                          gap: 8px;
+                          opacity: 0.7;
+                        "
+                      >
+                        <div
+                          style="
+                            width: 34px;
+                            height: 34px;
+                            border-radius: 10px;
+                            background: rgba(23, 24, 28, 0.06);
+                          "
+                        ></div>
+                        <div
+                          style="font-size: 12.5px; font-weight: 600; color: rgba(23, 24, 28, 0.6)"
+                        >
+                          {{ cs }}
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isSettings }}">
+              <div
+                data-screen-label="Settings"
+                style="
+                  display: grid;
+                  grid-template-columns: 200px 1fr;
+                  gap: 24px;
+                  max-width: 1100px;
+                "
+              >
+                <div style="display: flex; flex-direction: column; gap: 2px">
+                  <sc-for list="{{ settingsTabs }}" as="t" hint-placeholder-count="8">
+                    <div onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</div>
+                  </sc-for>
+                </div>
+                <div
+                  style="
+                    background: #fff;
+                    border: 1px solid rgba(23, 24, 28, 0.08);
+                    border-radius: 16px;
+                    padding: 26px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 18px;
+                  "
+                >
+                  <div style="font-size: 15px; font-weight: 700">{{ activeSettingsLabel }}</div>
+
+                  <sc-if value="{{ settingsIsProfile }}">
+                    <div style="display: flex; align-items: center; gap: 14px">
+                      <div
+                        style="
+                          width: 56px;
+                          height: 56px;
+                          border-radius: 14px;
+                          background: linear-gradient(135deg, #3d5afe, #7c5cff);
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          color: #fff;
+                          font-size: 18px;
+                          font-weight: 700;
+                        "
+                      >
+                        JM
+                      </div>
+                      <div
+                        style="font-size: 12.5px; font-weight: 650; color: #3d5afe; cursor: pointer"
+                      >
+                        Change photo
+                      </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px">
+                      <div style="display: flex; flex-direction: column; gap: 6px">
+                        <div
+                          style="font-size: 12px; font-weight: 600; color: rgba(23, 24, 28, 0.55)"
+                        >
+                          Full name
+                        </div>
+                        <div
+                          style="
+                            padding: 10px 12px;
+                            border: 1px solid rgba(23, 24, 28, 0.14);
+                            border-radius: 9px;
+                            font-size: 13.5px;
+                          "
+                        >
+                          Jordan Marsh
+                        </div>
+                      </div>
+                      <div style="display: flex; flex-direction: column; gap: 6px">
+                        <div
+                          style="font-size: 12px; font-weight: 600; color: rgba(23, 24, 28, 0.55)"
+                        >
+                          Email
+                        </div>
+                        <div
+                          style="
+                            padding: 10px 12px;
+                            border: 1px solid rgba(23, 24, 28, 0.14);
+                            border-radius: 9px;
+                            font-size: 13.5px;
+                          "
+                        >
+                          jordan@postpilot.app
+                        </div>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ settingsIsPublishing }}">
+                    <div style="display: flex; flex-direction: column; gap: 14px">
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          padding: 12px 14px;
+                          background: #faf9f7;
+                          border-radius: 10px;
+                        "
+                      >
+                        <div>
+                          <div style="font-size: 13px; font-weight: 600">Default publish mode</div>
+                          <div style="font-size: 11.5px; color: rgba(23, 24, 28, 0.5)">
+                            Applied to new posts unless changed
+                          </div>
+                        </div>
+                        <div style="font-size: 13px; font-weight: 650; color: #3d5afe">
+                          Schedule
+                        </div>
+                      </div>
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          padding: 12px 14px;
+                          background: #faf9f7;
+                          border-radius: 10px;
+                        "
+                      >
+                        <div>
+                          <div style="font-size: 13px; font-weight: 600">
+                            Auto-apply recommended time
+                          </div>
+                          <div style="font-size: 11.5px; color: rgba(23, 24, 28, 0.5)">
+                            Prefill scheduler with best time suggestion
+                          </div>
+                        </div>
+                        <div
+                          style="
+                            width: 38px;
+                            height: 22px;
+                            border-radius: 999px;
+                            background: #3d5afe;
+                            position: relative;
+                          "
+                        >
+                          <div
+                            style="
+                              width: 16px;
+                              height: 16px;
+                              border-radius: 50%;
+                              background: #fff;
+                              position: absolute;
+                              top: 3px;
+                              right: 3px;
+                            "
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ settingsIsTimezone }}">
+                    <div style="display: flex; flex-direction: column; gap: 6px">
+                      <div style="font-size: 12px; font-weight: 600; color: rgba(23, 24, 28, 0.55)">
+                        Timezone
+                      </div>
+                      <div
+                        style="
+                          padding: 10px 12px;
+                          border: 1px solid rgba(23, 24, 28, 0.14);
+                          border-radius: 9px;
+                          font-size: 13.5px;
+                          max-width: 280px;
+                        "
+                      >
+                        Eastern Time (ET) — New York
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ settingsIsAI }}">
+                    <div style="display: flex; flex-direction: column; gap: 14px">
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          padding: 12px 14px;
+                          background: #faf9f7;
+                          border-radius: 10px;
+                        "
+                      >
+                        <div>
+                          <div style="font-size: 13px; font-weight: 600">Recommendation window</div>
+                          <div style="font-size: 11.5px; color: rgba(23, 24, 28, 0.5)">
+                            How much history to weigh
+                          </div>
+                        </div>
+                        <div style="font-size: 13px; font-weight: 650; color: #3d5afe">
+                          Last 90 days
+                        </div>
+                      </div>
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          padding: 12px 14px;
+                          background: #faf9f7;
+                          border-radius: 10px;
+                        "
+                      >
+                        <div>
+                          <div style="font-size: 13px; font-weight: 600">
+                            Weight engagement over views
+                          </div>
+                        </div>
+                        <div
+                          style="
+                            width: 38px;
+                            height: 22px;
+                            border-radius: 999px;
+                            background: #3d5afe;
+                            position: relative;
+                          "
+                        >
+                          <div
+                            style="
+                              width: 16px;
+                              height: 16px;
+                              border-radius: 50%;
+                              background: #fff;
+                              position: absolute;
+                              top: 3px;
+                              right: 3px;
+                            "
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ settingsIsOther }}">
+                    <div style="font-size: 13px; color: rgba(23, 24, 28, 0.5); line-height: 1.6">
+                      {{ activeSettingsLabel }} settings will live here — kept minimal for this
+                      prototype.
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+    </x-dc>
+    <script
+      type="text/x-dc"
+      data-dc-script
+      data-props='{"$preview":{},"startScreen":{"editor":"enum","default":"dashboard","options":["dashboard","create","calendar","library","analytics","recommendations","accounts","settings"],"tsType":"string","section":"Behavior"},"compactSidebar":{"editor":"boolean","default":false,"tsType":"boolean","section":"Behavior"}}'
+    >
+      class Component extends DCLogic {
+        state = {
+          screen: null,
+          hasMedia: true,
+          platformYoutube: true,
+          platformTiktok: true,
+          activeTab: 'youtube',
+          publishMode: 'schedule',
+          previewPlatform: 'youtube',
+          heatMode: 'combined',
+          platformFilter: 'all',
+          calendarView: 'month',
+          selectedPostKey: null,
+          libraryFilter: 'all',
+          settingsTab: 'profile',
+        };
+
+        seededRand(seed) {
+          const x = Math.sin(seed) * 10000;
+          return x - Math.floor(x);
+        }
+
+        buildHeatCells(mode) {
+          const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+          const hourBands = ['6a','9a','12p','3p','6p','9p'];
+          const peakByMode = { youtube: [1,4], tiktok: [3,4], combined: [3,4] };
+          const peak = peakByMode[mode] || [3,4];
+          const cells = [];
+          // header row: empty corner + 7 day labels
+          cells.push({ isLabel: true, isNotLabel: false, text: '' });
+          days.forEach((d) => cells.push({ isLabel: true, isNotLabel: false, text: d }));
+          // data rows
+          hourBands.forEach((label, hi) => {
+            cells.push({ isLabel: true, isNotLabel: false, text: label });
+            days.forEach((d, di) => {
+              const distance = Math.abs(hi - peak[1]) + Math.abs(di - peak[0]) * 0.6;
+              const base = Math.max(0, 1 - distance / 5);
+              const noise = this.seededRand(hi * 7 + di * 13 + mode.length) * 0.15;
+              const score = Math.min(1, Math.max(0.06, base + noise));
+              cells.push({
+                isLabel: false,
+                isNotLabel: true,
+                color: `rgba(61,90,254,${score.toFixed(2)})`,
+                title: `${d} ${label}: ${Math.round(score * 100)} score`,
+              });
+            });
+          });
+          return cells;
+        }
+
+        goTo(screen) {
+          this.setState({ screen });
+        }
+
+        tabBtnStyle(active) {
+          return `flex:1; text-align:center; padding:13px; font-size:13px; font-weight:650; cursor:pointer; color:${active ? '#17181C' : 'rgba(23,24,28,0.45)'}; border-bottom:2px solid ${active ? '#3D5AFE' : 'transparent'}; margin-bottom:-1px;`;
+        }
+        modeBtnStyle(active) {
+          return `flex:1; text-align:center; padding:8px; border-radius:8px; font-size:12.5px; font-weight:650; cursor:pointer; background:${active ? '#fff' : 'transparent'}; color:${active ? '#17181C' : 'rgba(23,24,28,0.5)'}; box-shadow:${active ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'};`;
+        }
+        previewBtnStyle(active) {
+          return `padding:5px 10px; border-radius:6px; font-size:11.5px; font-weight:700; cursor:pointer; background:${active ? '#fff' : 'transparent'}; color:${active ? '#17181C' : 'rgba(23,24,28,0.45)'}; box-shadow:${active ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'};`;
+        }
+        platformCardStyle(active) {
+          return `display:flex; align-items:center; gap:12px; padding:14px; border-radius:12px; cursor:pointer; border:1.5px solid ${active ? '#3D5AFE' : 'rgba(23,24,28,0.1)'}; background:${active ? 'rgba(61,90,254,0.04)' : '#fff'};`;
+        }
+        checkStyle(active) {
+          return `width:18px; height:18px; border-radius:5px; flex-shrink:0; border:1.5px solid ${active ? '#3D5AFE' : 'rgba(23,24,28,0.22)'}; background:${active ? '#3D5AFE' : 'transparent'};`;
+        }
+
+        renderVals() {
+          const screen = this.state.screen || this.props.startScreen || 'dashboard';
+          const compact = !!this.props.compactSidebar;
+          const titles = {
+            dashboard: 'Dashboard',
+            create: 'Create Post',
+            calendar: 'Calendar',
+            library: 'Content Library',
+            analytics: 'Analytics',
+            recommendations: 'Best Posting Times',
+            accounts: 'Accounts',
+            settings: 'Settings',
+          };
+
+          const items = [
+            { key: 'dashboard', label: 'Dashboard', shape: 'square' },
+            { key: 'create', label: 'Create Post', shape: 'plus' },
+            { key: 'calendar', label: 'Calendar', shape: 'calendar' },
+            { key: 'library', label: 'Content Library', shape: 'stack' },
+            { key: 'analytics', label: 'Analytics', shape: 'bars' },
+            { key: 'recommendations', label: 'Recommendations', badge: 'AI', shape: 'target' },
+            { key: 'accounts', label: 'Accounts', shape: 'circle' },
+            { key: 'settings', label: 'Settings', shape: 'diamond' },
+          ];
+
+          const navItems = items.map((it) => {
+            const active = screen === it.key;
+            const c = active ? '#3D5AFE' : 'rgba(23,24,28,0.5)';
+            let iconInnerStyle = '';
+            switch (it.shape) {
+              case 'square':
+                iconInnerStyle = `width:100%; height:100%; border-radius:4px; border:1.6px solid ${c};`;
+                break;
+              case 'plus':
+                iconInnerStyle = `width:100%; height:100%; border-radius:50%; border:1.6px solid ${c}; background:linear-gradient(${c},${c}) center/8px 1.6px no-repeat, linear-gradient(${c},${c}) center/1.6px 8px no-repeat;`;
+                break;
+              case 'calendar':
+                iconInnerStyle = `width:100%; height:100%; border-radius:4px; border:1.6px solid ${c}; position:relative; background:linear-gradient(${c},${c}) top/100% 4px no-repeat;`;
+                break;
+              case 'stack':
+                iconInnerStyle = `width:100%; height:60%; margin-top:20%; border-radius:3px; background:linear-gradient(${c},${c}) top/100% 1.6px no-repeat, linear-gradient(${c},${c}) center/100% 1.6px no-repeat, linear-gradient(${c},${c}) bottom/100% 1.6px no-repeat; border-left:1.6px solid ${c}; border-right:1.6px solid ${c};`;
+                break;
+              case 'bars':
+                iconInnerStyle = `width:100%; height:100%; background:linear-gradient(${c},${c}) left/3px 55% no-repeat, linear-gradient(${c},${c}) center/3px 100% no-repeat, linear-gradient(${c},${c}) right/3px 75% no-repeat; background-position:left bottom, center bottom, right bottom;`;
+                break;
+              case 'target':
+                iconInnerStyle = `width:100%; height:100%; border-radius:50%; border:1.6px solid ${c}; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle, ${c} 0 2.5px, transparent 2.5px);`;
+                break;
+              case 'circle':
+                iconInnerStyle = `width:100%; height:100%; border-radius:50%; border:1.6px solid ${c};`;
+                break;
+              case 'diamond':
+                iconInnerStyle = `width:72%; height:72%; margin:14%; border:1.6px solid ${c}; transform:rotate(45deg);`;
+                break;
+            }
+            return {
+              iconType: it.key,
+              label: it.label,
+              badge: it.badge || '',
+              onClick: () => this.goTo(it.key),
+              rowStyle: `display:flex; align-items:center; ${compact ? 'justify-content:center;' : ''} gap:11px; padding:9px 10px; border-radius:9px; margin-bottom:2px; cursor:pointer; background:${active ? 'rgba(61,90,254,0.09)' : 'transparent'};`,
+              rowHoverStyle: active ? '' : 'background:rgba(23,24,28,0.045);',
+              iconWrapStyle: `width:18px; height:18px; flex-shrink:0; position:relative;`,
+              iconInnerStyle,
+              labelStyle: `font-size:13.5px; font-weight:${active ? '650' : '500'}; color:${active ? '#2A3EC4' : 'rgba(23,24,28,0.75)'};`,
+            };
+          });
+
+          const upcomingPosts = [
+            { title: 'How I edit short-form videos 3x faster', platforms: ['youtube', 'tiktok'], scheduledLabel: 'Tue, Jul 7 · 6:00 PM', status: 'scheduled', seed: 0, thumbLabel: 'TUTORIAL CUT' },
+            { title: '3 hooks that increased my watch time', platforms: ['tiktok'], scheduledLabel: 'Thu, Jul 9 · 8:15 PM', status: 'scheduled', seed: 1, thumbLabel: 'HOOK B-ROLL' },
+            { title: 'Behind the scenes of my product launch', platforms: ['youtube'], scheduledLabel: 'Fri, Jul 10 · 4:00 PM', status: 'needsreview', seed: 2, thumbLabel: 'BTS FOOTAGE' },
+          ];
+
+          const viewBars = [40, 55, 48, 62, 58, 70, 66, 74, 69, 80, 72, 88].map((h, i) => ({
+            height: h + '%',
+            color: i === 9 ? '#3D5AFE' : 'rgba(61,90,254,0.28)',
+          }));
+
+          const insights = [
+            'Your TikTok posts perform 28% better on Thursdays after 8 PM.',
+            'Short-form tutorials published between 6–9 PM outperform your average by 19%.',
+            'Your YouTube uploads on Tuesdays have the highest first-24-hour view velocity.',
+          ];
+
+          const publishLabels = { now: 'Publish Now', draft: 'Save as Draft', schedule: 'Schedule Post' };
+
+          return {
+            sidebarWidth: compact ? '76px' : '240px',
+            sidebarPad: compact ? '16px' : '22px',
+            sidebarExpanded: !compact,
+            screenTitle: titles[screen] || 'Dashboard',
+            isDashboard: screen === 'dashboard',
+            isCreate: screen === 'create',
+            isRecommendations: screen === 'recommendations',
+            isAnalytics: screen === 'analytics',
+            isCalendar: screen === 'calendar',
+            isLibrary: screen === 'library',
+            isAccounts: screen === 'accounts',
+            isSettings: screen === 'settings',
+            navItems,
+            goToCreate: () => this.goTo('create'),
+            goToRecommendations: () => this.goTo('recommendations'),
+            goToCalendar: () => this.goTo('calendar'),
+            goToAnalytics: () => this.goTo('analytics'),
+            upcomingPosts,
+            viewBars,
+            insights,
+
+            // Composer
+            hasMedia: this.state.hasMedia,
+            noMedia: !this.state.hasMedia,
+            setMedia: () => this.setState({ hasMedia: true }),
+            clearMedia: () => this.setState({ hasMedia: false }),
+
+            youtubeCardStyle: this.platformCardStyle(this.state.platformYoutube),
+            tiktokCardStyle: this.platformCardStyle(this.state.platformTiktok),
+            youtubeCheckStyle: this.checkStyle(this.state.platformYoutube),
+            tiktokCheckStyle: this.checkStyle(this.state.platformTiktok),
+            toggleYoutube: () => this.setState((s) => ({ platformYoutube: !s.platformYoutube })),
+            toggleTiktok: () => this.setState((s) => ({ platformTiktok: !s.platformTiktok })),
+
+            ytTabStyle: this.tabBtnStyle(this.state.activeTab === 'youtube'),
+            ttTabStyle: this.tabBtnStyle(this.state.activeTab === 'tiktok'),
+            tabIsYoutube: this.state.activeTab === 'youtube',
+            tabIsTiktok: this.state.activeTab === 'tiktok',
+            setTabYoutube: () => this.setState({ activeTab: 'youtube' }),
+            setTabTiktok: () => this.setState({ activeTab: 'tiktok' }),
+
+            modeNowStyle: this.modeBtnStyle(this.state.publishMode === 'now'),
+            modeDraftStyle: this.modeBtnStyle(this.state.publishMode === 'draft'),
+            modeScheduleStyle: this.modeBtnStyle(this.state.publishMode === 'schedule'),
+            modeIsSchedule: this.state.publishMode === 'schedule',
+            setModeNow: () => this.setState({ publishMode: 'now' }),
+            setModeDraft: () => this.setState({ publishMode: 'draft' }),
+            setModeSchedule: () => this.setState({ publishMode: 'schedule' }),
+            publishLabel: publishLabels[this.state.publishMode],
+            publishAction: () => this.goTo('calendar'),
+            useRecommended: () => {},
+
+            previewYtStyle: this.previewBtnStyle(this.state.previewPlatform === 'youtube'),
+            previewTtStyle: this.previewBtnStyle(this.state.previewPlatform === 'tiktok'),
+            previewIsYoutube: this.state.previewPlatform === 'youtube',
+            previewIsTiktok: this.state.previewPlatform === 'tiktok',
+            setPreviewYoutube: () => this.setState({ previewPlatform: 'youtube' }),
+            setPreviewTiktok: () => this.setState({ previewPlatform: 'tiktok' }),
+
+            // Recommendations
+            heatYtStyle: this.previewBtnStyle(this.state.heatMode === 'youtube'),
+            heatTtStyle: this.previewBtnStyle(this.state.heatMode === 'tiktok'),
+            heatCombinedStyle: this.previewBtnStyle(this.state.heatMode === 'combined'),
+            setHeatYoutube: () => this.setState({ heatMode: 'youtube' }),
+            setHeatTiktok: () => this.setState({ heatMode: 'tiktok' }),
+            setHeatCombined: () => this.setState({ heatMode: 'combined' }),
+            heatCells: this.buildHeatCells(this.state.heatMode),
+
+            // Analytics
+            platAllStyle: this.previewBtnStyle(this.state.platformFilter === 'all'),
+            platYtStyle: this.previewBtnStyle(this.state.platformFilter === 'youtube'),
+            platTtStyle: this.previewBtnStyle(this.state.platformFilter === 'tiktok'),
+            setPlatformAll: () => this.setState({ platformFilter: 'all' }),
+            setPlatformYt: () => this.setState({ platformFilter: 'youtube' }),
+            setPlatformTt: () => this.setState({ platformFilter: 'tiktok' }),
+            viewsChart: [30,42,38,55,48,60,58,66,70,63,78,74,86,82].map((h) => ({ height: h + '%' })),
+            engagementChart: [50,55,48,60,58,66,62,70,68,74,72,80,76,84].map((h) => ({ height: h + '%' })),
+            postRows: [
+              { title: '3 hooks that increased my watch time', platform: 'tiktok', date: 'Jun 28', views: '24.1K', likes: '3.2K', comments: '412', engagement: '9.8%', color: '#0E9F6E' },
+              { title: 'How I edit short-form videos 3x faster', platform: 'youtube', date: 'Jun 25', views: '18.6K', likes: '1.1K', comments: '206', engagement: '6.4%', color: '#3D5AFE' },
+              { title: 'Weekly content workflow tips', platform: 'youtube', date: 'Jun 21', views: '12.4K', likes: '890', comments: '134', engagement: '5.9%', color: '#E8734A' },
+              { title: 'Behind the scenes of my product launch', platform: 'tiktok', date: 'Jun 18', views: '31.7K', likes: '4.6K', comments: '588', engagement: '11.2%', color: '#7C5CFF' },
+              { title: 'My camera + audio setup, 2026 edition', platform: 'youtube', date: 'Jun 14', views: '9.8K', likes: '620', comments: '95', engagement: '5.1%', color: '#14151a' },
+              { title: 'Answering your top editing questions', platform: 'tiktok', date: 'Jun 10', views: '16.9K', likes: '2.0K', comments: '241', engagement: '8.3%', color: '#3D5AFE' },
+            ],
+
+            // Calendar
+            viewMonthStyle: this.modeBtnStyle(this.state.calendarView === 'month'),
+            viewWeekStyle: this.modeBtnStyle(this.state.calendarView === 'week'),
+            viewAgendaStyle: this.modeBtnStyle(this.state.calendarView === 'agenda'),
+            viewIsMonth: this.state.calendarView === 'month',
+            viewIsWeek: this.state.calendarView === 'week',
+            viewIsAgenda: this.state.calendarView === 'agenda',
+            setViewMonth: () => this.setState({ calendarView: 'month' }),
+            setViewWeek: () => this.setState({ calendarView: 'week' }),
+            setViewAgenda: () => this.setState({ calendarView: 'agenda' }),
+            weekdayLabels: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+            monthCells: this.buildMonthCells(),
+            agendaPosts: this.buildAgendaPosts(),
+            hasSelectedPost: !!this.state.selectedPostKey,
+            selectedPost: this.getSelectedPost(),
+            closePost: () => this.setState({ selectedPostKey: null }),
+
+            // Library
+            libAllStyle: this.previewBtnStyle(this.state.libraryFilter === 'all'),
+            libDraftStyle: this.previewBtnStyle(this.state.libraryFilter === 'draft'),
+            libScheduledStyle: this.previewBtnStyle(this.state.libraryFilter === 'scheduled'),
+            libPublishedStyle: this.previewBtnStyle(this.state.libraryFilter === 'published'),
+            setLibAll: () => this.setState({ libraryFilter: 'all' }),
+            setLibDraft: () => this.setState({ libraryFilter: 'draft' }),
+            setLibScheduled: () => this.setState({ libraryFilter: 'scheduled' }),
+            setLibPublished: () => this.setState({ libraryFilter: 'published' }),
+            libraryItems: this.buildLibraryItems(),
+
+            // Accounts
+            comingSoonPlatforms: ['Instagram', 'LinkedIn', 'X / Twitter', 'Facebook'],
+
+            // Settings
+            settingsTabs: this.buildSettingsTabs(),
+            activeSettingsLabel: ({ profile: 'Profile', workspace: 'Workspace', team: 'Team', notifications: 'Notifications', billing: 'Billing', publishing: 'Publishing Defaults', timezone: 'Timezone & Calendar', ai: 'AI Recommendation Preferences' })[this.state.settingsTab],
+            settingsIsProfile: this.state.settingsTab === 'profile',
+            settingsIsPublishing: this.state.settingsTab === 'publishing',
+            settingsIsTimezone: this.state.settingsTab === 'timezone',
+            settingsIsAI: this.state.settingsTab === 'ai',
+            settingsIsOther: ['workspace','team','notifications','billing'].includes(this.state.settingsTab),
+          };
+        }
+
+        buildLibraryItems() {
+          const all = [
+            { title: 'How I edit short-form videos 3x faster', platforms: ['youtube','tiktok'], status: 'scheduled', dateLabel: 'Scheduled Jul 7', color: '#3D5AFE', thumbLabel: 'TUTORIAL CUT', isTop: false },
+            { title: '3 hooks that increased my watch time', platforms: ['tiktok'], status: 'published', dateLabel: 'Published Jun 28', color: '#0E9F6E', thumbLabel: 'HOOK B-ROLL', isTop: true },
+            { title: 'Behind the scenes of my product launch', platforms: ['youtube'], status: 'needsreview', dateLabel: 'Needs review', color: '#E8734A', thumbLabel: 'BTS FOOTAGE', isTop: false },
+            { title: 'Weekly content workflow tips', platforms: ['youtube','tiktok'], status: 'draft', dateLabel: 'Edited 2 days ago', color: '#7C5CFF', thumbLabel: 'WORKFLOW', isTop: false },
+            { title: 'My camera + audio setup, 2026 edition', platforms: ['youtube'], status: 'published', dateLabel: 'Published Jun 14', color: '#14151a', thumbLabel: 'GEAR SETUP', isTop: false },
+            { title: 'Answering your top editing questions', platforms: ['tiktok'], status: 'published', dateLabel: 'Published Jun 10', color: '#3D5AFE', thumbLabel: 'Q&A CLIP', isTop: false },
+            { title: 'What I wish I knew before going full-time', platforms: ['youtube'], status: 'draft', dateLabel: 'Edited 5 days ago', color: '#0E9F6E', thumbLabel: 'VLOG DRAFT', isTop: false },
+            { title: 'Quick hook templates for TikTok', platforms: ['tiktok'], status: 'scheduled', dateLabel: 'Scheduled Jul 9', color: '#E8734A', thumbLabel: 'HOOK TEMPLATES', isTop: false },
+          ];
+          const filter = this.state.libraryFilter;
+          if (filter === 'all') return all;
+          return all.filter((it) => it.status === filter);
+        }
+
+        buildSettingsTabs() {
+          const tabs = [
+            { key: 'profile', label: 'Profile' },
+            { key: 'workspace', label: 'Workspace' },
+            { key: 'team', label: 'Team' },
+            { key: 'notifications', label: 'Notifications' },
+            { key: 'billing', label: 'Billing' },
+            { key: 'publishing', label: 'Publishing Defaults' },
+            { key: 'timezone', label: 'Timezone & Calendar' },
+            { key: 'ai', label: 'AI Recommendations' },
+          ];
+          return tabs.map((t) => {
+            const active = this.state.settingsTab === t.key;
+            return {
+              label: t.label,
+              onClick: () => this.setState({ settingsTab: t.key }),
+              style: `padding:9px 12px; border-radius:8px; font-size:13px; font-weight:${active ? '650' : '500'}; cursor:pointer; color:${active ? '#2A3EC4' : 'rgba(23,24,28,0.65)'}; background:${active ? 'rgba(61,90,254,0.09)' : 'transparent'};`,
+            };
+          });
+        }
+
+        buildAgendaPosts() {
+          const raw = [
+            { key: 'a1', day: 7, title: 'How I edit short-form videos 3x faster', platforms: ['youtube','tiktok'], scheduledLabel: 'Tue, Jul 7 · 6:00 PM', status: 'scheduled', seed: 0, thumbLabel: 'TUTORIAL CUT' },
+            { key: 'a2', day: 9, title: '3 hooks that increased my watch time', platforms: ['tiktok'], scheduledLabel: 'Thu, Jul 9 · 8:15 PM', status: 'scheduled', seed: 1, thumbLabel: 'HOOK B-ROLL' },
+            { key: 'a3', day: 10, title: 'Behind the scenes of my product launch', platforms: ['youtube'], scheduledLabel: 'Fri, Jul 10 · 4:00 PM', status: 'needsreview', seed: 2, thumbLabel: 'BTS FOOTAGE' },
+            { key: 'a4', day: 14, title: 'Weekly content workflow tips', platforms: ['youtube','tiktok'], scheduledLabel: 'Tue, Jul 14 · 6:00 PM', status: 'draft', seed: 3, thumbLabel: 'WORKFLOW' },
+            { key: 'a5', day: 16, title: 'Answering your top editing questions', platforms: ['tiktok'], scheduledLabel: 'Thu, Jul 16 · 8:15 PM', status: 'scheduled', seed: 4, thumbLabel: 'Q&A CLIP' },
+          ];
+          return raw.map((p) => ({ ...p, onClick: () => this.setState({ selectedPostKey: p.key }) }));
+        }
+
+        getSelectedPost() {
+          const key = this.state.selectedPostKey;
+          if (!key) return {};
+          const colorBySeed = ['#3D5AFE', '#0E9F6E', '#E8734A', '#7C5CFF', '#14151a'];
+          const posts = this.buildAgendaPosts();
+          const p = posts.find((x) => x.key === key);
+          if (!p) return {};
+          return { ...p, color: colorBySeed[p.seed % colorBySeed.length] };
+        }
+
+        buildMonthCells() {
+          // July 2026 starts on a Wednesday; 31 days
+          const firstWeekday = 3; // 0=Sun
+          const daysInMonth = 31;
+          const postsByDay = {
+            7: [{ label: 'YT + TT', bg: 'rgba(61,90,254,0.12)', color: '#2A3EC4' }],
+            9: [{ label: 'TikTok', bg: 'rgba(20,21,26,0.08)', color: '#14151a' }],
+            10: [{ label: 'YouTube', bg: 'rgba(255,59,48,0.1)', color: '#B8241A' }],
+            14: [{ label: 'YT + TT', bg: 'rgba(23,24,28,0.06)', color: 'rgba(23,24,28,0.5)' }],
+            16: [{ label: 'TikTok', bg: 'rgba(20,21,26,0.08)', color: '#14151a' }],
+          };
+          const recommendedDays = [7, 9, 14, 16, 21, 23, 28, 30];
+          const cells = [];
+          for (let i = 0; i < firstWeekday; i++) {
+            cells.push({ num: '', posts: [], bg: 'transparent', border: 'transparent', numColor: 'transparent', onClick: () => {} });
+          }
+          for (let d = 1; d <= daysInMonth; d++) {
+            const isToday = d === 4;
+            const isRecommended = recommendedDays.includes(d);
+            cells.push({
+              num: String(d),
+              posts: postsByDay[d] || [],
+              bg: isToday ? 'rgba(61,90,254,0.06)' : (isRecommended ? 'rgba(61,90,254,0.025)' : '#fff'),
+              border: isToday ? 'rgba(61,90,254,0.3)' : 'rgba(23,24,28,0.06)',
+              numColor: isToday ? '#2A3EC4' : '#17181C',
+              onClick: () => {},
+            });
+          }
+          return cells;
+        }
+      }
+    </script>
+  </body>
+</html>

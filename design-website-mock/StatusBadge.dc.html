@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <div
+        style="display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; background:{{ bg }}; font-family:'Inter',sans-serif;"
+      >
+        <span
+          style="width:6px; height:6px; border-radius:50%; background:{{ dot }}; flex-shrink:0;"
+        ></span>
+        <span
+          style="font-size:11.5px; font-weight:600; color:{{ text }}; letter-spacing:0.01em; white-space:nowrap;"
+          >{{ label }}</span
+        >
+      </div>
+    </x-dc>
+    <script
+      type="text/x-dc"
+      data-dc-script
+      data-props='{"$preview":{"width":110,"height":26},"status":{"editor":"enum","default":"scheduled","options":["draft","scheduled","published","failed","needsreview"],"tsType":"string"}}'
+    >
+      class Component extends DCLogic {
+        renderVals() {
+          const status = (this.props.status || 'draft').toLowerCase();
+          const map = {
+            draft:        { label: 'Draft',         dot: 'rgba(26,26,26,0.4)', bg: 'rgba(26,26,26,0.06)', text: 'rgba(26,26,26,0.65)' },
+            scheduled:    { label: 'Scheduled',      dot: '#3D5AFE',            bg: 'rgba(61,90,254,0.08)', text: '#2A3EC4' },
+            published:    { label: 'Published',      dot: '#0E9F6E',            bg: 'rgba(14,159,110,0.09)', text: '#0A7A55' },
+            failed:       { label: 'Failed',         dot: '#E23E3E',            bg: 'rgba(226,62,62,0.09)', text: '#C22F2F' },
+            needsreview:  { label: 'Needs Review',   dot: '#E8A23D',            bg: 'rgba(232,162,61,0.12)', text: '#9A6414' },
+          };
+          const key = status.replace(/\s+/g,'');
+          const m = map[key] || map.draft;
+          return { label: m.label, dot: m.dot, bg: m.bg, text: m.text };
+        }
+      }
+    </script>
+  </body>
+</html>

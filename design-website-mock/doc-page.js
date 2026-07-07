@@ -50,12 +50,12 @@
 
 (() => {
   const PAPER = {
-    letter: ['8.5in', '11in'],
-    a4: ['210mm', '297mm'],
-    legal: ['8.5in', '14in'],
+    letter: ["8.5in", "11in"],
+    a4: ["210mm", "297mm"],
+    legal: ["8.5in", "14in"],
   };
   const CSS_LENGTH = /^\d+(\.\d+)?(px|in|mm|cm|pt|pc)$/;
-  const safeLen = (v, fb) => (CSS_LENGTH.test((v || '').trim()) ? v.trim() : fb);
+  const safeLen = (v, fb) => (CSS_LENGTH.test((v || "").trim()) ? v.trim() : fb);
 
   const stylesheet = `
     :host {
@@ -111,36 +111,45 @@
   `;
 
   class DocPage extends HTMLElement {
-    static get observedAttributes() { return ['size', 'width', 'height', 'margin']; }
+    static get observedAttributes() {
+      return ["size", "width", "height", "margin"];
+    }
 
     constructor() {
       super();
-      this._root = this.attachShadow({ mode: 'open' });
-      this._mo = typeof MutationObserver === 'function'
-        ? new MutationObserver(() => this._scheduleMeasure())
-        : null;
+      this._root = this.attachShadow({ mode: "open" });
+      this._mo =
+        typeof MutationObserver === "function"
+          ? new MutationObserver(() => this._scheduleMeasure())
+          : null;
     }
 
     get pageWidth() {
-      const named = PAPER[(this.getAttribute('size') || '').toLowerCase()];
-      return safeLen(this.getAttribute('width'), named ? named[0] : PAPER.letter[0]);
+      const named = PAPER[(this.getAttribute("size") || "").toLowerCase()];
+      return safeLen(this.getAttribute("width"), named ? named[0] : PAPER.letter[0]);
     }
     get pageHeight() {
-      const named = PAPER[(this.getAttribute('size') || '').toLowerCase()];
-      return safeLen(this.getAttribute('height'), named ? named[1] : PAPER.letter[1]);
+      const named = PAPER[(this.getAttribute("size") || "").toLowerCase()];
+      return safeLen(this.getAttribute("height"), named ? named[1] : PAPER.letter[1]);
     }
-    get pageMargin() { return safeLen(this.getAttribute('margin'), '0.75in'); }
+    get pageMargin() {
+      return safeLen(this.getAttribute("margin"), "0.75in");
+    }
 
     connectedCallback() {
       if (!this._sheet) this._render();
       this._syncSize();
       this._syncPrintPageRule();
       this._ensureTextWrapDefaults();
-      if (this._mo) this._mo.observe(this, {
-        subtree: true, childList: true, characterData: true, attributes: true,
-      });
+      if (this._mo)
+        this._mo.observe(this, {
+          subtree: true,
+          childList: true,
+          characterData: true,
+          attributes: true,
+        });
       this._onResize = () => this._scheduleMeasure();
-      window.addEventListener('resize', this._onResize);
+      window.addEventListener("resize", this._onResize);
       if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(() => this._scheduleMeasure());
       }
@@ -148,14 +157,17 @@
     }
 
     disconnectedCallback() {
-      window.removeEventListener('resize', this._onResize);
+      window.removeEventListener("resize", this._onResize);
       if (this._mo) this._mo.disconnect();
-      if (this._raf) { cancelAnimationFrame(this._raf); this._raf = null; }
+      if (this._raf) {
+        cancelAnimationFrame(this._raf);
+        this._raf = null;
+      }
       // Drop the head rules when the last doc-page leaves, so a deleted
       // document's @page geometry and text-wrap defaults can't apply to
       // whatever replaces it.
-      if (!document.querySelector('doc-page')) {
-        ['doc-page-print', 'doc-page-text-wrap'].forEach((id) => {
+      if (!document.querySelector("doc-page")) {
+        ["doc-page-print", "doc-page-text-wrap"].forEach((id) => {
           const tag = document.getElementById(id);
           if (tag) tag.remove();
         });
@@ -180,19 +192,30 @@
             <tfoot><tr><td><div class="ftr-space"><slot name="footer"></slot></div></td></tr></tfoot>
           </table>
         </div>`;
-      this._sheet = this._root.querySelector('.sheet');
-      this._vars = this._root.getElementById('vars');
+      this._sheet = this._root.querySelector(".sheet");
+      this._vars = this._root.getElementById("vars");
     }
 
     /** Runtime sizing lives in a shadow <style> :host rule, never on the
      *  light-DOM host element, so serialize-persist can't write it back. */
     _syncSize(hdrH, ftrH) {
-      this._vars.textContent = ':host{' +
-        '--doc-page-w:' + this.pageWidth + ';' +
-        '--doc-page-h:' + this.pageHeight + ';' +
-        '--doc-page-margin:' + this.pageMargin + ';' +
-        '--doc-hdr-h:' + (hdrH || 0) + 'px;' +
-        '--doc-ftr-h:' + (ftrH || 0) + 'px}';
+      this._vars.textContent =
+        ":host{" +
+        "--doc-page-w:" +
+        this.pageWidth +
+        ";" +
+        "--doc-page-h:" +
+        this.pageHeight +
+        ";" +
+        "--doc-page-margin:" +
+        this.pageMargin +
+        ";" +
+        "--doc-hdr-h:" +
+        (hdrH || 0) +
+        "px;" +
+        "--doc-ftr-h:" +
+        (ftrH || 0) +
+        "px}";
     }
 
     /** @page is a no-op inside shadow DOM, so the rule lives in <head>.
@@ -200,23 +223,27 @@
      *  @page cascade is source-order per descriptor, so this rule wins
      *  over any other @page rule in the document. */
     _syncPrintPageRule() {
-      const id = 'doc-page-print';
+      const id = "doc-page-print";
       let tag = document.getElementById(id);
       if (!tag) {
-        tag = document.createElement('style');
+        tag = document.createElement("style");
         tag.id = id;
       }
       document.head.appendChild(tag);
       tag.textContent =
-        '@page { size: ' + this.pageWidth + ' ' + this.pageHeight + '; margin: 0; } ' +
-        '@media print { html, body { margin: 0 !important; padding: 0 !important; background: none !important; height: auto !important; overflow: visible !important; } ' +
-        'h1,h2,h3,h4,h5,h6 { break-after: avoid; } ' +
-        'figure,pre,blockquote,img,svg,tr { break-inside: avoid; } ' +
-        'p,li { orphans: 3; widows: 3; } ' +
-        '* { -webkit-print-color-adjust: exact; print-color-adjust: exact; } ' +
-        '*, *::before, *::after { animation-delay: -99s !important; animation-duration: .001s !important; ' +
-        'animation-iteration-count: 1 !important; animation-fill-mode: both !important; ' +
-        'animation-play-state: running !important; transition-duration: 0s !important; } }';
+        "@page { size: " +
+        this.pageWidth +
+        " " +
+        this.pageHeight +
+        "; margin: 0; } " +
+        "@media print { html, body { margin: 0 !important; padding: 0 !important; background: none !important; height: auto !important; overflow: visible !important; } " +
+        "h1,h2,h3,h4,h5,h6 { break-after: avoid; } " +
+        "figure,pre,blockquote,img,svg,tr { break-inside: avoid; } " +
+        "p,li { orphans: 3; widows: 3; } " +
+        "* { -webkit-print-color-adjust: exact; print-color-adjust: exact; } " +
+        "*, *::before, *::after { animation-delay: -99s !important; animation-duration: .001s !important; " +
+        "animation-iteration-count: 1 !important; animation-fill-mode: both !important; " +
+        "animation-play-state: running !important; transition-duration: 0s !important; } }";
     }
 
     /** Typographic defaults for document text: balance headings, avoid
@@ -227,19 +254,22 @@
      *  data-omelette-injected marks the tag for the host editor to strip
      *  at serialize, so it is never written back as authored source. */
     _ensureTextWrapDefaults() {
-      if (document.getElementById('doc-page-text-wrap')) return;
-      const tag = document.createElement('style');
-      tag.id = 'doc-page-text-wrap';
-      tag.setAttribute('data-omelette-injected', '');
+      if (document.getElementById("doc-page-text-wrap")) return;
+      const tag = document.createElement("style");
+      tag.id = "doc-page-text-wrap";
+      tag.setAttribute("data-omelette-injected", "");
       tag.textContent =
-        ':where(h1,h2,h3,h4,h5,h6){text-wrap:balance}' +
-        ':where(p,li,blockquote,figcaption){text-wrap:pretty}';
+        ":where(h1,h2,h3,h4,h5,h6){text-wrap:balance}" +
+        ":where(p,li,blockquote,figcaption){text-wrap:pretty}";
       document.head.appendChild(tag);
     }
 
     _scheduleMeasure() {
       if (this._raf) return;
-      this._raf = requestAnimationFrame(() => { this._raf = null; this._measure(); });
+      this._raf = requestAnimationFrame(() => {
+        this._raf = null;
+        this._measure();
+      });
     }
 
     /** Slot heights feed the print spacers (--doc-hdr-h / --doc-ftr-h), so
@@ -251,7 +281,7 @@
     }
   }
 
-  if (!customElements.get('doc-page')) {
-    customElements.define('doc-page', DocPage);
+  if (!customElements.get("doc-page")) {
+    customElements.define("doc-page", DocPage);
   }
 })();
