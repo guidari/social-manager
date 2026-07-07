@@ -188,7 +188,7 @@ A modular monolith to start — one Next.js app for API + UI, one separate long-
 
 - **Web / API (Next.js):** Auth, CRUD, presigned uploads, enqueues jobs. Stateless, horizontally scalable.
 - **Worker (Node + BullMQ):** Publishing, analytics sync, recommendation recompute, token refresh, notifications.
-- **Datastores:** Postgres (source of truth via Prisma), Redis (BullMQ queues + cache), S3 (media).
+- **Datastores:** Postgres (source of truth via Prisma, Supabase-hosted in dev/staging), Redis (BullMQ queues + cache — not yet provisioned), S3 (media).
 
 ### 3.2 Database Schema (Prisma-oriented)
 

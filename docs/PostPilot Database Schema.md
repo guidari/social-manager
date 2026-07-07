@@ -1,7 +1,7 @@
 # PostPilot — MVP Database Schema
 
 **Companion to:** `PostPilot Engineering Spec` · `PostPilot Implementation Checklist`
-**Database:** PostgreSQL 15+ · accessed via Prisma ORM
+**Database:** PostgreSQL 15+ · accessed via Prisma ORM · hosted on Supabase in dev/staging
 **Scope:** 13 tables covering auth/workspace, integrations, content, scheduling, publishing, analytics, and recommendations.
 
 ---
@@ -374,14 +374,26 @@ users ──< audit_logs (actor)
 
 ## Prisma Schema
 
+> **Supabase note:** `DATABASE_URL` should point at Supabase's shared transaction-mode
+> pooler (port 6543, `?pgbouncer=true`) for runtime queries; `directUrl` points at the
+> shared session-mode pooler (port 5432), which Prisma Migrate needs because the
+> transaction-mode pooler doesn't support the DDL migrations run. Supabase also
+> pre-installs a few extensions (`pgcrypto`, `uuid-ossp`, `pg_stat_statements`,
+> `supabase_vault`) that aren't declared below — `prisma migrate dev` will see these as
+> drift on a fresh project and offer to reset the schema. Until that's resolved (e.g. by
+> baselining the migration history), use `prisma db push` to sync schema changes instead.
+
 ```prisma
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [citext]
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 enum WorkspaceRole {

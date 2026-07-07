@@ -1,0 +1,71 @@
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [citext]
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+enum WorkspaceRole {
+  owner
+  admin
+  editor
+  reviewer
+}
+
+enum WorkspacePlan {
+  free
+  pro
+  agency
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique @db.Citext
+  passwordHash String?  @map("password_hash")
+  name         String
+  avatarUrl    String?  @map("avatar_url")
+  timezone     String   @default("UTC")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  memberships WorkspaceMember[]
+
+  @@map("users")
+}
+
+model Workspace {
+  id              String        @id @default(uuid())
+  name            String
+  slug            String        @unique
+  plan            WorkspacePlan @default(free)
+  defaultTimezone String        @default("UTC") @map("default_timezone")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  members WorkspaceMember[]
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id           String        @id @default(uuid())
+  workspaceId  String        @map("workspace_id")
+  userId       String        @map("user_id")
+  role         WorkspaceRole
+  invitedEmail String?       @map("invited_email") @db.Citext
+  joinedAt     DateTime?     @map("joined_at")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@map("workspace_members")
+}
