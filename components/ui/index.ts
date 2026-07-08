@@ -33,3 +33,6 @@ export type { BadgeProps, PlatformBadgeProps, StatusBadgeProps } from "./badge";
 
 export { EmptyState } from "./empty-state";
 export type { EmptyStateProps } from "./empty-state";
+
+export { PageContainer } from "./page-container";
+export type { PageContainerProps } from "./page-container";
