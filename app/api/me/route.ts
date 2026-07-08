@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
 import { verifySessionToken, SESSION_COOKIE_NAME } from "@/lib/auth/session";
+import { getUserWithMemberships } from "@/lib/auth/current-user";
 import { apiError } from "@/lib/api/errors";
 import { WORKSPACE_HEADER } from "@/lib/auth/require-permission";
 
@@ -10,14 +10,7 @@ export async function GET(request: NextRequest) {
     return apiError("UNAUTHENTICATED", "Sign in to continue.");
   }
 
-  const [user, memberships] = await Promise.all([
-    prisma.user.findUnique({ where: { id: session.userId } }),
-    prisma.workspaceMember.findMany({
-      where: { userId: session.userId, joinedAt: { not: null } },
-      orderBy: { createdAt: "asc" },
-      include: { workspace: true },
-    }),
-  ]);
+  const { user, memberships } = await getUserWithMemberships(session.userId);
 
   if (!user) {
     return apiError("UNAUTHENTICATED", "Sign in to continue.");
