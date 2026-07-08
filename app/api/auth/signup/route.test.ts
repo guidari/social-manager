@@ -58,11 +58,12 @@ describe("POST /api/auth/signup", () => {
   it("creates the user and workspace, sets a session cookie, and returns 201", async () => {
     const user = { id: "user-1", email: "ada@example.com", name: "Ada Lovelace" };
     const workspace = { id: "ws-1", name: "Ada Lovelace's Workspace", slug: "ada-lovelace" };
+    const createWorkspace = vi.fn().mockResolvedValue(workspace);
 
     prisma.$transaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => {
       const tx = {
         user: { create: vi.fn().mockResolvedValue(user) },
-        workspace: { create: vi.fn().mockResolvedValue(workspace) },
+        workspace: { create: createWorkspace },
       };
       return callback(tx);
     });
@@ -71,6 +72,15 @@ describe("POST /api/auth/signup", () => {
 
     expect(response.status).toBe(201);
     expect(hashPassword).toHaveBeenCalledWith("password123");
+
+    // Acceptance criterion: signup produces exactly one workspace with the
+    // creator as `owner`.
+    expect(createWorkspace).toHaveBeenCalledTimes(1);
+    expect(createWorkspace).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        members: { create: { userId: user.id, role: "owner", joinedAt: expect.any(Date) } },
+      }),
+    });
 
     const body = await response.json();
     expect(body).toEqual({
