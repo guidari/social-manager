@@ -44,6 +44,7 @@ model Workspace {
   slug            String        @unique
   plan            WorkspacePlan @default(free)
   defaultTimezone String        @default("UTC") @map("default_timezone")
+  onboardedAt     DateTime?     @map("onboarded_at")
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 
