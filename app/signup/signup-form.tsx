@@ -6,12 +6,14 @@ import Link from "next/link";
 import { Button, TextInput } from "@/components/ui";
 
 interface FieldErrors {
+  name?: string;
   email?: string;
   password?: string;
 }
 
-export default function LoginPage() {
+export function SignupForm() {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -25,10 +27,10 @@ export default function LoginPage() {
     setFieldErrors({});
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }),
       });
 
       if (!response.ok) {
@@ -40,7 +42,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/app");
+      router.push("/onboarding");
       router.refresh();
     } finally {
       setLoading(false);
@@ -55,12 +57,21 @@ export default function LoginPage() {
           <span className="text-base font-bold tracking-tight">PostPilot</span>
         </div>
 
-        <h1 className="mb-1 text-xl font-bold tracking-tight">Log in</h1>
+        <h1 className="mb-1 text-xl font-bold tracking-tight">Create your account</h1>
         <p className="mb-6 text-sm text-muted-foreground">
-          Welcome back. Enter your details to continue.
+          Start scheduling and optimizing your posts in minutes.
         </p>
 
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <TextInput
+            label="Name"
+            type="text"
+            autoComplete="name"
+            required
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            error={fieldErrors.name}
+          />
           <TextInput
             label="Email"
             type="email"
@@ -73,7 +84,7 @@ export default function LoginPage() {
           <TextInput
             label="Password"
             type="password"
-            autoComplete="current-password"
+            autoComplete="new-password"
             required
             value={password}
             onChange={(event) => setPassword(event.target.value)}
@@ -83,14 +94,14 @@ export default function LoginPage() {
           {formError && <p className="text-sm text-destructive">{formError}</p>}
 
           <Button type="submit" variant="primary" size="md" loading={loading} className="mt-2">
-            Log in
+            Sign up
           </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
-          <Link href="/signup" className="font-medium text-primary hover:underline">
-            Sign up
+          Already have an account?{" "}
+          <Link href="/login" className="font-medium text-primary hover:underline">
+            Log in
           </Link>
         </p>
       </div>
