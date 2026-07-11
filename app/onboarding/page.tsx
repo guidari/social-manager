@@ -1,10 +1,10 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { AppShell } from "@/components/shell/app-shell";
 import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth/session";
 import { getUserWithMemberships } from "@/lib/auth/current-user";
+import { OnboardingForm } from "./onboarding-form";
 
-export default async function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function OnboardingPage() {
   const session = verifySessionToken(cookies().get(SESSION_COOKIE_NAME)?.value);
   if (!session) {
     redirect("/login");
@@ -16,9 +16,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const activeMembership = memberships[0];
-  if (activeMembership && !activeMembership.workspace.onboardedAt) {
-    redirect("/onboarding");
+  if (!activeMembership || activeMembership.workspace.onboardedAt) {
+    redirect("/app");
   }
 
-  return <AppShell user={{ name: user.name, email: user.email }}>{children}</AppShell>;
+  return <OnboardingForm defaultTimezone={activeMembership.workspace.defaultTimezone} />;
 }
