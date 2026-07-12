@@ -2,7 +2,7 @@
 
 **Companion to:** `PostPilot Engineering Spec` · `PostPilot Implementation Checklist`
 **Database:** PostgreSQL 15+ · accessed via Prisma ORM · hosted on Supabase in dev/staging
-**Scope:** 13 tables covering auth/workspace, integrations, content, scheduling, publishing, analytics, and recommendations.
+**Scope:** 13 tables covering auth/workspace, integrations, content, scheduling, publishing, analytics, and recommendations — plus one additional table (`auth_tokens`) and a handful of settings columns on existing tables added later by DB-204 to close a gap found in the Settings/Password-Reset epics (see §14–15).
 
 ---
 
@@ -347,6 +347,50 @@
 
 ---
 
+## 14. `auth_tokens` *(DB-204 addition)*
+
+**Purpose:** Short-lived, single-use tokens backing password reset and email verification (AUTH-108). Added after the original 13-table DB-201 scope, once the Settings/Auth gaps below were found unticketed.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` | PK |
+| `user_id` | `uuid` | FK → `users.id`, cascade delete |
+| `type` | `text` (enum: `password_reset`, `email_verification`) | required |
+| `token_hash` | `text` | unique — store a hash, never the raw token, mirroring `account_tokens`' encryption discipline |
+| `expires_at` | `timestamptz` | required |
+| `used_at` | `timestamptz` | nullable — set on first use |
+| `created_at` | `timestamptz` | default `now()` |
+
+**Relationships:** belongs to `users`.
+
+**Indexes:** unique index on `token_hash`; index on `(user_id, type)`.
+
+**Constraints:** a token with `used_at` already set must be rejected even if `expires_at` hasn't passed yet (single-use, not just time-bound).
+
+---
+
+## 15. Settings columns added to existing tables *(DB-204 addition)*
+
+**Purpose:** The Settings epic (Group 11 — SET-901 through SET-906) needs a few columns on tables DB-201 already created. Additive and nullable/defaulted so existing rows and reads are unaffected.
+
+**On `workspaces` (table 2):**
+
+| Column | Type | Notes |
+|---|---|---|
+| `recommendation_weights` | `jsonb` | nullable — `{engagement, views, watchTime}`; REC-801 falls back to the Engineering Spec's default weights when `null` |
+| `recommendation_history_window_days` | `int` | nullable — same fallback behavior |
+| `default_publish_mode` | `text` (enum: `draft`, `schedule`, `now`) | nullable — `ScheduleControl` (SCHED-504) falls back to `draft` when unset |
+| `auto_apply_recommended` | `boolean` | default `false` |
+
+**On `users` (table 1):**
+
+| Column | Type | Notes |
+|---|---|---|
+| `notification_preferences` | `jsonb` | nullable — `{publishSuccess, publishFailure, reviewRequests, weeklySummary}`; a missing key defaults to `true` except `weeklySummary` |
+| `email_verified_at` | `timestamptz` | nullable — set by `GET /auth/verify` (AUTH-108) |
+
+---
+
 ## Entity Relationship Summary
 
 ```
@@ -368,6 +412,7 @@ users ──< workspace_members >── workspaces
 media_assets ──< content_drafts (media_asset_id)
 media_assets ──< post_platform_variants (custom_thumbnail_media_id)
 users ──< audit_logs (actor)
+users ──< auth_tokens (DB-204)
 ```
 
 ---
@@ -471,32 +516,50 @@ enum RecommendationPlatform {
   combined
 }
 
+enum PublishMode { // DB-204
+  draft
+  schedule
+  now
+}
+
+enum AuthTokenType { // DB-204
+  password_reset
+  email_verification
+}
+
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique @db.Citext
-  passwordHash String?  @map("password_hash")
-  name         String
-  avatarUrl    String?  @map("avatar_url")
-  timezone     String   @default("UTC")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id                     String    @id @default(uuid())
+  email                  String    @unique @db.Citext
+  passwordHash           String?   @map("password_hash")
+  name                   String
+  avatarUrl              String?   @map("avatar_url")
+  timezone               String    @default("UTC")
+  notificationPreferences Json?    @map("notification_preferences") // DB-204
+  emailVerifiedAt        DateTime? @map("email_verified_at") // DB-204
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
 
   memberships   WorkspaceMember[]
   mediaAssets   MediaAsset[]
   contentDrafts ContentDraft[]
   auditLogs     AuditLog[]
+  authTokens    AuthToken[] // DB-204
 
   @@map("users")
 }
 
 model Workspace {
-  id               String        @id @default(uuid())
-  name             String
-  slug             String        @unique
-  plan             WorkspacePlan @default(free)
-  defaultTimezone  String        @default("UTC") @map("default_timezone")
-  createdAt        DateTime      @default(now()) @map("created_at")
-  updatedAt        DateTime      @updatedAt @map("updated_at")
+  id                                String        @id @default(uuid())
+  name                              String
+  slug                              String        @unique
+  plan                              WorkspacePlan @default(free)
+  defaultTimezone                   String        @default("UTC") @map("default_timezone")
+  recommendationWeights             Json?         @map("recommendation_weights") // DB-204
+  recommendationHistoryWindowDays   Int?          @map("recommendation_history_window_days") // DB-204
+  defaultPublishMode                PublishMode?  @map("default_publish_mode") // DB-204
+  autoApplyRecommended              Boolean       @default(false) @map("auto_apply_recommended") // DB-204
+  createdAt                         DateTime      @default(now()) @map("created_at")
+  updatedAt                         DateTime      @updatedAt @map("updated_at")
 
   members         WorkspaceMember[]
   socialAccounts  SocialAccount[]
@@ -737,6 +800,21 @@ model AuditLog {
   @@index([resourceType, resourceId])
   @@map("audit_logs")
 }
+
+model AuthToken { // DB-204
+  id        String        @id @default(uuid())
+  userId    String        @map("user_id")
+  type      AuthTokenType
+  tokenHash String        @unique @map("token_hash")
+  expiresAt DateTime      @map("expires_at")
+  usedAt    DateTime?     @map("used_at")
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@map("auth_tokens")
+}
 ```
 
 ---
@@ -747,3 +825,4 @@ model AuditLog {
 - **Social account disconnect** does **not** cascade-delete `scheduled_posts` — historical posts/analytics remain for reporting; only new scheduling is blocked while `status = disconnected`.
 - **Content draft deletion** cascades to its `scheduled_posts` (and transitively their variants/jobs/snapshots) — only allowed at the application layer when no target is in a non-terminal state.
 - **Audit logs** use `onDelete: SetNull` on both FKs so history survives workspace/user deletion.
+- **Auth tokens** (DB-204) cascade-delete with their user — a deleted account's outstanding reset/verification links are useless anyway.
