@@ -79,6 +79,41 @@ Sets `postpilot_session` httpOnly cookie.
 
 ---
 
+### `POST /auth/forgot-password` *(AUTH-108)*
+**Auth:** none (public)
+
+**Request:** `{ "email": "string" }`
+
+**Response `200`:** `{ "ok": true }` — always this shape, regardless of whether the email matches an account (no account enumeration). If it matches, a short-lived single-use reset token is emailed.
+
+**Errors:** `429 RATE_LIMITED` (per email/IP).
+
+**Frontend notes:** Show the same generic "if that email exists, we sent a link" copy regardless of the response.
+
+---
+
+### `POST /auth/reset-password` *(AUTH-108)*
+**Auth:** none (public) — authenticated by the `token`
+
+**Request:** `{ "token": "string", "password": "string (min 8 chars)" }`
+
+**Response `200`:** `{ "user": {...}, "session": { "expiresAt": "iso8601" } }` — logs the user in and invalidates all other active sessions for that user.
+
+**Errors:** `422 VALIDATION_ERROR` (weak password); `401 UNAUTHENTICATED` (token invalid, expired, or already used).
+
+---
+
+### `GET /auth/verify` *(AUTH-108)*
+**Auth:** none (public) — authenticated by the `token` query param
+
+**Request (query):** `?token=string`
+
+**Response `200`:** `{ "ok": true }` — marks the user's email verified.
+
+**Errors:** `401 UNAUTHENTICATED` (token invalid/expired).
+
+---
+
 ### `GET /me`
 **Auth:** session required
 
@@ -94,6 +129,19 @@ Sets `postpilot_session` httpOnly cookie.
 **Errors:** `401 UNAUTHENTICATED`.
 
 **Frontend notes:** Call once on app shell mount (RSC root layout); cache in a top-level provider. Drives the workspace switcher and role-gated UI.
+
+---
+
+### `PATCH /me` *(SET-901)*
+**Auth:** session required
+
+**Request:** any subset of `{ "name": "string", "avatarUrl": "string|null", "timezone": "string (IANA)" }`
+
+**Response `200`:** `{ "user": {...same shape as GET /me's user...} }`
+
+**Errors:** `422 VALIDATION_ERROR` (invalid timezone string).
+
+**Frontend notes:** Backs `ProfileForm` in Settings; on success, update the same top-level provider `GET /me` populated so the TopBar avatar/name reflect the change without a refetch.
 
 ---
 
@@ -500,6 +548,130 @@ When `isColdStart: true`, `best` and `heatmap` are populated from category bench
 **Errors:** `422` (unknown format).
 
 **Frontend notes:** Trigger via a plain `<a href>` navigation or `window.open`, not `fetch` + blob — simpler and lets the browser handle the download natively.
+
+---
+
+## 8. Settings & Workspace
+
+*(Added for the Settings epic, Group 11 — SET-901 through SET-906. Referenced by the Implementation Checklist's Settings section since v1 but never previously specified here.)*
+
+### `GET /workspace`
+**Auth:** session + workspace (any role)
+
+**Response `200`:** `{ "workspace": { "id": "uuid", "name": "string", "slug": "string", "defaultTimezone": "string", "plan": "free|pro|agency" } }`
+
+**Errors:** `401`, `403`.
+
+---
+
+### `PATCH /workspace` *(SET-901)*
+**Auth:** session + workspace (role: `owner` or `admin`)
+
+**Request:** any subset of `{ "name": "string", "slug": "string" }`
+
+**Response `200`:** `{ "workspace": {...} }`
+
+**Errors:** `422 VALIDATION_ERROR`; `409 CONFLICT` (slug already taken); `403 FORBIDDEN` (role below admin).
+
+**Frontend notes:** Debounce a slug-availability check client-side before submit; the `409` is still the authoritative check.
+
+---
+
+### `GET /workspace/members` *(SET-902)*
+**Auth:** session + workspace (any role)
+
+**Response `200`:** `{ "members": [ { "id": "uuid", "name": "string", "email": "string", "role": "owner|admin|editor|reviewer", "status": "active|pending" } ] }`
+
+**Errors:** `401`, `403`.
+
+---
+
+### `POST /workspace/members` *(SET-902)*
+**Auth:** session + workspace (role: `owner` or `admin`)
+
+**Request:** `{ "email": "string", "role": "admin|editor|reviewer" }`
+
+**Response `201`:** `{ "member": { ...status: "pending"... } }` — invite email delivery may be stubbed in v1 (per the Implementation Checklist), but the member row and pending state must be real.
+
+**Errors:** `422 VALIDATION_ERROR`; `409 CONFLICT` (email already a member).
+
+---
+
+### `PATCH /workspace/members/:id` *(SET-902)*
+**Auth:** session + workspace (role: `owner` or `admin`)
+
+**Request:** `{ "role": "admin|editor|reviewer" }`
+
+**Response `200`:** `{ "member": {...} }`
+
+**Errors:** `403 FORBIDDEN` (attempting to change the sole Owner's role, or a non-admin attempting any change); `404`.
+
+---
+
+### `DELETE /workspace/members/:id` *(SET-902)*
+**Auth:** session + workspace (role: `owner` or `admin`)
+
+**Response `204`.**
+
+**Errors:** `403 FORBIDDEN` (attempting to remove the sole Owner); `404`.
+
+**Frontend notes:** Removing a member should invalidate their session on the backend immediately, not just remove the row from the list.
+
+---
+
+### `GET /settings/notifications` / `PATCH /settings/notifications` *(SET-903)*
+**Auth:** session required
+
+**Response `200` (GET):** `{ "preferences": { "publishSuccess": true, "publishFailure": true, "reviewRequests": true, "weeklySummary": false } }`
+
+**Request (PATCH):** any subset of the same keys.
+
+**Response `200` (PATCH):** `{ "preferences": {...} }`
+
+**Errors:** `422 VALIDATION_ERROR` (unknown key).
+
+**Frontend notes:** Persisted to `users.notification_preferences` (DB-204). Storage only in v1 — no delivery pipeline reads these yet.
+
+---
+
+### `GET /billing` *(SET-904)*
+**Auth:** session + workspace (any role)
+
+**Response `200`:** `{ "plan": "free|pro|agency", "accountsConnected": 1, "accountsLimit": 2 }`
+
+**Errors:** `401`, `403`.
+
+**Frontend notes:** Static/mock in v1 — no live payment-provider call required (per the Implementation Checklist).
+
+---
+
+### `GET /settings/publishing` / `PATCH /settings/publishing` *(SET-905)*
+**Auth:** session + workspace (role: `owner`, `admin`, or `editor`)
+
+**Response `200` (GET):** `{ "defaultPublishMode": "draft|schedule|now", "autoApplyRecommended": false }`
+
+**Request (PATCH):** any subset of the same keys.
+
+**Response `200` (PATCH):** `{ ...same shape... }`
+
+**Errors:** `422 VALIDATION_ERROR`.
+
+**Frontend notes:** Persisted to `workspaces.default_publish_mode` / `workspaces.auto_apply_recommended` (DB-204); `ScheduleControl` reads this as its default for new drafts, not existing ones in progress.
+
+---
+
+### `GET /settings/ai` / `PATCH /settings/ai` *(SET-906)*
+**Auth:** session + workspace (role: `owner` or `admin`)
+
+**Response `200` (GET):** `{ "weights": { "engagement": 0.4, "views": 0.35, "watchTime": 0.25 }, "historyWindowDays": 90 }`
+
+**Request (PATCH):** any subset of `{ "weights": {...}, "historyWindowDays": number }`
+
+**Response `200` (PATCH):** `{ ...same shape... }` — a successful `PATCH` triggers an on-demand REC-801 recompute, per that ticket's amended acceptance criteria; it does not wait for the next weekly run.
+
+**Errors:** `422 VALIDATION_ERROR` (weights don't sum sensibly / historyWindowDays out of allowed range).
+
+**Frontend notes:** Persisted to `workspaces.recommendation_weights` / `recommendation_history_window_days` (DB-204). Workspaces that never call `PATCH` here get the Engineering Spec's default weights from REC-801.
 
 ---
 

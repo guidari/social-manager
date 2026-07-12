@@ -7,9 +7,9 @@
 
 ## How to Read This Plan
 
-Each of the 9 groups below is one **Epic** (or two closely related epics where a group is large). Every epic lists its **user stories** (the "why," in product terms) and then a sequenced set of **tickets** (the "how," implementation-sized — roughly 0.5–2 days each for a mid-level engineer). Tickets carry explicit `Depends on:` references to other ticket IDs; a ticket with no unmet dependency is workable immediately once its group is reached. Groups themselves are already in build order — later groups assume everything in earlier groups is done.
+Each of the 11 groups below is one **Epic** (or two closely related epics where a group is large). Every epic lists its **user stories** (the "why," in product terms) and then a sequenced set of **tickets** (the "how," implementation-sized — roughly 0.5–2 days each for a mid-level engineer). Tickets carry explicit `Depends on:` references to other ticket IDs; a ticket with no unmet dependency is workable immediately once its group is reached. Groups themselves are already in build order — later groups assume everything in earlier groups is done, with one exception: Group 9 (Polish/QA) is numbered where it historically sat, but it "cuts across everything" and its final hardening tickets (QA-902, QA-906, QA-907) don't actually close out until Groups 10–11 (Content Library, Settings) land too — see each ticket's `Depends on:`.
 
-**Ticket ID prefixes:** `AUTH` (App Shell/Auth) · `DB` (Database & Models) · `ACCT` (Account Integrations) · `COMP` (Composer) · `SCHED` (Scheduling) · `CAL` (Calendar) · `ANLY` (Analytics) · `REC` (Recommendations) · `QA` (Polish/QA/Observability).
+**Ticket ID prefixes:** `AUTH` (App Shell/Auth) · `DB` (Database & Models) · `ACCT` (Account Integrations) · `COMP` (Composer) · `SCHED` (Scheduling) · `CAL` (Calendar) · `ANLY` (Analytics) · `REC` (Recommendations) · `QA` (Polish/QA/Observability) · `LIB` (Content Library) · `SET` (Settings).
 
 ---
 
@@ -23,7 +23,9 @@ Each of the 9 groups below is one **Epic** (or two closely related epics where a
 6. **Calendar** — needs scheduling (5) to have anything to visualize/move.
 7. **Analytics** — needs published posts flowing through scheduling (5) to have metrics to ingest.
 8. **Recommendations** — needs analytics (7) as its data source.
-9. **Polish / QA / Observability** — cuts across everything; runs continuously but hardens in a final pass before launch.
+9. **Polish / QA / Observability** — cuts across everything; runs continuously but hardens in a final pass before launch, *after* groups 10–11 land.
+10. **Content Library** — needs Composer (4) for post data and Analytics (7) for performance tags; otherwise independent of Scheduling/Calendar/Recommendations.
+11. **Settings** — needs Auth/Workspace (1) for Profile/Team, Account Integrations (3) for Billing's usage count, Scheduling (5) for Publishing Defaults, and Recommendations (8) for AI tuning.
 
 ---
 
@@ -91,6 +93,28 @@ Each of the 9 groups below is one **Epic** (or two closely related epics where a
 - Returning users skip onboarding.
 **Depends on:** AUTH-105.
 
+### AUTH-107 — Signup / register page
+**Type:** Implementation ticket
+**Details:** `/signup` route (email, password, name) mirroring `/login`; on success, redirects to `/onboarding`.
+**Acceptance criteria:** field-level and conflict errors surface like `/login`'s; `/login`↔`/signup` cross-link; already-logged-in visitors are redirected to `/app`.
+**Depends on:** AUTH-102, AUTH-103.
+
+### AUTH-108 — Password reset + email verification
+**Type:** Implementation ticket
+**Details:** `/forgot-password` + `/reset-password?token=` routes and endpoints with short-lived single-use tokens; stands up a minimal transactional email provider (reused later for notification work); email-verification banner + link.
+**Acceptance criteria:**
+- Known and unknown emails get an identical generic response from forgot-password (no account enumeration).
+- Reset links expire quickly and are single-use; completing a reset invalidates other active sessions.
+**Depends on:** AUTH-103.
+
+### AUTH-109 — WorkspaceSwitcher + MobileNavDrawer
+**Type:** Implementation ticket
+**Details:** Fills the Component Inventory §2 (Navigation) gap AUTH-105 left open: `WorkspaceSwitcher` (multi-membership dropdown off `GET /me`) and `MobileNavDrawer` (the real slide-in nav below the mobile breakpoint, not just the icon rail).
+**Acceptance criteria:**
+- A 2+-workspace user can switch active workspace from the Sidebar.
+- Below the mobile breakpoint, a slide-in drawer replaces the Sidebar, matching QA-906's documented collapse behavior.
+**Depends on:** AUTH-105.
+
 ---
 
 ## 2 · Database & Models
@@ -126,6 +150,12 @@ Each of the 9 groups below is one **Epic** (or two closely related epics where a
 **Acceptance criteria:**
 - Tokens are unreadable in a raw DB dump (encrypted at rest).
 - A unit test confirms `account_tokens` fields never appear in any API response serializer, even for `owner`/`admin` roles.
+**Depends on:** DB-201.
+
+### DB-204 — Settings schema additions (weights, publishing defaults, notification prefs)
+**Type:** Implementation ticket
+**Details:** Adds the nullable columns Group 11 (Settings) needs that weren't in DB-201's original 13-table scope: `workspaces.recommendation_weights` (jsonb), `workspaces.recommendation_history_window_days` (int), `workspaces.default_publish_mode` (enum), `workspaces.auto_apply_recommended` (boolean), `users.notification_preferences` (jsonb).
+**Acceptance criteria:** migration adds all 5 columns with sensible defaults; existing rows and reads are unaffected.
 **Depends on:** DB-201.
 
 ---
@@ -179,6 +209,12 @@ Each of the 9 groups below is one **Epic** (or two closely related epics where a
 - Connect/reconnect/disconnect/test flows work end-to-end against ACCT-302/303/304.
 - Disconnect with active scheduled posts shows the confirm dialog listing affected posts (per API Contract's `409` + `force` pattern) before it's built in group 5 — for now, confirm dialog appears but the "affected posts" list is empty until Scheduling exists; ticket is still completable and re-verified in QA-903.
 **Depends on:** ACCT-302, ACCT-303, ACCT-304, AUTH-102.
+
+### ACCT-306 — Complete onboarding account-connection step
+**Type:** Implementation ticket
+**Details:** Replaces AUTH-106's "stub link until group 3 lands" with a real embedded connect step: `OAuthConnectButton`s for YouTube + TikTok inline in `/onboarding`, plus a "skip for now" path.
+**Acceptance criteria:** connecting from onboarding updates `social_accounts` identically to connecting later from `/app/accounts`; skipping still lands on `/app`.
+**Depends on:** AUTH-106, ACCT-302, ACCT-303.
 
 ---
 
@@ -434,7 +470,8 @@ Each of the 9 groups below is one **Epic** (or two closely related epics where a
 **Acceptance criteria:**
 - Given a seeded set of snapshots with a clear best hour, the job's top-scoring cell matches the expected hour in a unit test.
 - Sparse cells (1–2 posts) are visibly shrunk toward the platform mean rather than producing a false 100% confidence score.
-**Depends on:** ANLY-701, DB-201.
+- If a workspace has set `workspaces.recommendation_weights`/`recommendation_history_window_days` (DB-204), the job uses those; otherwise it falls back to the spec's default weights (no regression for workspaces that never touch SET-906).
+**Depends on:** ANLY-701, DB-201, DB-204.
 
 ### REC-802 — Cold-start benchmark seeding
 **Type:** Implementation ticket
@@ -497,7 +534,7 @@ Each of the 9 groups below is one **Epic** (or two closely related epics where a
 **Type:** Implementation ticket
 **Details:** Verify every documented empty state (Dashboard, Composer, Calendar, Library, Analytics, Recommendations cold-start, Accounts, Settings Team tab) against a fresh zero-data workspace.
 **Acceptance criteria:** all 8 documented empty states render with the correct copy and CTA from the Implementation Checklist — checked off one by one against that doc.
-**Depends on:** groups 3–8 complete.
+**Depends on:** groups 3–8 complete, plus group 10 (Content Library) and group 11 (Settings) — this ticket can't check the Library or Settings-Team-tab empty states before those groups exist.
 
 ### QA-903 — Cross-domain edge cases
 **Type:** Implementation ticket
@@ -520,20 +557,106 @@ Each of the 9 groups below is one **Epic** (or two closely related epics where a
 ### QA-906 — Responsive pass
 **Type:** Implementation ticket
 **Details:** Verify the documented responsive collapse behavior (sidebar → icon rail → drawer, tables → stacked cards, calendar → agenda) across all 8 routes at tablet and mobile widths.
-**Acceptance criteria:** no horizontal scroll or clipped content on any route at 375px and 768px widths.
-**Depends on:** groups 1–8 complete.
+**Acceptance criteria:** no horizontal scroll or clipped content on any route at 375px and 768px widths; the drawer collapse specifically requires AUTH-109.
+**Depends on:** groups 1–8 complete, AUTH-109, plus group 10 (Content Library) and group 11 (Settings).
 
 ### QA-907 — Load/volume sanity check
 **Type:** Implementation ticket
 **Details:** Seed a workspace with ~500 posts and ~5,000 analytics snapshots; verify Calendar, Library, and Analytics pages remain responsive (cursor pagination actually used, no full-table scans).
 **Acceptance criteria:** all three pages load in under 1.5s server-response time against the seeded volume.
-**Depends on:** CAL-601, ANLY-703, COMP-403.
+**Depends on:** CAL-601, ANLY-703, COMP-403, LIB-901.
 
 ### QA-908 — Pre-launch security pass
 **Type:** Implementation ticket
 **Details:** Confirm `can()` policy coverage on every route (no route trusts a client-supplied role), confirm token encryption (DB-203) holds under a raw DB dump, confirm rate limiting on `/auth/login` and publish/schedule mutations.
 **Acceptance criteria:** a scripted audit hitting every documented API endpoint with a wrong-role session receives `403` on every write route it shouldn't access.
 **Depends on:** AUTH-104, DB-203, all domain API tickets.
+
+### QA-909 — Global 404 / not-found pages
+**Type:** Implementation ticket
+**Details:** Next.js `not-found.tsx` at the root and inside `/app/*` for bad/deleted resource ids (e.g. an invalid `draftId`), plus a branded 404 for unknown routes — distinct from QA-901's per-widget error boundaries, which cover failed data fetches, not missing resources/routes.
+**Acceptance criteria:** a deleted/nonexistent draft id shows a friendly not-found state with a way back; an unknown route shows a branded 404, logged in or out.
+**Depends on:** AUTH-105.
+
+---
+
+## 10 · Content Library
+
+**Epic:** As a creator, I have a central place to browse, search, and reopen everything I've drafted, scheduled, or published, so content is reusable instead of buried in the Calendar or forgotten.
+
+**Depends on:** COMP-403 (needs `content_drafts`/`GET /posts` as its data source), ANLY-703 (needs analytics for performance tags).
+
+**User stories:**
+- As a user, I can search and filter my content library by status/platform/campaign/date.
+- As a user, I can see which of my posts are top performers or need per-platform adaptation.
+- As a user, I can reopen any item into the composer, or duplicate it.
+
+### LIB-901 — Content Library page (grid, search, filter bar, pagination)
+**Type:** Implementation ticket
+**Details:** `/app/library` per the Implementation Checklist: search input, filter bar (status/platform/type/campaign/date), content grid (PostCard variant), EmptyState — wired to the existing `GET /posts` (COMP-403); no new backend work.
+**Acceptance criteria:**
+- Search + filters combine as AND; cursor pagination is used, not offset.
+- Item click opens the composer pre-filled; duplicate action available.
+- Correct empty states for zero content vs. filtered-to-zero.
+**Depends on:** COMP-403, AUTH-102.
+
+### LIB-902 — Performance tags on Library items (top performer / needs adaptation)
+**Type:** Implementation ticket
+**Details:** Computed "top performer" (simple percentile rule over `GET /analytics/posts`, mock-in-v1 per the Checklist) and "needs adaptation" tags per item.
+**Acceptance criteria:** tags derive from a single batched analytics lookup, not per-item calls; a workspace with no analytics history shows untagged items, not an error or a false positive.
+**Depends on:** LIB-901, ANLY-703.
+
+---
+
+## 11 · Settings
+
+**Epic:** As a user, I can manage my profile, workspace, team, notification preferences, billing, publishing defaults, and AI recommendation tuning in one place, so the product's configurable behavior has a home instead of being hardcoded or absent.
+
+**Depends on:** AUTH-104 (Profile/Team need workspace + roles), DB-204 (settings columns), SCHED-504 (Publishing Defaults feeds ScheduleControl), REC-801 (AI tuning configures the recompute job).
+
+**User stories:**
+- As a user, I can edit my profile and workspace name.
+- As an owner/admin, I can invite, remove, and change the role of teammates.
+- As a user, I can control which notifications I receive.
+- As a user, I can see my current plan and usage.
+- As a user, I can set my default publish mode and whether recommended times auto-apply.
+- As a user, I can tune the weighting the recommendation engine uses.
+
+### SET-901 — Profile & Workspace settings tabs
+**Type:** Implementation ticket
+**Details:** `SettingsTabList` shell + `ProfileForm` + `WorkspaceForm` per Component Inventory §9; adds `PATCH /me` and `GET/PATCH /workspace`.
+**Acceptance criteria:** deep-linking to a tab works; profile edits reflect in the TopBar immediately; non-owner/admin sees Workspace as read-only, not hidden.
+**Depends on:** AUTH-104, AUTH-102.
+
+### SET-902 — Team management tab
+**Type:** Implementation ticket
+**Details:** `TeamMembersTable` (invite/remove/change-role) per Component Inventory §9; `GET/POST/DELETE /workspace/members`. Invite email delivery may be stubbed per the Checklist, but the UI (pending state, resend/cancel) must be complete.
+**Acceptance criteria:** last-owner protection (can't demote/remove the sole Owner); removed members lose access immediately.
+**Depends on:** AUTH-104, SET-901.
+
+### SET-903 — Notification preferences tab
+**Type:** Implementation ticket
+**Details:** `NotificationPreferences` toggle list per Component Inventory §9; `GET/PATCH /settings/notifications`, persisted to `users.notification_preferences` (DB-204).
+**Acceptance criteria:** toggles persist immediately and survive a refresh. (Storage only — no delivery pipeline reads these yet; that's separate notification-delivery work.)
+**Depends on:** SET-901, DB-204.
+
+### SET-904 — Billing tab
+**Type:** Implementation ticket
+**Details:** `BillingPanel` per Component Inventory §9 — static plan summary + usage, mock in v1 (no live payment provider required); `GET /billing` reads `workspaces.plan`.
+**Acceptance criteria:** plan + usage numbers match the DB; "Manage billing" behaves predictably even as a placeholder.
+**Depends on:** SET-901.
+
+### SET-905 — Publishing Defaults + Timezone tab
+**Type:** Implementation ticket
+**Details:** `PublishingDefaultsForm` (default mode, auto-apply-recommended) + timezone control per Component Inventory §9; `GET/PATCH /settings/publishing`, persisted to `workspaces.default_publish_mode`/`auto_apply_recommended` (DB-204). `ScheduleControl` reads these as new-draft defaults.
+**Acceptance criteria:** a new composer draft starts in the configured default mode; auto-apply-recommended pre-fills schedule time from REC-803 and still validates.
+**Depends on:** SET-901, DB-204, SCHED-504.
+
+### SET-906 — AI Recommendation tuning tab
+**Type:** Implementation ticket
+**Details:** `AITuningPanel` (weighting sliders + history window) per Component Inventory §9; `GET/PATCH /settings/ai`, persisted via DB-204; REC-801 reads these overrides (see REC-801's amended acceptance criteria).
+**Acceptance criteria:** saving new weights triggers an immediate recompute (not just the next weekly run); untouched workspaces see no change from today's hardcoded-weight behavior.
+**Depends on:** SET-901, DB-204, REC-801.
 
 ---
 
@@ -549,22 +672,28 @@ Each of the 9 groups below is one **Epic** (or two closely related epics where a
 3 Account Integrations
    │
    ▼
-4 Composer ──────────────┐
-   │                     │
-   ▼                     │
-5 Scheduling              │
-   │                     │
-   ▼                     │
-6 Calendar                │  (7 also depends directly on 5,
-   │                     │   not on 6 — Calendar and Analytics
-   ▼                     │   can be built in parallel by two
-7 Analytics ◄─────────────┘   engineers once Scheduling lands)
+4 Composer ──────────────┬──────────────┐
+   │                     │              │
+   ▼                     │              │
+5 Scheduling              │              │
+   │                     │              │
+   ▼                     │              │
+6 Calendar                │  (7 also depends directly on 5,     │
+   │                     │   not on 6 — Calendar and Analytics  │
+   ▼                     │   can be built in parallel by two    │
+7 Analytics ◄─────────────┘   engineers once Scheduling lands)  │
+   │                                                            │
+   ▼                                                            ▼
+8 Recommendations                                    10 Content Library
+   │                                                            │
+   ▼                                                            │
+11 Settings ◄────────────────────────────────────────────────────┘
+   (needs 1, 3, 5, 8 — see Group 11's Depends on)
    │
    ▼
-8 Recommendations
-   │
-   ▼
-9 Polish / QA / Observability (continuous, hardens at the end)
+9 Polish / QA / Observability (numbered where it historically sat;
+   its final hardening tickets — QA-902/906/907 — actually close
+   out only after 10 and 11 above are done)
 ```
 
 **Parallelization note for a 2-engineer team:** once group 5 (Scheduling) is done, one engineer can take group 6 (Calendar) while the other starts group 7 (Analytics) — neither depends on the other, only on Scheduling. Both must complete before group 8 (Recommendations), which needs Analytics's data and benefits from Calendar's highlight slot (REC-806) already stubbed.
